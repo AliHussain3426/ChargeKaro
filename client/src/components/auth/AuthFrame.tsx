@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft, ArrowUpRight, CircleCheck, ShieldCheck, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './auth.css';
 
 interface AuthFrameProps {
@@ -22,8 +22,11 @@ export default function AuthFrame({
   previewLabel = 'Open demo dashboard',
   children,
 }: AuthFrameProps) {
+  const location = useLocation();
+  const mode = location.pathname.startsWith('/register') ? 'register' : 'login';
+
   return (
-    <div className="auth-page auth-refined">
+    <div className={`auth-page auth-refined auth-page--${mode}`}>
       <aside className="auth-story" aria-label="GreenCharge introduction">
         <span className="auth-orbit auth-orbit-one" aria-hidden="true" />
         <span className="auth-orbit auth-orbit-two" aria-hidden="true" />

@@ -1,9 +1,10 @@
 # PROJECT STATE
 
 **Project:** EV Charging Platform  
-**Last Updated:** 5 November 2026  
-**Current Phase:** Scaffolding & Initial Application Structure  
-**Status:** Frontend & backend foundations created; route-complete UI shell with a polished public entry point and customer discovery prototype
+**Last Updated:** 5 November 2026 (11:16 AM PKT)  
+**Current Phase:** Scaffolding & Initial Application Structure (Phase 1)  
+**Overall Completion:** ~42% overall (~70% of Phase 1 Website Structure & Flow)  
+**Status:** Frontend and backend foundations verified; the public experience is now a single anchored landing page, authentication uses an animated two-panel prototype, and dashboard navigation is responsive and collapsible. Backend workflows remain pending.
 
 ---
 
@@ -23,17 +24,21 @@ A supplier can manage multiple stations, and each station can contain multiple c
 
 ---
 
-## 2. Current Development Status
+## 2. Current Development Status & Progress Breakdown
 
-The project has moved from the planning phase into initial application scaffolding and UI structure implementation:
-
-- Frontend (React + TypeScript + Vite) initialized at `/client`.
-- Backend (Node.js + Express.js + TypeScript) initialized at `/server`.
-- Shared design tokens and visual guidelines (#0B7D68 primary, #CCCECF card surface, #E4F0F0 background) integrated into Tailwind CSS v4 theme.
-- Responsive layout foundations created (`PublicLayout` and role-based `DashboardLayout` with mobile bottom nav).
-- Public marketing and authentication page structures created.
-- Customer dashboard views scaffolded.
-- Payments and supplier verification logic are explicitly deferred for later phases.
+| Milestone / Component | Progress | Status | Notes |
+|---|---|---|---|
+| **Repository Setup & Tooling** | 95% | Completed | React 19 + Vite + Tailwind v4 frontend; Express 5 + TS backend; builds passing |
+| **Design System & Tokens** | 90% | Completed | #0B7D68 primary, #CCCECF card surface, #E4F0F0 background, DM Sans / Manrope typography |
+| **Public Navigation & Marketing** | 90% | Completed | Landing, How It Works, For Customers, For Suppliers, Demo Access, 404 pages |
+| **Authentication UI** | 75% | Completed | Login, Register Select, Customer Register, Supplier Register, Forgot Password |
+| **Customer Interface Flow** | 55% | In Progress | Overview & Station Discovery prototypes done; Bookings, Vehicles, Profile scaffolded |
+| **Supplier Interface Flow** | 35% | In Progress | App shell and 7 views scaffolded with skeletons; awaiting high-fidelity prototypes |
+| **Super Admin Interface Flow** | 30% | In Progress | App shell and 8 views scaffolded with skeletons; awaiting high-fidelity prototypes |
+| **Backend API & Database** | 15% | Scaffolded | Server architecture, configs, middleware done; Mongoose models and controllers pending |
+| **Interactive Map & OSRM Routing**| 0% | Planned | Deferred until station discovery UI refinement is completed |
+| **Payments & Supplier Verification** | 0% | Deferred | Intentionally deferred to later phase per project requirements |
+| **Overall Project Progress** | **~42%** | **In Progress** | **~70% of Phase 1 Structure & Previewable Flow** |
 
 ---
 
@@ -159,13 +164,13 @@ The project follows a clean, modern, elegant, and professional visual direction.
 | Functional Area | Current Status | Notes |
 |---|---|---|
 | Project Scaffolding | Completed | Backend core & frontend core initialized and build tested |
-| Public Navigation & Layout | Completed | `PublicLayout` and marketing pages created and connected |
-| Dashboard Layout | Completed | `DashboardLayout` with mobile bottom nav created and connected |
+| Public Navigation & Layout | Completed | Glass header and footer connected to one smooth-scrolling landing page; legacy public URLs redirect to their corresponding landing section |
+| Dashboard Layout | Completed | Rounded, borderless shared shell with mobile bottom nav, viewport-aware sidebar collapse, and manual sidebar toggle |
 | Customer Interface Structure | Completed | Overview, Stations, Bookings, Vehicles, Profile scaffolded; overview and discovery have representative UI data |
 | Supplier Interface Structure | Completed | Shell and 7 core supplier views scaffolded and routed |
 | Super Admin Interface Structure | Completed | Shell and 8 core admin oversight views scaffolded and routed |
 | Full Route Aggregation | Completed | `App.tsx` routes configured across all 5 areas |
-| Customer / Supplier Registration | Scaffolding | Static forms created; backend integration pending |
+| Customer / Supplier Registration | Scaffolding | Static forms use a rounded two-panel layout that swaps sides between sign-in and registration; backend integration pending |
 | Authentication & Authorization | Planned | Middleware & models pending |
 | Charging Station & Terminal Management | Planned | Pending schemas and CRUD APIs |
 | Booking Workflow | Planned | Pending schemas and request lifecycles |
@@ -189,6 +194,9 @@ The following areas have been verified against the actual repository source code
 - [x] Design system variables configured in `client/src/index.css` (#0B7D68, #CCCECF, #E4F0F0).
 - [x] Public layouts and marketing pages created.
 - [x] Auth layout forms created.
+- [x] Public header navigation scrolls to Home, How It Works, For Customers, and For Suppliers sections on the landing page; former standalone public URLs redirect to the matching section.
+- [x] Authentication surfaces are rounded and borderless, with a reduced-motion-safe side-switch animation between sign-in and registration.
+- [x] Dashboard sidebar is rounded and borderless, automatically collapses on medium desktop widths, and includes an accessible manual expand/collapse control.
 - [x] Customer dashboard shell & pages created.
 - [x] Supplier dashboard shell & pages created (`pages/supplier/*`).
 - [x] Admin dashboard shell & pages created (`pages/admin/*`).

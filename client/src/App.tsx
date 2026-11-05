@@ -1,13 +1,10 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 
 // Layouts
 import PublicLayout from '@/components/layout/PublicLayout';
 
 // Public pages
 import LandingPage from '@/pages/public/LandingPage';
-import HowItWorksPage from '@/pages/public/HowItWorksPage';
-import ForCustomersPage from '@/pages/public/ForCustomersPage';
-import ForSuppliersPage from '@/pages/public/ForSuppliersPage';
 import DemoAccessPage from '@/pages/public/DemoAccessPage';
 import NotFoundPage from '@/pages/public/NotFoundPage';
 
@@ -57,9 +54,9 @@ export default function App() {
         {/* ── Public routes ── */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/how-it-works" element={<HowItWorksPage />} />
-          <Route path="/for-customers" element={<ForCustomersPage />} />
-          <Route path="/for-suppliers" element={<ForSuppliersPage />} />
+          <Route path="/how-it-works" element={<Navigate to="/#how-it-works" replace />} />
+          <Route path="/for-customers" element={<Navigate to="/#for-customers" replace />} />
+          <Route path="/for-suppliers" element={<Navigate to="/#for-suppliers" replace />} />
           <Route path="/demo" element={<DemoAccessPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterSelectPage />} />

@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils';
 import './public-layout.css';
 
 const navLinks = [
-  { label: 'Home', href: '/' },
-  { label: 'How It Works', href: '/how-it-works' },
-  { label: 'For Customers', href: '/for-customers' },
-  { label: 'For Suppliers', href: '/for-suppliers' },
+  { label: 'Home', href: '/', hash: '' },
+  { label: 'How It Works', href: '/#how-it-works', hash: '#how-it-works' },
+  { label: 'For Customers', href: '/#for-customers', hash: '#for-customers' },
+  { label: 'For Suppliers', href: '/#for-suppliers', hash: '#for-suppliers' },
 ];
 
 const copyrightYear = new Date().getFullYear();
@@ -19,6 +19,7 @@ export default function PublicLayout() {
   const isAuthRoute = location.pathname === '/login'
     || location.pathname === '/forgot-password'
     || location.pathname.startsWith('/register');
+  const isNavActive = (hash: string) => location.pathname === '/' && location.hash === hash;
 
   return (
     <div className={cn('site-shell flex flex-col', isAuthRoute && 'site-shell--auth')}>
@@ -35,10 +36,10 @@ export default function PublicLayout() {
               <Link
                 key={link.href}
                 to={link.href}
-                aria-current={location.pathname === link.href ? 'page' : undefined}
+                aria-current={isNavActive(link.hash) ? 'page' : undefined}
                 className={cn(
                   'transition-colors',
-                  location.pathname === link.href
+                  isNavActive(link.hash)
                     ? 'text-primary'
                     : 'text-foreground-secondary hover:text-primary'
                 )}
@@ -79,11 +80,11 @@ export default function PublicLayout() {
                 <Link
                   key={link.href}
                   to={link.href}
-                  aria-current={location.pathname === link.href ? 'page' : undefined}
+                  aria-current={isNavActive(link.hash) ? 'page' : undefined}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     'block py-2 transition-colors',
-                    location.pathname === link.href
+                    isNavActive(link.hash)
                       ? 'text-primary'
                       : 'text-foreground-secondary hover:text-primary'
                   )}
@@ -135,9 +136,9 @@ export default function PublicLayout() {
             <nav aria-label="Explore GreenCharge">
               <p className="footer-column-title">Explore</p>
               <Link to="/">Home</Link>
-              <Link to="/how-it-works">How it works</Link>
-              <Link to="/for-customers">For EV drivers</Link>
-              <Link to="/for-suppliers">For station operators</Link>
+              <Link to="/#how-it-works">How it works</Link>
+              <Link to="/#for-customers">For EV drivers</Link>
+              <Link to="/#for-suppliers">For station operators</Link>
             </nav>
             <nav aria-label="Account links">
               <p className="footer-column-title">Account</p>
