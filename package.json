@@ -1,0 +1,11 @@
+{
+  "name": "greencharge-platform",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "cd client && node node_modules/vite/bin/vite.js",
+    "build": "cd client && node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build",
+    "lint": "cd client && node node_modules/oxlint/bin/oxlint",
+    "preview": "cd client && node node_modules/vite/bin/vite.js preview"
+  }
+}

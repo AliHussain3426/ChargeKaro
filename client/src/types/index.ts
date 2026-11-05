@@ -1,8 +1,10 @@
-export enum UserRole {
-  CUSTOMER = 'CUSTOMER',
-  SUPPLIER = 'SUPPLIER',
-  ADMIN = 'ADMIN',
-}
+export const UserRole = {
+  CUSTOMER: 'CUSTOMER',
+  SUPPLIER: 'SUPPLIER',
+  ADMIN: 'ADMIN',
+} as const;
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
 export interface User {
   _id: string;
@@ -33,4 +35,3 @@ export interface NavItem {
   badge?: string | number;
   children?: NavItem[];
 }
-

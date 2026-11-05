@@ -1,63 +1,15 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Calendar, Car, Bell } from 'lucide-react';
-
-const quickActions = [
-  { icon: MapPin, label: 'Find Stations', href: '/customer/stations', color: 'bg-primary-light text-primary' },
-  { icon: Calendar, label: 'My Bookings', href: '/customer/bookings', color: 'bg-info-light text-info' },
-  { icon: Car, label: 'My Vehicles', href: '/customer/vehicles', color: 'bg-success-light text-success' },
-  { icon: Bell, label: 'Notifications', href: '/customer/notifications', color: 'bg-warning-light text-warning' },
-];
+import { BatteryCharging, CalendarDays, CarFront, ChevronRight, MapPin, PlugZap } from 'lucide-react';
 
 export default function CustomerOverview() {
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="mt-1 text-sm text-foreground-secondary">Welcome back! Here is your charging overview.</p>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        {quickActions.map((action) => (
-          <Link
-            key={action.href}
-            to={action.href}
-            className="rounded-[12px] bg-surface border border-border-light p-4 hover:shadow-md transition-all group"
-          >
-            <div className={`size-10 rounded-[10px] ${action.color} flex items-center justify-center`}>
-              <action.icon className="size-5" />
-            </div>
-            <p className="mt-3 text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-              {action.label}
-            </p>
-          </Link>
-        ))}
-      </div>
-
-      {/* Stats placeholder */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {[
-          { label: 'Total Bookings', value: '—' },
-          { label: 'Active Bookings', value: '—' },
-          { label: 'Registered Vehicles', value: '—' },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-[12px] bg-surface border border-border-light p-5">
-            <p className="text-sm text-foreground-secondary">{stat.label}</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{stat.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent Activity placeholder */}
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <h2 className="text-base font-semibold text-foreground mb-4">Recent Activity</h2>
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <Calendar className="size-10 text-foreground-muted/40 mb-3" />
-          <p className="text-sm text-foreground-muted">No recent activity yet.</p>
-          <p className="text-xs text-foreground-muted mt-1">Your booking history will appear here.</p>
-        </div>
-      </div>
+      <header className="dash-page-head"><div><p className="dash-section-label">Driver overview</p><h1 className="dash-title">Your next charge, sorted.</h1><p className="dash-description">Nissan Leaf is at 62%. A compatible fast charger is available close to you.</p></div><Link to="/customer/stations" className="gc-button gc-button-primary">Find a station <ChevronRight className="size-4" /></Link></header>
+      <section className="dash-metric-row"><div className="dash-metric"><p className="dash-section-label">Registered vehicles</p><b>1</b><span>Nissan Leaf · Type 2</span></div><div className="dash-metric"><p className="dash-section-label">Active bookings</p><b>0</b><span>Find a station to reserve your next slot</span></div><div className="dash-metric"><p className="dash-section-label">Nearest compatible charger</p><b>1.8 <small className="text-base">km</small></b><span>Gulberg Charge Hub · 45 kW</span></div></section>
+      <section className="dash-grid"><article className="dash-panel charge-card"><p className="dash-section-label">Vehicle charge</p><h2>Nissan Leaf is ready when you are.</h2><p>40 kWh battery · Type 2 connector · estimated 146 km remaining</p><div className="charge-gauge"><b>62%</b><span><BatteryCharging className="mb-1 ml-auto size-5 text-[#9fd6c7]" />Current charge</span></div><div className="charge-meter"><i /></div></article>
+        <article className="dash-panel"><div className="dash-panel-head"><div><p className="dash-section-label">Closest available</p><h2 className="dash-panel-title mt-1">Ready to charge</h2></div><MapPin className="size-5 text-primary" /></div><div className="activity-list"><div className="activity-row"><span className="activity-icon"><PlugZap className="size-4" /></span><div className="activity-main"><b>Gulberg Charge Hub</b><span>45 kW · 2 ports open</span></div><span className="activity-time">1.8 km</span></div><div className="activity-row"><span className="activity-icon"><PlugZap className="size-4" /></span><div className="activity-main"><b>DHA Phase 5 EV Stop</b><span>22 kW · 1 port open</span></div><span className="activity-time">4.2 km</span></div><Link to="/customer/stations" className="activity-row text-sm font-bold text-primary">Explore all compatible stations <ChevronRight className="ml-auto size-4" /></Link></div></article>
+      </section>
+      <section className="dash-grid mt-5"><article className="dash-panel"><div className="dash-panel-head"><div><p className="dash-section-label">Next action</p><h2 className="dash-panel-title mt-1">Reserve a charging session</h2></div><CalendarDays className="size-5 text-primary" /></div><div className="p-5"><p className="max-w-xl text-sm leading-6 text-foreground-secondary">Choose your preferred station, select a time, and send a booking request. Its supplier will confirm the slot before any payment step.</p><Link to="/customer/stations" className="gc-button gc-button-secondary mt-5">Choose a station</Link></div></article><article className="dash-panel"><div className="dash-panel-head"><div><p className="dash-section-label">Vehicle setup</p><h2 className="dash-panel-title mt-1">Keep your details current</h2></div><CarFront className="size-5 text-primary" /></div><div className="p-5"><p className="text-sm leading-6 text-foreground-secondary">Your vehicle determines which connectors and power levels are relevant to your search.</p><Link to="/customer/vehicles" className="gc-link mt-5 inline-flex items-center text-sm">Manage Nissan Leaf <ChevronRight className="size-4" /></Link></div></article></section>
     </div>
   );
 }
-

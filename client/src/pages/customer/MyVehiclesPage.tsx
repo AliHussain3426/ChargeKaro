@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { Car, Plus } from 'lucide-react';
 
 export default function MyVehiclesPage() {

@@ -1,4 +1,4 @@
-import { User, Mail, Phone, Lock } from 'lucide-react';
+import { User, Mail, Phone } from 'lucide-react';
 
 export default function CustomerProfilePage() {
   return (

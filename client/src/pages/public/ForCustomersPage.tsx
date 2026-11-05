@@ -1,47 +1,22 @@
+import { ArrowRight, BatteryCharging, CalendarClock, CarFront, MapPin, PlugZap, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { MapPin, Clock, Battery, Shield } from 'lucide-react';
-
-const benefits = [
-  { icon: MapPin, title: 'Station Discovery', desc: 'Find charging stations near you or anywhere along your route with our interactive map.' },
-  { icon: Clock, title: 'Easy Booking', desc: 'Reserve your charging slot in advance — no more waiting at busy stations.' },
-  { icon: Battery, title: 'Multiple Charger Types', desc: 'Filter by connector type, power level, and compatibility with your vehicle.' },
-  { icon: Shield, title: 'Secure Payments', desc: 'Pay for charging sessions securely through the platform.' },
-];
+import './public-pages.css';
 
 export default function ForCustomersPage() {
   return (
-    <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1440px]">
-        <div className="text-center max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-foreground">For EV Owners</h1>
-          <p className="mt-4 text-foreground-secondary">
-            Discover, book, and charge at stations across Pakistan. GreenCharge takes the hassle
-            out of keeping your EV on the road.
-          </p>
+    <div className="product-page">
+      <section className="product-hero">
+        <div className="gc-container product-hero-grid">
+          <div><p className="product-kicker"><CarFront className="size-4" /> For EV drivers</p><h1>Make every charge feel planned.</h1><p className="product-hero-copy">Keep your vehicle, compatible charging options, and booking decisions together—so you can concentrate on the journey instead of the logistics.</p><div className="product-hero-actions"><Link to="/register/customer" className="gc-button gc-button-primary">Create driver account <ArrowRight className="size-4" /></Link><Link to="/how-it-works" className="gc-button gc-button-secondary">See how it works</Link></div></div>
+          <div className="product-stage"><div className="ui-paper ui-paper--wide" data-ui><div className="flex items-start justify-between gap-4"><div><p className="ui-eyebrow">Nearby compatible stations</p><h2 className="ui-title">Gulberg, Lahore</h2></div><span className="ui-round-icon"><SlidersHorizontal className="size-4" /></span></div><div className="ui-list"><div className="ui-list-row"><span className="ui-round-icon"><PlugZap className="size-4" /></span><div><b>Gulberg Charge Hub</b><small>CCS2 · 45 kW · 2 ports open</small></div><span>1.8 km</span></div><div className="ui-list-row"><span className="ui-round-icon"><PlugZap className="size-4" /></span><div><b>DHA Phase 5 EV Stop</b><small>Type 2 · 22 kW · 1 port open</small></div><span>4.2 km</span></div><div className="ui-list-row"><span className="ui-round-icon"><PlugZap className="size-4" /></span><div><b>Johar Town Fast Charge</b><small>CCS2 · 50 kW · all ports occupied</small></div><span>6.7 km</span></div></div></div><span className="product-stage__note">The details you need before leaving.</span></div>
         </div>
+      </section>
 
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {benefits.map((b) => (
-            <div key={b.title} className="rounded-[12px] bg-surface p-6 border border-border-light">
-              <div className="size-10 rounded-[10px] bg-primary-light flex items-center justify-center">
-                <b.icon className="size-5 text-primary" />
-              </div>
-              <h3 className="mt-4 text-base font-semibold text-foreground">{b.title}</h3>
-              <p className="mt-2 text-sm text-foreground-secondary leading-relaxed">{b.desc}</p>
-            </div>
-          ))}
-        </div>
+      <section className="product-story product-story--soft"><div className="gc-container"><header className="story-heading"><div><p className="product-kicker">Designed for the drive</p><h2>Everything earns its place.</h2></div><p>GreenCharge puts the decision-making information first. The supporting details are there when you need them—not turned into decoration or buried behind vague status labels.</p></header><div className="journey-list"><article className="journey-row"><div className="journey-index"><span>1</span> Your vehicle</div><div className="journey-copy"><h3>Search with compatibility in mind.</h3><p>Vehicle connector and charging details provide a useful starting point for finding relevant terminals. Missing compatibility information never pretends to be a yes.</p><div className="journey-response" data-ui><strong>Nissan Leaf · Type 2 connector</strong><span>Use it to see the station options most likely to fit.</span></div></div></article><article className="journey-row"><div className="journey-index"><span>2</span> The station</div><div className="journey-copy"><h3>Compare the important details first.</h3><p>Power, connector type, availability, location, pricing, and operating context belong together when you are choosing a charging stop.</p><div className="journey-response" data-ui><strong>45 kW · 2 ports available · 1.8 km away</strong><span>Useful detail, not a generic station card.</span></div></div></article><article className="journey-row"><div className="journey-index"><span>3</span> The request</div><div className="journey-copy"><h3>Keep the status honest.</h3><p>See whether a session is requested, accepted, confirmed, cancelled, or completed. A click on a button is never presented as a completed booking.</p><div className="journey-response" data-ui><strong>Pending supplier review</strong><span>We show the state that has actually been reached.</span></div></div></article></div></div></section>
 
-        <div className="mt-12 text-center">
-          <Link
-            to="/register/customer"
-            className="inline-flex items-center justify-center rounded-[10px] bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
-          >
-            Create Customer Account
-          </Link>
-        </div>
-      </div>
+      <section className="product-statement gc-container"><div><p className="product-kicker"><BatteryCharging className="size-4" /> Your charging home</p><h2>More signal, less dashboard noise.</h2><p>The driver dashboard makes your vehicle state, next decision, and closest compatible options easy to scan—with navigation for when you want to go deeper.</p></div><div className="signal-board"><div><CarFront className="size-5" /><b>Vehicles</b><p>Keep the EVs you drive ready for accurate charging guidance.</p></div><div><MapPin className="size-5" /><b>Stations</b><p>Discover charging options by place, connector, power, and availability.</p></div><div><CalendarClock className="size-5" /><b>Bookings</b><p>Follow each request through the real status it has reached.</p></div><div><PlugZap className="size-5" /><b>Charging history</b><p>Review completed charging sessions when live data is connected.</p></div></div></section>
+
+      <section className="product-callout"><div className="gc-container product-callout-inner"><div><p className="product-kicker !text-[#c7eee4]">Take the next step</p><h2>A better charging stop starts here.</h2><p>Set up your driver profile now and explore the planned interface while live search and booking services are integrated.</p></div><div className="callout-panel"><p className="ui-eyebrow">GreenCharge driver</p><h3 className="ui-title">One account, one clearer journey.</h3><p>Register as a driver to start with the part that makes every later decision more useful: your vehicle.</p><Link to="/register/customer" className="gc-button gc-button-primary mt-5 w-full">Create driver account <ArrowRight className="size-4" /></Link></div></div></section>
     </div>
   );
 }
-

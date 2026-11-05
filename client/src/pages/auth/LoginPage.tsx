@@ -1,80 +1,25 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Eye, EyeOff } from 'lucide-react';
+import AuthFrame from '@/components/auth/AuthFrame';
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState('');
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage('Sign-in is ready for the authentication API. No credentials are submitted in this prototype.');
+  }
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh] px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 text-primary mb-4">
-            <Zap className="size-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
-          <p className="mt-2 text-sm text-foreground-muted">
-            Sign in to your GreenCharge account
-          </p>
-        </div>
-
-        <form className="rounded-[12px] bg-surface border border-border-light p-6 sm:p-8">
-          <div className="flex flex-col gap-5">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                className="w-full rounded-[8px] border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                  Password
-                </label>
-                <Link to="/forgot-password" className="text-xs text-primary hover:text-primary-hover font-medium">
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  className="w-full rounded-[8px] border border-border bg-background px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full rounded-[10px] bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors"
-            >
-              Sign In
-            </button>
-          </div>
-
-          <p className="mt-6 text-center text-sm text-foreground-muted">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary hover:text-primary-hover font-medium">
-              Create one
-            </Link>
-          </p>
-        </form>
-      </div>
-    </div>
+    <AuthFrame title="Welcome back." description="Sign in to manage your charging plans, stations, or platform operations." previewTo="/demo" previewLabel="Open demo dashboard">
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <div className="field"><label htmlFor="email">Email address</label><input id="email" type="email" placeholder="you@example.com" autoComplete="email" required /></div>
+        <div className="field"><label htmlFor="password">Password</label><input id="password" type="password" placeholder="Enter your password" autoComplete="current-password" required /></div>
+        <div className="form-help"><label className="form-check"><input type="checkbox" /> Keep me signed in</label><Link className="gc-link" to="/forgot-password">Forgot password?</Link></div>
+        {message && <p className="success-message" role="status">{message}</p>}
+        <button className="gc-button gc-button-primary auth-submit" type="submit">Sign in</button>
+      </form>
+      <p className="auth-footer">New to GreenCharge? <Link className="gc-link" to="/register">Create an account</Link></p>
+    </AuthFrame>
   );
 }
-

@@ -1,49 +1,26 @@
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import AuthFrame from '@/components/auth/AuthFrame';
 
 export default function CustomerRegisterPage() {
-  return (
-    <div className="flex items-center justify-center min-h-[70vh] px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Customer Registration</h1>
-          <p className="mt-2 text-sm text-foreground-muted">
-            Create your account to start finding charging stations
-          </p>
-        </div>
+  const [message, setMessage] = useState('');
 
-        <form className="rounded-[12px] bg-surface border border-border-light p-6 sm:p-8">
-          <div className="flex flex-col gap-5">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
-              <input id="name" type="text" placeholder="Enter your full name" className="w-full rounded-[8px] border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">Email Address</label>
-              <input id="email" type="email" placeholder="you@example.com" className="w-full rounded-[8px] border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" />
-            </div>
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1.5">Phone Number</label>
-              <input id="phone" type="tel" placeholder="+92 300 1234567" className="w-full rounded-[8px] border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1.5">Password</label>
-              <input id="password" type="password" placeholder="Create a strong password" className="w-full rounded-[8px] border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" />
-            </div>
-            <div>
-              <label htmlFor="confirm" className="block text-sm font-medium text-foreground mb-1.5">Confirm Password</label>
-              <input id="confirm" type="password" placeholder="Re-enter your password" className="w-full rounded-[8px] border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" />
-            </div>
-            <button type="submit" className="w-full rounded-[10px] bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors">
-              Create Account
-            </button>
-          </div>
-          <p className="mt-6 text-center text-sm text-foreground-muted">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary hover:text-primary-hover font-medium">Sign in</Link>
-          </p>
-        </form>
-      </div>
-    </div>
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage('Your customer account form is ready. Account creation will be connected when the authentication API is available.');
+  }
+
+  return (
+    <AuthFrame title="Start charging smarter." description="Set up your driver account. You can add a vehicle and explore compatible stations next." previewTo="/demo" previewLabel="Open demo dashboard">
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <div className="field"><label htmlFor="customer-name">Full name</label><input id="customer-name" type="text" placeholder="Your full name" autoComplete="name" required /></div>
+        <div className="form-split"><div className="field"><label htmlFor="customer-email">Email address</label><input id="customer-email" type="email" placeholder="you@example.com" autoComplete="email" required /></div><div className="field"><label htmlFor="customer-phone">Phone number</label><input id="customer-phone" type="tel" placeholder="0300 1234567" autoComplete="tel" required /></div></div>
+        <div className="field"><label htmlFor="customer-password">Create password</label><input id="customer-password" type="password" placeholder="At least 8 characters" autoComplete="new-password" minLength={8} required /></div>
+        <label className="form-check"><input type="checkbox" required /> I agree to the platform terms and privacy policy.</label>
+        {message && <p className="success-message" role="status">{message}</p>}
+        <button className="gc-button gc-button-primary auth-submit" type="submit">Create driver account</button>
+      </form>
+      <p className="auth-footer">Already have an account? <Link className="gc-link" to="/login">Sign in</Link></p>
+    </AuthFrame>
   );
 }
-

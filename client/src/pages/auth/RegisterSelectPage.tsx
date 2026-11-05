@@ -1,53 +1,15 @@
+import { ArrowRight, CarFront, Store } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { User, Store } from 'lucide-react';
+import AuthFrame from '@/components/auth/AuthFrame';
 
 export default function RegisterSelectPage() {
   return (
-    <div className="flex items-center justify-center min-h-[70vh] px-4 py-12">
-      <div className="w-full max-w-lg">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Create an Account</h1>
-          <p className="mt-2 text-sm text-foreground-muted">
-            Choose how you want to use GreenCharge
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link
-            to="/register/customer"
-            className="group rounded-[12px] bg-surface border border-border-light p-6 hover:border-primary hover:shadow-md transition-all"
-          >
-            <div className="size-12 rounded-[10px] bg-primary-light flex items-center justify-center group-hover:bg-primary transition-colors">
-              <User className="size-6 text-primary group-hover:text-primary-foreground transition-colors" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-foreground">EV Owner</h3>
-            <p className="mt-2 text-sm text-foreground-secondary leading-relaxed">
-              Find stations, book charging slots, and manage your electric vehicles.
-            </p>
-          </Link>
-
-          <Link
-            to="/register/supplier"
-            className="group rounded-[12px] bg-surface border border-border-light p-6 hover:border-primary hover:shadow-md transition-all"
-          >
-            <div className="size-12 rounded-[10px] bg-primary-light flex items-center justify-center group-hover:bg-primary transition-colors">
-              <Store className="size-6 text-primary group-hover:text-primary-foreground transition-colors" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-foreground">Station Supplier</h3>
-            <p className="mt-2 text-sm text-foreground-secondary leading-relaxed">
-              List your charging stations, manage bookings, and grow your business.
-            </p>
-          </Link>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-foreground-muted">
-          Already have an account?{' '}
-          <Link to="/login" className="text-primary hover:text-primary-hover font-medium">
-            Sign in
-          </Link>
-        </p>
+    <AuthFrame title="Choose your account." description="GreenCharge adapts to what you need to do. Select the path that matches your role." storyTitle="A charging network works better when everyone is connected." storyCopy="Whether you need a reliable stop or operate the infrastructure behind one, your workspace begins here." previewTo="/demo" previewLabel="Open demo dashboard">
+      <div className="role-choice-grid">
+        <Link to="/register/customer" className="role-choice"><span className="role-choice-icon"><CarFront className="size-5" /></span><span><h2>I drive an EV</h2><p>Find stations, manage vehicles, and request charging sessions.</p></span><ArrowRight className="ml-auto size-4 text-[#0b7d68]" /></Link>
+        <Link to="/register/supplier" className="role-choice"><span className="role-choice-icon"><Store className="size-5" /></span><span><h2>I run charging stations</h2><p>Manage stations, terminals, requests, and earnings.</p></span><ArrowRight className="ml-auto size-4 text-[#0b7d68]" /></Link>
       </div>
-    </div>
+      <p className="auth-footer">Already have an account? <Link className="gc-link" to="/login">Sign in</Link></p>
+    </AuthFrame>
   );
 }
-
