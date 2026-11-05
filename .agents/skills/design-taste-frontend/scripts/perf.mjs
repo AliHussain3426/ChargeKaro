@@ -79,9 +79,11 @@ function findChrome() {
   if (!f) throw new Error('no Chrome found (set CHROME_PATH)');
   return f;
 }
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml',
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.avif': 'image/avif', '.gif': 'image/gif', '.woff2': 'font/woff2', '.woff': 'font/woff',
-  '.mp4': 'video/mp4', '.webm': 'video/webm', '.txt': 'text/plain', '.ico': 'image/x-icon' };
+  '.mp4': 'video/mp4', '.webm': 'video/webm', '.txt': 'text/plain', '.ico': 'image/x-icon'
+};
 const GZ = new Set(['.html', '.js', '.mjs', '.css', '.json', '.svg', '.txt']);
 
 async function serve(root) {
@@ -229,7 +231,7 @@ async function measure(chrome, url, W, H, nogl = false) {
   const atEnd = await E(SNAP);
   const audit = await E(AUDIT);
   off();
-  await send('Target.closeTarget', { targetId }).catch(() => {});
+  await send('Target.closeTarget', { targetId }).catch(() => { });
   return { reqs: [...reqs.values()], atLoad, atEnd, audit, loadReqs, errors, docH: audit.docH, stuck, waiting0 };
 }
 

@@ -9,6 +9,7 @@ const navLinks = [
   { label: 'How It Works', href: '/#how-it-works', hash: '#how-it-works' },
   { label: 'For Customers', href: '/#for-customers', hash: '#for-customers' },
   { label: 'For Suppliers', href: '/#for-suppliers', hash: '#for-suppliers' },
+  { label: 'About / Helpline', href: '/#about-help', hash: '#about-help' },
 ];
 
 const copyrightYear = new Date().getFullYear();
@@ -139,6 +140,7 @@ export default function PublicLayout() {
               <Link to="/#how-it-works">How it works</Link>
               <Link to="/#for-customers">For EV drivers</Link>
               <Link to="/#for-suppliers">For station operators</Link>
+              <Link to="/#about-help">About / Helpline</Link>
             </nav>
             <nav aria-label="Account links">
               <p className="footer-column-title">Account</p>

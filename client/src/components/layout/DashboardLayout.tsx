@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type FocusEvent } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Bell, ChevronLeft, ChevronRight, LogOut, Menu, X, Zap } from 'lucide-react';
+import { Bell, LogOut, Menu, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
@@ -14,30 +14,56 @@ const roleLabels = { customer: 'Driver workspace', supplier: 'Supplier workspace
 
 export default function DashboardLayout({ role, sidebarItems, mobileNavItems = [] }: DashboardLayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const location = useLocation();
   const isActive = (href: string) => href === `/${role}` ? location.pathname === href : location.pathname.startsWith(href);
 
   useEffect(() => {
-    const syncSidebarWidth = () => {
+    const resetSidebarForMobile = () => {
       if (window.innerWidth <= 900) {
-        setIsSidebarCollapsed(false);
+        setIsSidebarExpanded(false);
         setIsMenuOpen(false);
       } else if (window.innerWidth <= 1180) {
-        setIsSidebarCollapsed(true);
+        setIsSidebarExpanded(false);
       }
     };
 
-    syncSidebarWidth();
-    window.addEventListener('resize', syncSidebarWidth);
-    return () => window.removeEventListener('resize', syncSidebarWidth);
+    resetSidebarForMobile();
+    window.addEventListener('resize', resetSidebarForMobile);
+    return () => {
+      window.removeEventListener('resize', resetSidebarForMobile);
+      if (collapseTimerRef.current) window.clearTimeout(collapseTimerRef.current);
+    };
   }, []);
 
+  const isDesktopRail = () => window.innerWidth > 900;
+
+  const expandSidebar = () => {
+    if (!isDesktopRail()) return;
+    if (collapseTimerRef.current) window.clearTimeout(collapseTimerRef.current);
+    setIsSidebarExpanded(true);
+  };
+
+  const collapseSidebar = () => {
+    if (!isDesktopRail()) return;
+    if (collapseTimerRef.current) window.clearTimeout(collapseTimerRef.current);
+    collapseTimerRef.current = window.setTimeout(() => {
+      if (!sidebarRef.current?.matches(':focus-within')) setIsSidebarExpanded(false);
+    }, 140);
+  };
+
+  const handleSidebarBlur = (event: FocusEvent<HTMLElement>) => {
+    const nextElement = event.relatedTarget as Node | null;
+    if (!nextElement || !event.currentTarget.contains(nextElement)) collapseSidebar();
+  };
+
   return (
-    <div className={cn('dashboard-root', isSidebarCollapsed && 'dashboard-root--sidebar-collapsed')}>
+    <div className={cn('dashboard-root', isSidebarExpanded && 'dashboard-root--sidebar-expanded')}>
       {isMenuOpen && <button className="fixed inset-0 z-20 bg-[#143530]/25 lg:hidden" aria-label="Close navigation" onClick={() => setIsMenuOpen(false)} />}
-      <aside className={cn('dashboard-sidebar transition-transform duration-200', isMenuOpen ? 'translate-x-0 shadow-xl' : '')}>
-        <div className="dashboard-brand"><Link to="/" className="brand" aria-label="GreenCharge home"><span className="brand-mark"><Zap className="size-4 fill-current" /></span><span>GreenCharge</span></Link><button type="button" onClick={() => setIsSidebarCollapsed((isCollapsed) => !isCollapsed)} className="sidebar-toggle" aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-pressed={isSidebarCollapsed}>{isSidebarCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}</button><p className="dashboard-role">{roleLabels[role]}</p><button onClick={() => setIsMenuOpen(false)} className="absolute right-3 top-3 p-2 text-foreground lg:hidden" aria-label="Close navigation"><X className="size-4" /></button></div>
+      <aside ref={sidebarRef} onMouseEnter={expandSidebar} onMouseLeave={collapseSidebar} onFocus={expandSidebar} onBlur={handleSidebarBlur} className={cn('dashboard-sidebar', isMenuOpen && 'dashboard-sidebar--open')}>
+        <div className="dashboard-brand"><Link to="/" className="brand" aria-label="GreenCharge home"><span className="brand-mark"><Zap className="size-4 fill-current" /></span><span>GreenCharge</span></Link><p className="dashboard-role">{roleLabels[role]}</p><button onClick={() => setIsMenuOpen(false)} className="absolute right-3 top-3 p-2 text-foreground lg:hidden" aria-label="Close navigation"><X className="size-4" /></button></div>
         <nav className="dashboard-nav" aria-label={`${role} navigation`}>
           {sidebarItems.map((item) => { const Icon = item.icon; return <Link key={item.href} to={item.href} title={item.label} aria-label={item.label} className={cn(isActive(item.href) && 'active')} onClick={() => setIsMenuOpen(false)}>{Icon && <Icon className="size-4" />}<span>{item.label}</span>{item.badge !== undefined && <span className="nav-badge">{item.badge}</span>}</Link>; })}
         </nav>

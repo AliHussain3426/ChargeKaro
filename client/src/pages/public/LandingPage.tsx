@@ -1,10 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, CalendarDays, Check, CircleCheck, CircleDollarSign, MapPin, Navigation, PlugZap, Route, Settings2, Store, Zap } from 'lucide-react';
+import { ArrowRight, CalendarDays, Check, CircleCheck, CircleDollarSign, Copy, Headphones, Mail, MapPin, Navigation, PlugZap, Route, Settings2, Store, Zap } from 'lucide-react';
 
 export default function LandingPage() {
   const [selectedSlot, setSelectedSlot] = useState('14:30');
+  const [supportMessage, setSupportMessage] = useState('');
   const location = useLocation();
+
+  async function copySupportEmail() {
+    const supportEmail = 'support@greencharge.pk';
+
+    try {
+      await navigator.clipboard.writeText(supportEmail);
+      setSupportMessage('Support email copied.');
+    } catch {
+      setSupportMessage(`Email us at ${supportEmail}.`);
+    }
+  }
 
   useEffect(() => {
     const sectionId = location.hash.slice(1);
@@ -83,6 +95,24 @@ export default function LandingPage() {
             <div className="supplier-fragment-row"><span><Settings2 className="size-4" /></span><div><b>Booking requests</b><small>3 requests waiting for review</small></div><strong>Review</strong></div>
             <div className="supplier-fragment-row"><span><CircleDollarSign className="size-4" /></span><div><b>Session earnings</b><small>Clear records after completed sessions</small></div><strong>View</strong></div>
           </div>
+        </div>
+      </section>
+
+      <section id="about-help" className="landing-help">
+        <div className="gc-container help-grid">
+          <div className="help-copy">
+            <span className="section-kicker">About GreenCharge</span>
+            <h2 className="section-title mt-4">EV charging information that is easier to act on.</h2>
+            <p>GreenCharge is being built for drivers and charging operators in Pakistan who need station details, booking decisions, and account tools in one place.</p>
+          </div>
+          <aside className="help-panel" aria-labelledby="help-title">
+            <span className="help-panel-icon"><Headphones className="size-5" /></span>
+            <p className="fragment-label">Need help?</p>
+            <h3 id="help-title">Contact GreenCharge support.</h3>
+            <p>For account or platform questions, contact the GreenCharge support team.</p>
+            <div className="help-actions"><button type="button" onClick={copySupportEmail} className="gc-button gc-button-secondary">Copy support email <Copy className="size-4" /></button><a href="mailto:support@greencharge.pk?subject=GreenCharge%20support" className="help-email-link">Open email app <Mail className="size-4" /></a></div>
+            <p className="help-status" role="status" aria-live="polite">{supportMessage}</p>
+          </aside>
         </div>
       </section>
 

@@ -16,17 +16,17 @@ interface AuthFrameProps {
 export default function AuthFrame({
   title,
   description,
-  storyTitle = 'Every journey starts with a confident charge.',
-  storyCopy = 'Find the right charger, reserve a time that works, and keep the details of every stop close at hand.',
+  storyTitle = 'Make every charging stop easier to plan.',
+  storyCopy = 'Keep your vehicle, station details, and booking information in one clear place.',
   previewTo = '/demo',
-  previewLabel = 'Open demo dashboard',
+  previewLabel = 'View demo workspace',
   children,
 }: AuthFrameProps) {
   const location = useLocation();
   const mode = location.pathname.startsWith('/register') ? 'register' : 'login';
 
   return (
-    <div className={`auth-page auth-refined auth-page--${mode}`}>
+    <div key={location.pathname} className={`auth-page auth-refined auth-page--${mode}`}>
       <aside className="auth-story" aria-label="GreenCharge introduction">
         <span className="auth-orbit auth-orbit-one" aria-hidden="true" />
         <span className="auth-orbit auth-orbit-two" aria-hidden="true" />
@@ -44,7 +44,7 @@ export default function AuthFrame({
           <div className="auth-heading-group"><h1 className="auth-heading">{title}</h1><p className="auth-subheading">{description}</p></div>
           {children}
           <div className="auth-bypass" aria-label="Prototype dashboard shortcut">
-            <div><span className="auth-bypass-label">Prototype shortcut</span><p>Open the demo dashboard without signing in.</p></div>
+            <div><span className="auth-bypass-label">Explore first</span><p>View the workspace before creating an account.</p></div>
             <Link to={previewTo} className="auth-bypass-link">{previewLabel}<ArrowUpRight className="size-4" /></Link>
           </div>
         </div>

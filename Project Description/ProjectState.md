@@ -1,10 +1,10 @@
 # PROJECT STATE
 
 **Project:** EV Charging Platform  
-**Last Updated:** 5 November 2026 (11:16 AM PKT)  
+**Last Updated:** 5 November 2026 (11:42 AM PKT)
 **Current Phase:** Scaffolding & Initial Application Structure (Phase 1)  
 **Overall Completion:** ~42% overall (~70% of Phase 1 Website Structure & Flow)  
-**Status:** Frontend and backend foundations verified; the public experience is now a single anchored landing page, authentication uses an animated two-panel prototype, and dashboard navigation is responsive and collapsible. Backend workflows remain pending.
+**Status:** Frontend and backend foundations verified; the public experience includes an About / Helpline section with working contact actions, and authentication uses equal-size sliding two-panel surfaces with refined language. Backend workflows remain pending.
 
 ---
 
@@ -164,13 +164,13 @@ The project follows a clean, modern, elegant, and professional visual direction.
 | Functional Area | Current Status | Notes |
 |---|---|---|
 | Project Scaffolding | Completed | Backend core & frontend core initialized and build tested |
-| Public Navigation & Layout | Completed | Glass header and footer connected to one smooth-scrolling landing page; legacy public URLs redirect to their corresponding landing section |
-| Dashboard Layout | Completed | Rounded, borderless shared shell with mobile bottom nav, viewport-aware sidebar collapse, and manual sidebar toggle |
+| Public Navigation & Layout | Completed | Glass header and footer connect to one smooth-scrolling landing page, including Home, product sections, and an About / Helpline anchor; legacy public URLs redirect to their corresponding landing section |
+| Dashboard Layout | Completed | Bright, slim, square-edged navigation rail with automatic pointer/keyboard expansion, automatic collapse, and a responsive mobile drawer |
 | Customer Interface Structure | Completed | Overview, Stations, Bookings, Vehicles, Profile scaffolded; overview and discovery have representative UI data |
 | Supplier Interface Structure | Completed | Shell and 7 core supplier views scaffolded and routed |
 | Super Admin Interface Structure | Completed | Shell and 8 core admin oversight views scaffolded and routed |
 | Full Route Aggregation | Completed | `App.tsx` routes configured across all 5 areas |
-| Customer / Supplier Registration | Scaffolding | Static forms use a rounded two-panel layout that swaps sides between sign-in and registration; backend integration pending |
+| Customer / Supplier Registration | Scaffolding | Static forms use equal-size rounded two-panel surfaces that slide between sign-in and registration; content and field language are refined, while backend integration remains pending |
 | Authentication & Authorization | Planned | Middleware & models pending |
 | Charging Station & Terminal Management | Planned | Pending schemas and CRUD APIs |
 | Booking Workflow | Planned | Pending schemas and request lifecycles |
@@ -194,9 +194,10 @@ The following areas have been verified against the actual repository source code
 - [x] Design system variables configured in `client/src/index.css` (#0B7D68, #CCCECF, #E4F0F0).
 - [x] Public layouts and marketing pages created.
 - [x] Auth layout forms created.
-- [x] Public header navigation scrolls to Home, How It Works, For Customers, and For Suppliers sections on the landing page; former standalone public URLs redirect to the matching section.
-- [x] Authentication surfaces are rounded and borderless, with a reduced-motion-safe side-switch animation between sign-in and registration.
-- [x] Dashboard sidebar is rounded and borderless, automatically collapses on medium desktop widths, and includes an accessible manual expand/collapse control.
+- [x] Public header navigation scrolls to Home, How It Works, For Customers, For Suppliers, and About / Helpline sections on the landing page; former standalone public URLs redirect to the matching section.
+- [x] Authentication surfaces are rounded and borderless, use a shared responsive surface height, and slide between sign-in and registration with reduced-motion-safe fallbacks.
+- [x] About / Helpline provides both an in-page support-email copy action and an email-client link.
+- [x] Dashboard navigation uses a slim, square-edged, high-contrast rail that automatically expands on pointer or keyboard focus and collapses when that interaction ends.
 - [x] Customer dashboard shell & pages created.
 - [x] Supplier dashboard shell & pages created (`pages/supplier/*`).
 - [x] Admin dashboard shell & pages created (`pages/admin/*`).

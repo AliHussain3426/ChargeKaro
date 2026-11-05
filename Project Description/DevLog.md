@@ -137,4 +137,28 @@ Keep entries short and informative. Do not overwrite previous entries.
 - **Verification:** Root `npm run build` completed successfully (2,098 modules transformed); root `npm run lint` completed successfully with no findings.
 - **Status:** Completed as a front-end prototype refinement. Authentication, bookings, payments, and role authorization remain intentionally unimplemented backend work.
 
+### [2026-11-05] - Slim Dashboard Rail, Auth Sizing & About Helpline
+
+- **Objective:** Refine the dashboard sidebar into a lighter modern rail, normalize login and registration surface sizing, and add an About / Helpline entry to the landing-page navigation.
+- **Changes:**
+  - Replaced the card-like dashboard sidebar with a square-edged, bright rail that is slim by default, expands while hovered or keyboard-focused, and collapses automatically afterward. The mobile drawer remains full-width and readable.
+  - Removed the dull dashboard ground in favor of a lighter mint-neutral workspace treatment and maintained clear active navigation states.
+  - Made the desktop authentication panes equal-width and gave the white form surface a shared baseline height; short and mobile viewports retain their compact layout to avoid unnecessary scroll.
+  - Added the About / Helpline navigation item, matching landing section, support-email action, and footer link. It remains part of the single-page navigation model.
+- **Files:** `client/src/components/layout/DashboardLayout.tsx`, `client/src/components/auth/auth.css`, `client/src/components/layout/PublicLayout.tsx`, `client/src/components/layout/public-layout.css`, `client/src/pages/public/LandingPage.tsx`, `client/src/index.css`, `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:** Root build and lint both passed (2,098 modules transformed). Local development routes for landing, auth, all three dashboards, and the new About / Helpline anchor returned HTTP 200.
+- **Status:** Completed as a UI refinement; authentication and support messaging are still front-end prototypes until backend services are connected.
+
+### [2026-11-05] - Auth Slide Transition, Consistent Cards & Helpline Actions
+
+- **Objective:** Finish the authentication and helpline refinement before beginning dashboard UI work.
+- **Changes:**
+  - Made authentication route changes remount the shared frame so the login and registration compositions visibly slide from their opposing directions with smoother timing.
+  - Applied one shared responsive card height to the desktop login and registration forms, including compact desktop heights, so equivalent screens no longer appear to use different card sizes.
+  - Rewrote authentication headings, helper text, labels, role labels, and prototype messaging in clearer product language.
+  - Replaced the single helpline mail link with two usable actions: copy the support email directly on the page or open the configured email client with a subject line.
+- **Files:** `client/src/components/auth/AuthFrame.tsx`, `client/src/components/auth/auth.css`, `client/src/pages/auth/LoginPage.tsx`, `client/src/pages/auth/CustomerRegisterPage.tsx`, `client/src/pages/auth/SupplierRegisterPage.tsx`, `client/src/pages/auth/RegisterSelectPage.tsx`, `client/src/pages/public/LandingPage.tsx`, `client/src/index.css`, `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:** Root build and lint completed successfully (2,098 modules transformed). Landing, About / Helpline, login, and all registration URLs returned HTTP 200 locally.
+- **Status:** Completed as a front-end refinement. Authentication submission and support ticket delivery remain pending backend work.
+
 <!-- AI agents: Add every new development entry below this line. -->
