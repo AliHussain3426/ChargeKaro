@@ -1,37 +1,4 @@
-import { DollarSign } from 'lucide-react';
+import { CircleDollarSign, WalletCards } from 'lucide-react';
 
-export default function EarningsPage() {
-  return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Earnings</h1>
-        <p className="mt-1 text-sm text-foreground-secondary">Track your revenue and transaction history.</p>
-      </div>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {[
-          { label: 'Total Earnings', value: '—' },
-          { label: 'This Month', value: '—' },
-          { label: 'Pending Payouts', value: '—' },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-[12px] bg-surface border border-border-light p-5">
-            <p className="text-sm text-foreground-secondary">{stat.label}</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{stat.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Transaction history */}
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <h2 className="text-base font-semibold text-foreground mb-4">Transaction History</h2>
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <DollarSign className="size-12 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">No transactions yet</p>
-          <p className="text-xs text-foreground-muted mt-1">Completed bookings and payouts will appear here.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+const transactions = [{ booking: 'GC-1024 · Gulberg Charge Hub', date: '08 Nov 2026', amount: 'PKR 1,440', status: 'Settled' }, { booking: 'GC-1019 · Gulberg Charge Hub', date: '04 Nov 2026', amount: 'PKR 960', status: 'Settled' }, { booking: 'GC-1017 · DHA Phase 5 EV Stop', date: '02 Nov 2026', amount: 'PKR 720', status: 'Pending' }];
+export default function EarningsPage() { return <div className="workspace-page"><header className="workspace-head"><div><h1>Earnings</h1><p>A clear view of completed charging sessions and settlement status.</p></div></header><section className="workspace-metric-strip"><div className="workspace-metric"><span>This month</span><strong>PKR 3,120</strong><small>3 completed sessions</small></div><div className="workspace-metric"><span>Pending settlement</span><strong>PKR 720</strong><small>1 accepted session</small></div><div className="workspace-metric"><span>Platform commission</span><strong>10%</strong><small>Applied after payment</small></div></section><section className="workspace-panel"><div className="workspace-panel-head"><div><h2>Recent settlements</h2><p>Sample settlement records until payment integration is connected.</p></div><WalletCards className="size-5 text-primary" /></div><ul className="workspace-list">{transactions.map((transaction) => <li className="workspace-list-row" key={transaction.booking}><span className="workspace-row-icon"><CircleDollarSign className="size-4" /></span><div className="workspace-row-main"><strong>{transaction.booking}</strong><span>{transaction.date}</span></div><span className="workspace-row-value">{transaction.amount}<small><span className={`workspace-status ${transaction.status === 'Pending' ? 'workspace-status--warning' : ''}`}>{transaction.status}</span></small></span></li>)}</ul></section></div>; }

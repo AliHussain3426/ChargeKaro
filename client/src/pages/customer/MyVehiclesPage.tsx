@@ -1,30 +1,7 @@
-import { Car, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { BatteryCharging, ChevronRight, PlugZap, Plus } from 'lucide-react';
 
 export default function MyVehiclesPage() {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Vehicles</h1>
-          <p className="mt-1 text-sm text-foreground-secondary">Manage your registered electric vehicles.</p>
-        </div>
-        <button className="inline-flex items-center gap-2 rounded-[10px] bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors">
-          <Plus className="size-4" />
-          <span className="hidden sm:inline">Add Vehicle</span>
-        </button>
-      </div>
-
-      {/* Empty state */}
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Car className="size-12 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">No vehicles registered</p>
-          <p className="text-xs text-foreground-muted mt-1 max-w-xs">
-            Add your electric vehicle to get tailored charging station recommendations.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+  const [setupOpen, setSetupOpen] = useState(false);
+  return <div className="workspace-page"><header className="workspace-head"><div><h1>My vehicles</h1><p>Vehicle details keep station recommendations compatible with your connector and charging needs.</p></div><button className="workspace-action" onClick={() => setSetupOpen(!setupOpen)}><Plus className="size-4" /> Add vehicle</button></header>{setupOpen && <div className="workspace-notice"><PlugZap className="size-4" /> Vehicle setup is ready for the backend onboarding flow. Add vehicle persistence is not connected in this preview.</div>}<section className="workspace-card-grid"><article className="workspace-panel workspace-card"><div className="flex items-start justify-between gap-4"><div><h3>Nissan Leaf</h3><p>2021 · Electric car</p></div><span className="workspace-status">Default vehicle</span></div><div className="workspace-card-footer"><span className="inline-flex items-center gap-2 text-sm font-semibold"><PlugZap className="size-4 text-primary" /> Type 2 · 40 kWh</span><button className="workspace-text-button">Edit <ChevronRight className="size-4" /></button></div></article><article className="workspace-panel workspace-card"><div className="flex items-start justify-between gap-4"><div><h3>Charging preference</h3><p>Station search prioritizes fast Type 2 chargers within your selected distance.</p></div><BatteryCharging className="size-5 text-primary" /></div><div className="workspace-card-footer"><span className="text-sm font-semibold">Up to 45 kW</span><button className="workspace-text-button">Adjust <ChevronRight className="size-4" /></button></div></article></section></div>;
 }
-

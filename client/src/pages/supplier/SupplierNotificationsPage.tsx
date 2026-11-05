@@ -1,21 +1,3 @@
-import { Bell } from 'lucide-react';
-
-export default function SupplierNotificationsPage() {
-  return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
-        <p className="mt-1 text-sm text-foreground-secondary">Stay updated on bookings, stations, and platform activity.</p>
-      </div>
-
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Bell className="size-12 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">No notifications</p>
-          <p className="text-xs text-foreground-muted mt-1">You're all caught up.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+import { Bell, CalendarCheck, CircleDollarSign, PlugZap } from 'lucide-react';
+const alerts = [{ icon: CalendarCheck, title: 'Two booking requests await review', detail: 'Both requests are for Type 2 terminals at Gulberg Charge Hub.', time: 'Today' }, { icon: PlugZap, title: 'Terminal DHA-01 marked offline', detail: 'Review availability before publishing the station.', time: 'Yesterday' }, { icon: CircleDollarSign, title: 'Settlement ready', detail: 'PKR 2,400 from completed sessions is ready for reconciliation.', time: '05 Nov' }];
+export default function SupplierNotificationsPage() { return <div className="workspace-page"><header className="workspace-head"><div><h1>Notifications</h1><p>Operational updates for your stations, terminals, and charging requests.</p></div></header><section className="workspace-panel"><div className="workspace-panel-head"><div><h2>Operational updates</h2><p>3 items need your attention</p></div><Bell className="size-5 text-primary" /></div><ul className="workspace-list">{alerts.map(({ icon: Icon, title, detail, time }) => <li className="workspace-list-row" key={title}><span className="workspace-row-icon"><Icon className="size-4" /></span><div className="workspace-row-main"><strong>{title}</strong><span>{detail}</span></div><span className="workspace-row-value">{time}</span></li>)}</ul></section></div>; }

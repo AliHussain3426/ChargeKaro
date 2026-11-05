@@ -1,4 +1,5 @@
-import { ArrowUpRight, ChevronDown, Filter, Navigation, PlugZap, Search, SlidersHorizontal } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ArrowUpRight, Filter, MapPin, Navigation, PlugZap, Search, SlidersHorizontal } from 'lucide-react';
 
 const stations = [
   { name: 'Gulberg Charge Hub', place: 'Main Boulevard, Lahore', distance: '1.8 km', ports: '2 ports open', power: '45 kW', status: 'Available' },
@@ -7,47 +8,18 @@ const stations = [
 ];
 
 export default function FindStationsPage() {
-  return (
-    <div className="enter">
-      <div className="flex items-end justify-between mb-7">
-        <div>
-          <p className="eyebrow">Station discovery</p><h1 className="mt-1 text-3xl font-bold text-foreground">Find a charger</h1>
-          <p className="mt-2 text-sm text-foreground-secondary">Showing compatible stations close to your current location.</p>
-        </div>
-        <button className="hidden sm:inline-flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-foreground-secondary hover:bg-surface-elevated transition-colors">
-          <Filter className="size-4" />
-          Filters
-        </button>
-      </div>
+  const [query, setQuery] = useState('Near Gulberg, Lahore');
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [selected, setSelected] = useState(stations[0].name);
+  const visibleStations = useMemo(() => stations.filter((station) => (!availableOnly || station.status === 'Available') && `${station.name} ${station.place}`.toLowerCase().includes(query.replace('Near ', '').toLowerCase().split(',')[0] || '')), [availableOnly, query]);
+  const selectedStation = stations.find((station) => station.name === selected) ?? stations[0];
 
-      {/* Search bar */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-foreground-muted" />
-          <input
-            type="text"
-            placeholder="Search by city, area, or station name..."
-            defaultValue="Near Gulberg, Lahore" className="w-full rounded-lg border border-border bg-white pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-          />
-        </div>
-        <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white sm:hidden"><SlidersHorizontal className="size-4" /> Filters</button>
-      </div>
-
-      {/* Map placeholder */}
-      <div className="grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
-        <section className="app-panel overflow-hidden rounded-xl">
-          <div className="flex items-center justify-between p-5"><div><p className="eyebrow">Nearby stations</p><h2 className="mt-1 text-lg font-bold">3 compatible chargers</h2></div><button className="text-foreground-muted"><ChevronDown className="size-5" /></button></div>
-          <div className="border-t border-[#e3ecea]">
-            {stations.map((station) => <article key={station.name} className="group border-b border-[#e3ecea] p-5 last:border-b-0 hover:bg-[#f7fbfa]"><div className="flex gap-3"><span className={`mt-1 status-dot ${station.status === 'Busy' ? 'busy' : ''}`} /><div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><h3 className="font-semibold text-foreground">{station.name}</h3><span className="shrink-0 text-sm font-semibold text-foreground">{station.distance}</span></div><p className="mt-1 text-sm text-foreground-secondary">{station.place}</p><div className="mt-3 flex items-center justify-between text-xs text-foreground-muted"><span>{station.power} · {station.ports}</span><button className="inline-flex items-center font-semibold text-primary">Details <ArrowUpRight className="ml-1 size-3" /></button></div></div></div></article>)}
-          </div>
-        </section>
-        <section className="route-pattern relative min-h-[440px] overflow-hidden rounded-xl bg-[#d8ebe7] p-6">
-          <div className="absolute inset-x-[-12%] top-[48%] h-14 -rotate-[30deg] bg-[#f7fbfa]" /><div className="absolute left-[43%] top-[-15%] h-[125%] w-12 rotate-[25deg] bg-[#f7fbfa]" />
-          <div className="absolute left-[16%] top-[18%] grid size-10 place-items-center rounded-full bg-white text-primary shadow-md"><PlugZap className="size-5" /></div><div className="absolute right-[19%] top-[30%] grid size-11 place-items-center rounded-full bg-primary text-white shadow-md"><PlugZap className="size-5" /></div><div className="absolute bottom-[20%] right-[30%] grid size-10 place-items-center rounded-full bg-white text-primary shadow-md"><PlugZap className="size-5" /></div>
-          <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white p-4 shadow-lg"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-lg bg-primary-light text-primary"><Navigation className="size-5" /></span><div><p className="text-sm font-semibold text-foreground">Your location</p><p className="text-xs text-foreground-secondary">Gulberg, Lahore</p></div></div></div>
-        </section>
-      </div>
+  return <div className="workspace-page station-discovery">
+    <header className="workspace-head station-discovery-head"><div><h1>Find a charger</h1><p>Compatible charging points near Gulberg, Lahore for your Nissan Leaf.</p></div><button className={`workspace-action workspace-action--secondary station-filter ${availableOnly ? 'is-active' : ''}`} onClick={() => setAvailableOnly(!availableOnly)}><Filter className="size-4" />{availableOnly ? 'Available only' : 'Filters'}</button></header>
+    <div className="station-search"><Search className="size-4" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a city, area, or station" aria-label="Search a city, area, or station" /><button type="button" onClick={() => setQuery('Near Gulberg, Lahore')} aria-label="Use Gulberg location"><Navigation className="size-4" /> <span>Use location</span></button></div>
+    <div className="station-discovery-grid">
+      <section className="workspace-panel station-results"><div className="workspace-panel-head"><div><h2>{visibleStations.length} compatible charger{visibleStations.length === 1 ? '' : 's'}</h2><p>{availableOnly ? 'Showing currently available ports only.' : 'Sorted by closest compatible station.'}</p></div><SlidersHorizontal className="size-4 text-foreground-muted" /></div><ul className="workspace-list">{visibleStations.map((station) => <li key={station.name}><button className={`station-result ${selected === station.name ? 'is-selected' : ''}`} onClick={() => setSelected(station.name)}><span className={`station-status-dot ${station.status === 'Busy' ? 'is-busy' : ''}`} /><span className="station-result-main"><strong>{station.name}</strong><small>{station.place}</small><em>{station.power} · {station.ports}</em></span><span className="station-result-side"><b>{station.distance}</b><span>{station.status}</span><ArrowUpRight className="size-4" /></span></button></li>)}</ul>{visibleStations.length === 0 && <div className="workspace-empty"><MapPin className="size-7" /><strong>No matching chargers</strong><p>Try another area or turn off the available-only filter.</p></div>}</section>
+      <section className="station-map" aria-label="Station map preview"><span className="station-map-road station-map-road--one" /><span className="station-map-road station-map-road--two" /><button className="station-map-pin station-map-pin--origin" aria-label="Your location"><Navigation className="size-4" /></button><button className="station-map-pin station-map-pin--selected" aria-label={`${selectedStation.name}, selected`}><PlugZap className="size-4" /></button><button className="station-map-pin station-map-pin--other" aria-label="Another charging station"><PlugZap className="size-4" /></button><div className="station-map-summary"><span className="workspace-row-icon"><PlugZap className="size-4" /></span><div><strong>{selectedStation.name}</strong><p>{selectedStation.distance} away · {selectedStation.power} · {selectedStation.ports}</p></div><button className="workspace-text-button">Details <ArrowUpRight className="size-4" /></button></div></section>
     </div>
-  );
+  </div>;
 }
-

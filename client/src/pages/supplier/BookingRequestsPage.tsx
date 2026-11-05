@@ -1,42 +1,6 @@
-import { CalendarCheck } from 'lucide-react';
+import { useState } from 'react';
+import { CalendarCheck, Check, Clock3, X } from 'lucide-react';
 
-const tabs = ['All', 'Pending', 'Accepted', 'In Progress', 'Completed', 'Rejected'];
-
-export default function BookingRequestsPage() {
-  return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Booking Requests</h1>
-        <p className="mt-1 text-sm text-foreground-secondary">Review and manage incoming booking requests from customers.</p>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
-        {tabs.map((tab, i) => (
-          <button
-            key={tab}
-            className={`shrink-0 rounded-[8px] px-4 py-2 text-sm font-medium transition-colors ${
-              i === 0
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-surface text-foreground-secondary hover:bg-surface-elevated'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Empty state */}
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <CalendarCheck className="size-12 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">No booking requests</p>
-          <p className="text-xs text-foreground-muted mt-1 max-w-xs">
-            When customers request a charging session at your stations, requests will appear here.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+type RequestState = 'Pending' | 'Accepted' | 'Declined';
+const initialRequests = [{ id: 1, name: 'Ayesha Khan', vehicle: 'Nissan Leaf · Type 2', time: 'Thu, 14 Nov · 10:30–11:30', state: 'Pending' as RequestState }, { id: 2, name: 'Hassan Ali', vehicle: 'MG ZS EV · Type 2', time: 'Fri, 15 Nov · 14:00–15:00', state: 'Pending' as RequestState }];
+export default function BookingRequestsPage() { const [requests, setRequests] = useState(initialRequests); const changeState = (id: number, state: RequestState) => setRequests((current) => current.map((request) => request.id === id ? { ...request, state } : request)); return <div className="workspace-page"><header className="workspace-head"><div><h1>Booking requests</h1><p>Review upcoming charging sessions and confirm slots at your published terminals.</p></div></header><div className="workspace-notice"><CalendarCheck className="size-4" /> {requests.filter((request) => request.state === 'Pending').length} request{requests.filter((request) => request.state === 'Pending').length === 1 ? '' : 's'} need a decision. Actions update this front-end preview only.</div><section className="workspace-panel"><div className="workspace-panel-head"><div><h2>Incoming requests</h2><p>Gulberg Charge Hub · Type 2 terminals</p></div></div><ul className="workspace-list">{requests.map((request) => <li className="workspace-list-row" key={request.id}><span className="workspace-row-icon"><CalendarCheck className="size-4" /></span><div className="workspace-row-main"><strong>{request.name}</strong><span><Clock3 className="mr-1 inline size-3" />{request.time} · {request.vehicle}</span></div>{request.state === 'Pending' ? <div className="workspace-action-row"><button className="decline" onClick={() => changeState(request.id, 'Declined')}><X className="mr-1 inline size-3" />Decline</button><button className="accept" onClick={() => changeState(request.id, 'Accepted')}><Check className="mr-1 inline size-3" />Accept</button></div> : <span className={`workspace-status ${request.state === 'Declined' ? 'workspace-status--muted' : ''}`}>{request.state}</span>}</li>)}</ul></section></div>; }

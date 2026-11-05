@@ -1,21 +1,4 @@
-import { Bell } from 'lucide-react';
+import { Bell, CalendarCheck, CircleCheck, MapPin } from 'lucide-react';
 
-export default function CustomerNotificationsPage() {
-  return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
-        <p className="mt-1 text-sm text-foreground-secondary">Stay updated on your bookings and activity.</p>
-      </div>
-
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Bell className="size-12 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">No notifications</p>
-          <p className="text-xs text-foreground-muted mt-1">You're all caught up.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+const alerts = [{ icon: CalendarCheck, title: 'Booking confirmed', detail: 'Gulberg Charge Hub confirmed your Thursday 10:30 session.', time: 'Today' }, { icon: MapPin, title: 'A nearby charger is available', detail: 'Two compatible ports are open at Gulberg Charge Hub.', time: '2 days ago' }, { icon: CircleCheck, title: 'Vehicle profile ready', detail: 'Your Nissan Leaf is set as the default vehicle for station search.', time: '4 days ago' }];
+export default function CustomerNotificationsPage() { return <div className="workspace-page"><header className="workspace-head"><div><h1>Notifications</h1><p>Updates about your charging plans, bookings, and vehicle profile.</p></div></header><section className="workspace-panel"><div className="workspace-panel-head"><div><h2>Recent updates</h2><p>3 items in your driver workspace</p></div><Bell className="size-5 text-primary" /></div><ul className="workspace-list">{alerts.map(({ icon: Icon, title, detail, time }) => <li className="workspace-list-row" key={title}><span className="workspace-row-icon"><Icon className="size-4" /></span><div className="workspace-row-main"><strong>{title}</strong><span>{detail}</span></div><span className="workspace-row-value">{time}</span></li>)}</ul></section></div>; }

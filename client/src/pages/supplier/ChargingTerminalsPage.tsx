@@ -1,30 +1,4 @@
-import { Plug, Plus } from 'lucide-react';
-
-export default function ChargingTerminalsPage() {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Charging Terminals</h1>
-          <p className="mt-1 text-sm text-foreground-secondary">Manage the individual charging points across your stations.</p>
-        </div>
-        <button className="inline-flex items-center gap-2 rounded-[10px] bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors">
-          <Plus className="size-4" />
-          <span className="hidden sm:inline">Add Terminal</span>
-        </button>
-      </div>
-
-      {/* Empty state */}
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Plug className="size-12 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">No terminals added</p>
-          <p className="text-xs text-foreground-muted mt-1 max-w-xs">
-            Add charging terminals to your stations so customers can book them.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+import { PlugZap, Plus } from 'lucide-react';
+import { useState } from 'react';
+const terminals = [{ name: 'Terminal GC-01', station: 'Gulberg Charge Hub', connector: 'Type 2 · 45 kW', status: 'Available' }, { name: 'Terminal GC-02', station: 'Gulberg Charge Hub', connector: 'CCS2 · 50 kW', status: 'In use' }, { name: 'Terminal DHA-01', station: 'DHA Phase 5 EV Stop', connector: 'Type 2 · 22 kW', status: 'Offline' }];
+export default function ChargingTerminalsPage() { const [notice, setNotice] = useState(false); return <div className="workspace-page"><header className="workspace-head"><div><h1>Charging terminals</h1><p>Review connector capacity and availability across your stations.</p></div><button className="workspace-action" onClick={() => setNotice(!notice)}><Plus className="size-4" /> Add terminal</button></header>{notice && <div className="workspace-notice"><PlugZap className="size-4" /> Terminal setup is a front-end preview until station and terminal APIs are connected.</div>}<section className="workspace-panel"><div className="workspace-panel-head"><div><h2>3 terminals</h2><p>Availability is sample data for the supplier workspace.</p></div></div><ul className="workspace-list">{terminals.map((terminal) => <li className="workspace-list-row" key={terminal.name}><span className="workspace-row-icon"><PlugZap className="size-4" /></span><div className="workspace-row-main"><strong>{terminal.name}</strong><span>{terminal.station} · {terminal.connector}</span></div><span className={`workspace-status ${terminal.status === 'In use' ? 'workspace-status--warning' : terminal.status === 'Offline' ? 'workspace-status--muted' : ''}`}>{terminal.status}</span></li>)}</ul></section></div>; }

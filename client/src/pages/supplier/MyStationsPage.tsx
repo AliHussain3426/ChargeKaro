@@ -1,30 +1,3 @@
-import { Store, Plus } from 'lucide-react';
-
-export default function MyStationsPage() {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Stations</h1>
-          <p className="mt-1 text-sm text-foreground-secondary">Manage your registered charging stations.</p>
-        </div>
-        <button className="inline-flex items-center gap-2 rounded-[10px] bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary-hover transition-colors">
-          <Plus className="size-4" />
-          <span className="hidden sm:inline">Add Station</span>
-        </button>
-      </div>
-
-      {/* Empty state */}
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Store className="size-12 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">No stations registered</p>
-          <p className="text-xs text-foreground-muted mt-1 max-w-xs">
-            Add your first charging station to start receiving bookings from EV owners.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+import { useState } from 'react';
+import { ChevronRight, MapPin, Plus, Store } from 'lucide-react';
+export default function MyStationsPage() { const [notice, setNotice] = useState(false); return <div className="workspace-page"><header className="workspace-head"><div><h1>My stations</h1><p>Manage the locations drivers see when they plan a charging stop.</p></div><button className="workspace-action" onClick={() => setNotice(!notice)}><Plus className="size-4" /> Add station</button></header>{notice && <div className="workspace-notice"><Store className="size-4" /> Station creation will be connected when supplier onboarding and station APIs are available.</div>}<section className="workspace-card-grid"><article className="workspace-panel workspace-card"><div className="flex items-start justify-between gap-4"><div><h3>Gulberg Charge Hub</h3><p><MapPin className="mr-1 inline size-3" /> Main Boulevard, Lahore</p></div><span className="workspace-status">Published</span></div><div className="workspace-card-footer"><span className="text-sm font-semibold">2 of 3 terminals available</span><button className="workspace-text-button">Manage <ChevronRight className="size-4" /></button></div></article><article className="workspace-panel workspace-card"><div className="flex items-start justify-between gap-4"><div><h3>DHA Phase 5 EV Stop</h3><p><MapPin className="mr-1 inline size-3" /> Commercial Area, Lahore</p></div><span className="workspace-status workspace-status--warning">Draft</span></div><div className="workspace-card-footer"><span className="text-sm font-semibold">Complete terminal details</span><button className="workspace-text-button">Continue <ChevronRight className="size-4" /></button></div></article></section></div>; }

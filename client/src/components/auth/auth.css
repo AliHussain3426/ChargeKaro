@@ -11,7 +11,7 @@
   gap: 12px;
   padding: 12px;
   background: #e8f1ee;
-  --auth-card-height: clamp(660px, 76svh, 720px);
+  --auth-card-min-height: clamp(600px, 68svh, 660px);
 }
 
 .auth-page--register {
@@ -109,11 +109,11 @@
 
 .auth-surface {
   position: relative;
-  width: min(100%, 560px);
-  height: var(--auth-card-height);
-  min-height: var(--auth-card-height);
+  width: min(100%, 640px);
+  min-height: var(--auth-card-min-height);
   display: flex;
   flex-direction: column;
+  overflow: visible;
   padding: clamp(1.55rem, 3.4vw, 2.65rem);
   border: 0;
   border-radius: 28px;
@@ -302,7 +302,7 @@
 /* Registration keeps its focus on the form on common laptop-height screens. */
 @media (min-width: 901px) and (max-height: 820px) {
   .auth-page.auth-refined {
-    --auth-card-height: min(680px, calc(100svh - 56px));
+    --auth-card-min-height: 0;
   }
 
   .auth-refined .auth-story {
@@ -322,9 +322,8 @@
   }
 
   .auth-surface {
-    height: var(--auth-card-height);
-    min-height: var(--auth-card-height);
-    overflow-y: auto;
+    min-height: var(--auth-card-min-height);
+    overflow: visible;
     padding: 1.3rem clamp(1.45rem, 2.6vw, 2rem);
     border-radius: 24px;
   }
