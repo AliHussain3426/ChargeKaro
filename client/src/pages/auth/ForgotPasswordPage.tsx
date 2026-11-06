@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <AuthFrame title="Reset your password." description="Enter the address connected to your account and we will guide you through a secure reset." previewTo="/demo" previewLabel="Open demo dashboard">
+    <AuthFrame title="Reset your password." description="Enter the address connected to your account and we will guide you through a secure reset." previewTo="/demo" previewLabel="View demo workspace">
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <div className="field"><label htmlFor="recovery-email">Email address</label><input id="recovery-email" type="email" placeholder="you@example.com" autoComplete="email" required /></div>
         {message && <p className="success-message" role="status">{message}</p>}

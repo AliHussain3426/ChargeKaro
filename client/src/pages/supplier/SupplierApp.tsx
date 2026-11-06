@@ -16,7 +16,13 @@ const mobileNavItems: NavItem[] = [
   { label: 'Overview', href: '/supplier', icon: LayoutDashboard },
   { label: 'Bookings', href: '/supplier/bookings', icon: CalendarCheck },
   { label: 'Stations', href: '/supplier/stations', icon: Store },
-  { label: 'More', href: '/supplier/profile', icon: UserCog },
+  { label: 'Alerts', href: '/supplier/notifications', icon: Bell },
+];
+
+const mobileDrawerItems: NavItem[] = [
+  { label: 'Charging Terminals', href: '/supplier/terminals', icon: Plug },
+  { label: 'Earnings', href: '/supplier/earnings', icon: DollarSign },
+  { label: 'Profile & Settings', href: '/supplier/profile', icon: UserCog },
 ];
 
 export default function SupplierApp() {
@@ -25,6 +31,7 @@ export default function SupplierApp() {
       role="supplier"
       sidebarItems={sidebarItems}
       mobileNavItems={mobileNavItems}
+      mobileDrawerItems={mobileDrawerItems}
     />
   );
 }

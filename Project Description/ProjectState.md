@@ -1,10 +1,10 @@
 # PROJECT STATE
 
 **Project:** EV Charging Platform  
-**Last Updated:** 5 November 2026 (4:45 PM PKT)
+**Last Updated:** 6 November 2026
 **Current Phase:** Scaffolding & Initial Application Structure (Phase 1)  
 **Overall Completion:** ~48% overall (~80% of Phase 1 Website Structure & Flow)  
-**Status:** Frontend and backend foundations verified; the public experience includes an About / Helpline section with working contact actions; authentication uses matching, scroll-free rectangular two-panel surfaces with refined language. Customer and Supplier dashboards now use role-specific operational overview compositions, with interactive prototype UI across their main routes. Super Admin views remain scaffolded skeletons. Backend workflows remain pending.
+**Status:** Frontend and backend foundations verified; the public experience includes an About / Helpline section with working contact actions; authentication and landing views use responsive, safe-area-aware mobile layouts. Customer, Supplier, and Super Admin dashboards now provide role-specific interactive prototype UI. Backend workflows remain pending.
 
 ---
 
@@ -31,12 +31,12 @@ A supplier can manage multiple stations, and each station can contain multiple c
 | **Repository Setup & Tooling** | 95% | Completed | React 19 + Vite + Tailwind v4 frontend; Express 5 + TS backend; builds passing |
 | **Design System & Tokens** | 90% | Completed | #0B7D68 primary, #CCCECF card surface, #E4F0F0 background, DM Sans / Manrope typography |
 | **Public Navigation & Marketing** | 90% | Completed | Landing, How It Works, For Customers, For Suppliers, Demo Access, 404 pages |
-| **Authentication UI** | 75% | Completed | Login, Register Select, Customer Register, Supplier Register, Forgot Password; matching scroll-free form surfaces |
+| **Authentication UI** | 80% | Completed | Login, Register Select, Customer Register, Supplier Register, Forgot Password; matching surfaces and mobile-safe input/layout rules |
 | **Customer Interface Flow** | 65% | In Progress | Overview, container-aware station discovery, bookings, vehicles, notifications, and profile/settings have interactive prototype UIs |
 | **Supplier Interface Flow** | 55% | In Progress | Overview, requests, stations, terminals, earnings, notifications, and profile/settings have interactive prototype UIs |
-| **Super Admin Interface Flow** | 30% | In Progress | App shell and 8 views scaffolded with skeletons; awaiting high-fidelity prototypes |
+| **Super Admin Interface Flow** | 60% | In Progress | Overview, management lists, reports, and settings now use interactive operational prototype UIs |
 | **Backend API & Database** | 15% | Scaffolded | Server architecture, configs, middleware done; Mongoose models and controllers pending |
-| **Interactive Map & OSRM Routing**| 0% | Planned | Deferred until station discovery UI refinement is completed |
+| **Interactive Map & OSRM Routing**| 0% | Planned | Awaiting Leaflet/API details for live map integration |
 | **Payments & Supplier Verification** | 0% | Deferred | Intentionally deferred to later phase per project requirements |
 | **Overall Project Progress** | **~48%** | **In Progress** | **~80% of Phase 1 Structure & Previewable Flow** |
 
@@ -100,7 +100,7 @@ The continuity files are:
 The platform uses a unified application adapting across viewports and user roles:
 
 ### Customer Interface
-- Mobile-first responsive experience with sticky bottom navigation.
+- Mobile-first responsive experience with a single sticky bottom navigation system; the desktop rail is intentionally unavailable on mobile to prevent duplicated controls.
 - Vehicle registration and management.
 - Charging station discovery and map view.
 - Charging booking requests and status tracking.
@@ -166,7 +166,7 @@ The project follows a clean, modern, elegant, and professional visual direction.
 |---|---|---|
 | Project Scaffolding | Completed | Backend core & frontend core initialized and build tested |
 | Public Navigation & Layout | Completed | Glass header and footer connect to one smooth-scrolling landing page, including Home, product sections, and an About / Helpline anchor; legacy public URLs redirect to their corresponding landing section |
-| Dashboard Layout | Completed | Bright, slim inset navigation rail with automatic pointer/keyboard expansion that smoothly shifts the desktop workspace, plus a responsive mobile drawer |
+| Dashboard Layout | Completed | Bright, slim inset navigation rail with automatic pointer/keyboard expansion that smoothly shifts the desktop workspace, plus a single responsive mobile bottom navigation system |
 | Customer Interface Structure | Completed | Overview, station discovery, bookings, vehicles, notifications, and profile/settings have representative UI data and preview interactions |
 | Supplier Interface Structure | Completed | Shell and 7 core supplier views are routed with representative operational data and preview interactions |
 | Super Admin Interface Structure | Completed | Shell and 8 core admin oversight views scaffolded and routed |
@@ -198,7 +198,7 @@ The following areas have been verified against the actual repository source code
 - [x] Public header navigation scrolls to Home, How It Works, For Customers, For Suppliers, and About / Helpline sections on the landing page; former standalone public URLs redirect to the matching section.
 - [x] Authentication surfaces are rounded and borderless, use matching rectangular sizing without internal form-card scrolling, and slide between sign-in and registration with reduced-motion-safe fallbacks.
 - [x] About / Helpline provides both an in-page support-email copy action and an email-client link.
-- [x] Dashboard navigation uses a slim, high-contrast inset rail that automatically expands on pointer or keyboard focus, smoothly shifts the desktop workspace, and collapses when that interaction ends.
+- [x] Dashboard navigation uses a slim, high-contrast inset rail that automatically expands on pointer or keyboard focus, smoothly shifts the desktop workspace, and collapses when that interaction ends; mobile instead uses only the bottom navigation, with safe-area-aware content spacing so actions cannot sit behind it.
 - [x] Customer dashboard includes prototype booking filters, a vehicle setup prompt, station discovery, and notification rows.
 - [x] Supplier dashboard includes prototype booking decisions, station and terminal management surfaces, earnings, and notification rows.
 - [x] Customer dashboard shell & pages created.

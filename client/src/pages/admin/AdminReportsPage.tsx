@@ -1,38 +1,4 @@
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, ChevronRight, CircleDollarSign, PlugZap, Route } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-export default function AdminReportsPage() {
-  return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Reports & Analytics</h1>
-        <p className="mt-1 text-sm text-foreground-secondary">Platform performance, usage statistics, and insights.</p>
-      </div>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: 'Total Bookings', value: '—' },
-          { label: 'Revenue', value: '—' },
-          { label: 'Active Users', value: '—' },
-          { label: 'Station Utilization', value: '—' },
-        ].map((stat) => (
-          <div key={stat.label} className="rounded-[12px] bg-surface border border-border-light p-5">
-            <p className="text-sm text-foreground-secondary">{stat.label}</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{stat.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Chart placeholder */}
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <h2 className="text-base font-semibold text-foreground mb-4">Platform Analytics</h2>
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <BarChart3 className="size-14 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">Analytics charts will appear here</p>
-          <p className="text-xs text-foreground-muted mt-1">Charts and graphs will render when data is available.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+export default function AdminReportsPage() { return <div className="admin-page"><header className="workspace-head"><div><p className="admin-context">GreenCharge platform</p><h1>Reports & analytics</h1><p>Prototype reporting for network activity, utilisation, and settlement visibility.</p></div><span className="admin-freshness">Snapshot · 05 Nov 2026</span></header><section className="admin-report-hero"><div><span>Network activity</span><strong>3 completed charging sessions</strong><p>Across the current prototype dataset, with one session pending settlement.</p></div><div className="admin-report-bars" aria-label="Session activity chart"><i /><i /><i /><i /><i className="is-active" /><i /><i /></div></section><section className="admin-report-grid"><article className="workspace-panel workspace-card"><CircleDollarSign className="size-5 text-primary" /><h3>PKR 3,120</h3><p>Recorded session value this month.</p><Link to="/admin/bookings" className="workspace-text-button">View bookings <ChevronRight className="size-4" /></Link></article><article className="workspace-panel workspace-card"><PlugZap className="size-5 text-primary" /><h3>2 available ports</h3><p>At the currently published station.</p><Link to="/admin/terminals" className="workspace-text-button">Review terminals <ChevronRight className="size-4" /></Link></article><article className="workspace-panel workspace-card"><Route className="size-5 text-primary" /><h3>1.8 km</h3><p>Nearest sample route to an available charger.</p><Link to="/admin/stations" className="workspace-text-button">Review stations <ChevronRight className="size-4" /></Link></article></section><div className="workspace-notice"><BarChart3 className="size-4" /> Charts and reporting will use live booking, station, and settlement records once the admin API is connected.</div></div>; }

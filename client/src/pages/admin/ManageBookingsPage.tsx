@@ -1,48 +1,10 @@
-import { CalendarCheck, Search } from 'lucide-react';
+import { CalendarCheck } from 'lucide-react';
+import AdminListWorkspace from '@/components/dashboard/AdminListWorkspace';
 
-const tabs = ['All', 'Pending', 'Confirmed', 'In Progress', 'Completed', 'Cancelled'];
+const rows = [
+  { name: 'BK-1024 · Ayesha Khan', meta: 'Gulberg Charge Hub · Thu, 14 Nov · 10:30–11:30', status: 'Confirmed', value: 'PKR 1,440', group: 'Confirmed' },
+  { name: 'BK-1025 · Hassan Ali', meta: 'Gulberg Charge Hub · Fri, 15 Nov · 14:00–15:00', status: 'Pending', value: 'PKR 1,200', group: 'Pending' },
+  { name: 'BK-1017 · Zara Malik', meta: 'DHA Phase 5 EV Stop · Mon, 04 Nov · 18:00–19:00', status: 'Completed', value: 'PKR 720', group: 'Completed' },
+];
 
-export default function ManageBookingsPage() {
-  return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Manage Bookings</h1>
-        <p className="mt-1 text-sm text-foreground-secondary">View and oversee all platform booking activity.</p>
-      </div>
-
-      <div className="mb-6">
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-foreground-muted" />
-          <input
-            type="text"
-            placeholder="Search bookings by ID, customer, or station..."
-            className="w-full rounded-[10px] border border-border bg-surface pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-          />
-        </div>
-        <div className="flex gap-1 overflow-x-auto pb-1">
-          {tabs.map((tab, i) => (
-            <button
-              key={tab}
-              className={`shrink-0 rounded-[8px] px-4 py-2 text-sm font-medium transition-colors ${
-                i === 0
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-surface text-foreground-secondary hover:bg-surface-elevated'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-[12px] bg-surface border border-border-light p-6">
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <CalendarCheck className="size-12 text-foreground-muted/30 mb-3" />
-          <p className="text-sm font-medium text-foreground-muted">No bookings to display</p>
-          <p className="text-xs text-foreground-muted mt-1">All platform bookings will appear here.</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+export default function ManageBookingsPage() { return <AdminListWorkspace title="Bookings" description="Oversee charging session requests and their platform status." itemLabel="Booking" tabs={['All bookings', 'Pending', 'Confirmed', 'Completed']} rows={rows} icon={CalendarCheck} />; }

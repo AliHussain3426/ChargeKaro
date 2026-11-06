@@ -15,7 +15,12 @@ const mobileNavItems: NavItem[] = [
   { label: 'Home', href: '/customer', icon: LayoutDashboard },
   { label: 'Explore', href: '/customer/stations', icon: MapPin },
   { label: 'Bookings', href: '/customer/bookings', icon: Calendar },
-  { label: 'Profile', href: '/customer/profile', icon: UserCog },
+  { label: 'Alerts', href: '/customer/notifications', icon: Bell },
+];
+
+const mobileDrawerItems: NavItem[] = [
+  { label: 'My Vehicles', href: '/customer/vehicles', icon: Car },
+  { label: 'Profile & Settings', href: '/customer/profile', icon: UserCog },
 ];
 
 export default function CustomerApp() {
@@ -24,6 +29,7 @@ export default function CustomerApp() {
       role="customer"
       sidebarItems={sidebarItems}
       mobileNavItems={mobileNavItems}
+      mobileDrawerItems={mobileDrawerItems}
     />
   );
 }

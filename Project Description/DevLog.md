@@ -191,6 +191,18 @@ Keep entries short and informative. Do not overwrite previous entries.
 
 <!-- AI agents: Add every new development entry below this line. -->
 
+### [2026-11-05] - Mobile-First Fit Pass & Admin Operations Workspace
+
+- **Objective:** Prevent mobile login/landing layouts from requiring browser zoom and replace the remaining Super Admin placeholder screens with usable operational prototypes.
+- **Changes:**
+  - Added `viewport-fit=cover`, safe-area-aware auth padding, dynamic viewport-height sizing, horizontal overflow protection, and 16px mobile form text to prevent iOS Safari’s automatic input zoom.
+  - Reorganized the phone landing hero into full-width actions and compact, non-bleeding visual panels rather than relying on negative desktop-style margins.
+  - Built the Super Admin overview, searchable/filterable Users, Suppliers, Stations, Terminals, and Bookings management lists, plus a compact reports view. Review controls update preview-only local state and do not claim backend persistence.
+  - Added mobile stacking for admin command, reporting, management, and list layouts.
+- **Files:** `client/index.html`, `client/src/components/auth/auth.css`, `client/src/index.css`, `client/src/components/dashboard/AdminListWorkspace.tsx`, `client/src/pages/admin/*`, `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:** Root `npm run build` passed (2,100 modules transformed); root `npm run lint` passed with no findings; landing, login, registration, and all admin routes returned HTTP 200 locally. Admin source lint passed with 0 failures; existing System Settings kicker labels remain design-skill warnings only.
+- **Status:** Completed as a front-end/responsive prototype refinement. Leaflet map, live data, authentication, and admin permissions remain pending integrations.
+
 ### [2026-11-05] - Role-Specific Dashboard Overview Redesign
 
 - **Objective:** Replace the generic, line-heavy customer and supplier overview pages with distinct operational dashboard compositions.
@@ -277,6 +289,25 @@ Keep entries short and informative. Do not overwrite previous entries.
 
 <!-- AI agents: Add every new development entry below this line. -->
 
+---
+
+### [2026-11-06] - Mobile Dashboard Navigation Simplification
+
+- **Objective:** Remove duplicated dashboard navigation on narrow screens and prevent fixed mobile navigation from obscuring page actions.
+- **Changes:**
+  - Removed the mobile sidebar drawer, backdrop, open/close controls, and hamburger trigger from the shared dashboard shell.
+  - Kept the auto-expanding inset navigation rail for desktop only; customer, supplier, and admin mobile workspaces now have one navigation system: the bottom bar.
+  - Added safe-area-aware bottom content padding and navigation height, plus a subtle elevated bottom-bar surface, so page controls remain clear of the fixed mobile navigation.
+  - Renamed the supplier mobile `More` destination to `Profile` for clear, direct navigation.
+- **Files Modified:**
+  - `client/src/components/layout/DashboardLayout.tsx`
+  - `client/src/index.css`
+  - `client/src/pages/supplier/SupplierApp.tsx`
+  - `Project Description/ProjectState.md`
+  - `Project Description/DevLog.md`
+- **Verification:** Frontend `npm run lint` passed with 0 errors and `npm run build` passed (2,100 modules transformed).
+- **Status:** Completed.
+
 
 ---
 
@@ -298,5 +329,30 @@ Keep entries short and informative. Do not overwrite previous entries.
   - Linter: `npm run lint` passed (0 errors, 0 warnings across 44 files).
 - **Status:** Completed.
 - **Notes:** Ready to initiate the high-fidelity redesign of Super Admin oversight views (`AdminOverview`, `ManageStationsPage`, `ManageBookingsPage`, `ManageUsersPage`).
+
+<!-- AI agents: Add every new development entry below this line. -->
+
+
+---
+
+### [2026-11-05] - Authentication Card Sizing & Alignment Unification
+
+- **Objective:** Fix size inconsistencies, top-overflow clipping, and visual disparities between login and registration cards reported from browser inspection.
+- **Changes:**
+  - Removed duplicate and conflicting legacy authentication CSS rules from `client/src/index.css` that were clashing with `auth.css`.
+  - Unified card sizing across all authentication routes (`/login`, `/register`, `/register/customer`, `/register/supplier`, `/forgot-password`) to a consistent `max-width: 480px` with matching 22px border radius, 2.25rem padding, and subtle elevation.
+  - Resolved the flexbox top-overflow bug: switched `.auth-surface` to `margin-block: auto` inside the scrollable `.auth-main` container so cards center cleanly on tall screens and scroll naturally without ever pushing the top accent bar or header off-screen on shorter viewports.
+  - Standardized all form fields (48px height, 10px radius, 1.5px border), role selection cards, primary action buttons, heading typography, and bottom demo bypass links across both login and register views.
+  - Standardized demo link text in `ForgotPasswordPage.tsx`.
+- **Files Modified:**
+  - `client/src/components/auth/auth.css`
+  - `client/src/index.css`
+  - `client/src/pages/auth/ForgotPasswordPage.tsx`
+  - `Project Description/ProjectState.md`
+  - `Project Description/DevLog.md`
+- **Verification:**
+  - `npm run build` passed cleanly (2,099 modules transformed, 80.49 kB CSS, 390.59 kB JS).
+  - `npm run lint` passed with 0 errors and 0 warnings across 44 files.
+- **Status:** Completed.
 
 <!-- AI agents: Add every new development entry below this line. -->

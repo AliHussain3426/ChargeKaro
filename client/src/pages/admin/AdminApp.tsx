@@ -13,11 +13,19 @@ const sidebarItems: NavItem[] = [
   { label: 'System Settings', href: '/admin/settings', icon: Settings },
 ];
 
+const mobileNavItems: NavItem[] = [
+  { label: 'Overview', href: '/admin', icon: LayoutDashboard },
+  { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Stations', href: '/admin/stations', icon: MapPin },
+  { label: 'Settings', href: '/admin/settings', icon: Settings },
+];
+
 export default function AdminApp() {
   return (
     <DashboardLayout
       role="admin"
       sidebarItems={sidebarItems}
+      mobileNavItems={mobileNavItems}
     />
   );
 }
