@@ -379,3 +379,29 @@ Keep entries short and informative. Do not overwrite previous entries.
   - Captured and visually reviewed the local route at 1440px desktop, 820px tablet, and 390px mobile.
   - The installed layout checker could not inspect the Vite application because it expects the skill's standalone page system (`window.lyCheck`); the browser screenshots provided the visual QA fallback.
 - **Status:** Completed.
+
+
+---
+
+### [2026-11-07] - Vercel Deployment & Admin Module Resolution Investigation
+
+- **Objective:** Investigate why Vercel cloned and built commit `5f5e515` instead of `ca7f3c4`, verify TypeScript module resolution for `AdminListWorkspace`, and ensure build passes.
+- **Root Cause Analysis:**
+  1. **Vercel Source Commit (`5f5e515` vs `ca7f3c4`):**
+     - Commit `5f5e515` ("Redesigned the Landing Page & deploy") updated five admin pages to import `AdminListWorkspace`, but `AdminListWorkspace.tsx` was not added to git in that commit. Vercel triggered a deployment on `5f5e515` and failed with module resolution errors.
+     - The subsequent commit `ca7f3c4` ("Disable automatic Vercel deployments") added `AdminListWorkspace.tsx`, but simultaneously introduced `client/vercel.json` with `"git": { "deploymentEnabled": false }`.
+     - Because `git.deploymentEnabled: false` tells Vercel's Git integration to ignore push events, Vercel never triggered a build for commit `ca7f3c4`. As a result, the deployment visible in Vercel's dashboard remained the failed build of `5f5e515`.
+  2. **TypeScript Module Resolution:**
+     - Verified `vite.config.ts` (`@` -> `./src`), `tsconfig.app.json` (`@/*` -> `./src/*` with `moduleResolution: "bundler"`), and default export in `AdminListWorkspace.tsx`.
+     - In commit `ca7f3c4`, module resolution is fully valid; `npm run build` passes with zero errors.
+- **Changes Made:**
+  - Updated `client/vercel.json` to enable deployments (`"deploymentEnabled": true`) and added SPA fallback rewrites (`/*` -> `/index.html`) so subsequent git pushes trigger Vercel deployments and handle client-side routing properly.
+- **Files Modified:**
+  - `client/vercel.json`
+  - `Project Description/DevLog.md`
+- **Verification:**
+  - Ran `cd client; npm run build` (`tsc -b && vite build`) -> passed cleanly (2,100 modules transformed, 0 errors).
+  - Ran `npm run lint` -> passed with 0 errors and 0 warnings across 45 files.
+- **Status:** Completed.
+
+<!-- AI agents: Add every new development entry below this line. -->
