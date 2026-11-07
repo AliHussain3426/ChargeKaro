@@ -30,7 +30,7 @@ A supplier can manage multiple stations, and each station can contain multiple c
 |---|---|---|---|
 | **Repository Setup & Tooling** | 95% | Completed | React 19 + Vite + Tailwind v4 frontend; Express 5 + TS backend; builds passing |
 | **Design System & Tokens** | 90% | Completed | #0B7D68 primary, #CCCECF card surface, #E4F0F0 background, DM Sans / Manrope typography |
-| **Public Navigation & Marketing** | 90% | Completed | Landing, How It Works, For Customers, For Suppliers, Demo Access, 404 pages |
+| **Public Navigation & Marketing** | 90% | Completed | A bespoke route-planning landing page, one-page public navigation, demo access, and 404 pages |
 | **Authentication UI** | 80% | Completed | Login, Register Select, Customer Register, Supplier Register, Forgot Password; matching surfaces and mobile-safe input/layout rules |
 | **Customer Interface Flow** | 65% | In Progress | Overview, container-aware station discovery, bookings, vehicles, notifications, and profile/settings have interactive prototype UIs |
 | **Supplier Interface Flow** | 55% | In Progress | Overview, requests, stations, terminals, earnings, notifications, and profile/settings have interactive prototype UIs |
@@ -100,7 +100,7 @@ The continuity files are:
 The platform uses a unified application adapting across viewports and user roles:
 
 ### Customer Interface
-- Mobile-first responsive experience with a single sticky bottom navigation system; the desktop rail is intentionally unavailable on mobile to prevent duplicated controls.
+- Mobile-first responsive experience with a primary sticky bottom navigation and a separate secondary-options drawer; the desktop rail is intentionally unavailable on mobile to prevent duplicated controls.
 - Vehicle registration and management.
 - Charging station discovery and map view.
 - Charging booking requests and status tracking.
@@ -165,8 +165,8 @@ The project follows a clean, modern, elegant, and professional visual direction.
 | Functional Area | Current Status | Notes |
 |---|---|---|
 | Project Scaffolding | Completed | Backend core & frontend core initialized and build tested |
-| Public Navigation & Layout | Completed | Glass header and footer connect to one smooth-scrolling landing page, including Home, product sections, and an About / Helpline anchor; legacy public URLs redirect to their corresponding landing section |
-| Dashboard Layout | Completed | Bright, slim inset navigation rail with automatic pointer/keyboard expansion that smoothly shifts the desktop workspace, plus a single responsive mobile bottom navigation system |
+| Public Navigation & Layout | Completed | Glass header and footer connect to a smooth-scrolling, product-led route-planning landing page, including Home, product sections, and an About / Helpline anchor; legacy public URLs redirect to their corresponding landing section |
+| Dashboard Layout | Completed | Bright, slim inset navigation rail with automatic pointer/keyboard expansion that smoothly shifts the desktop workspace; mobile prioritizes four primary destinations in the bottom bar and places secondary tools in a dedicated More drawer |
 | Customer Interface Structure | Completed | Overview, station discovery, bookings, vehicles, notifications, and profile/settings have representative UI data and preview interactions |
 | Supplier Interface Structure | Completed | Shell and 7 core supplier views are routed with representative operational data and preview interactions |
 | Super Admin Interface Structure | Completed | Shell and 8 core admin oversight views scaffolded and routed |
@@ -198,7 +198,8 @@ The following areas have been verified against the actual repository source code
 - [x] Public header navigation scrolls to Home, How It Works, For Customers, For Suppliers, and About / Helpline sections on the landing page; former standalone public URLs redirect to the matching section.
 - [x] Authentication surfaces are rounded and borderless, use matching rectangular sizing without internal form-card scrolling, and slide between sign-in and registration with reduced-motion-safe fallbacks.
 - [x] About / Helpline provides both an in-page support-email copy action and an email-client link.
-- [x] Dashboard navigation uses a slim, high-contrast inset rail that automatically expands on pointer or keyboard focus, smoothly shifts the desktop workspace, and collapses when that interaction ends; mobile instead uses only the bottom navigation, with safe-area-aware content spacing so actions cannot sit behind it.
+- [x] Dashboard navigation uses a slim, high-contrast inset rail that automatically expands on pointer or keyboard focus, smoothly shifts the desktop workspace, and collapses when that interaction ends; mobile uses a primary bottom navigation for everyday tasks plus a separate More drawer for secondary tools, with safe-area-aware content spacing so actions cannot sit behind it.
+- [x] The landing page presents the product through animated route-planning, driver booking, and supplier workspace UI rather than generic marketing blocks; it has been visually checked at 1440px desktop, 820px tablet, and 390px mobile widths.
 - [x] Customer dashboard includes prototype booking filters, a vehicle setup prompt, station discovery, and notification rows.
 - [x] Supplier dashboard includes prototype booking decisions, station and terminal management surfaces, earnings, and notification rows.
 - [x] Customer dashboard shell & pages created.
