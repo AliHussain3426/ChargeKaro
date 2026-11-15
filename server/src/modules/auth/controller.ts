@@ -54,6 +54,7 @@ export const registerCustomer = async (
       phone: req.body.phone,
       password: req.body.password,
     });
+    setAuthCookies(res, result.accessToken, result.refreshToken);
     res.status(201).json({
       success: true,
       message: 'Customer account created successfully',
@@ -78,6 +79,7 @@ export const registerSupplier = async (
       phone: req.body.phone,
       password: req.body.password,
     });
+    setAuthCookies(res, result.accessToken, result.refreshToken);
     res.status(201).json({
       success: true,
       message: 'Supplier account created successfully',

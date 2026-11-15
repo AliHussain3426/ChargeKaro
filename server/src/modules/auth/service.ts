@@ -86,7 +86,18 @@ export const authService = {
       preferences: {},
     }).save();
 
-    return { user: savedUser, profileId: profile._id };
+    const accessToken = signAccessToken({
+      userId: savedUser._id.toString(),
+      email: savedUser.email,
+      role: savedUser.role,
+    });
+    const refreshToken = signRefreshToken({
+      userId: savedUser._id.toString(),
+      email: savedUser.email,
+      role: savedUser.role,
+    });
+
+    return { user: savedUser, profileId: profile._id, accessToken, refreshToken };
   },
 
   async registerSupplier(input: RegisterSupplierInput) {
@@ -113,7 +124,18 @@ export const authService = {
       verificationStatus: VerificationStatus.UNVERIFIED,
     }).save();
 
-    return { user: savedUser, profileId: profile._id };
+    const accessToken = signAccessToken({
+      userId: savedUser._id.toString(),
+      email: savedUser.email,
+      role: savedUser.role,
+    });
+    const refreshToken = signRefreshToken({
+      userId: savedUser._id.toString(),
+      email: savedUser.email,
+      role: savedUser.role,
+    });
+
+    return { user: savedUser, profileId: profile._id, accessToken, refreshToken };
   },
 
   async login(input: LoginInput) {

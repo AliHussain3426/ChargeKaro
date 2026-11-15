@@ -1,11 +1,14 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 
+// Auth
+import { AuthProvider } from '@/context/AuthContext';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+
 // Layouts
 import PublicLayout from '@/components/layout/PublicLayout';
 
 // Public pages
 import LandingPage from '@/pages/public/LandingPage';
-import DemoAccessPage from '@/pages/public/DemoAccessPage';
 import NotFoundPage from '@/pages/public/NotFoundPage';
 
 // Auth pages
@@ -49,58 +52,80 @@ import SystemSettingsPage from '@/pages/admin/SystemSettingsPage';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* ── Public routes ── */}
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/how-it-works" element={<Navigate to="/#how-it-works" replace />} />
-          <Route path="/for-customers" element={<Navigate to="/#for-customers" replace />} />
-          <Route path="/for-suppliers" element={<Navigate to="/#for-suppliers" replace />} />
-          <Route path="/demo" element={<DemoAccessPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterSelectPage />} />
-          <Route path="/register/customer" element={<CustomerRegisterPage />} />
-          <Route path="/register/supplier" element={<SupplierRegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        </Route>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* ── Public routes ── */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/how-it-works" element={<Navigate to="/#how-it-works" replace />} />
+            <Route path="/for-customers" element={<Navigate to="/#for-customers" replace />} />
+            <Route path="/for-suppliers" element={<Navigate to="/#for-suppliers" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterSelectPage />} />
+            <Route path="/register/customer" element={<CustomerRegisterPage />} />
+            <Route path="/register/supplier" element={<SupplierRegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          </Route>
 
-        {/* ── Customer routes ── */}
-        <Route path="/customer" element={<CustomerApp />}>
-          <Route index element={<CustomerOverview />} />
-          <Route path="stations" element={<FindStationsPage />} />
-          <Route path="bookings" element={<MyBookingsPage />} />
-          <Route path="vehicles" element={<MyVehiclesPage />} />
-          <Route path="notifications" element={<CustomerNotificationsPage />} />
-          <Route path="profile" element={<CustomerProfilePage />} />
-        </Route>
+          {/* ── Customer routes (driver accounts only) ── */}
+          <Route
+            path="/customer"
+            element={
+              <ProtectedRoute roles={['CUSTOMER']}>
+                <CustomerApp />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<CustomerOverview />} />
+            <Route path="stations" element={<FindStationsPage />} />
+            <Route path="bookings" element={<MyBookingsPage />} />
+            <Route path="vehicles" element={<MyVehiclesPage />} />
+            <Route path="notifications" element={<CustomerNotificationsPage />} />
+            <Route path="profile" element={<CustomerProfilePage />} />
+          </Route>
 
-        {/* ── Supplier routes ── */}
-        <Route path="/supplier" element={<SupplierApp />}>
-          <Route index element={<SupplierOverview />} />
-          <Route path="bookings" element={<BookingRequestsPage />} />
-          <Route path="stations" element={<MyStationsPage />} />
-          <Route path="terminals" element={<ChargingTerminalsPage />} />
-          <Route path="earnings" element={<EarningsPage />} />
-          <Route path="notifications" element={<SupplierNotificationsPage />} />
-          <Route path="profile" element={<SupplierProfilePage />} />
-        </Route>
+          {/* ── Supplier routes (supplier accounts only) ── */}
+          <Route
+            path="/supplier"
+            element={
+              <ProtectedRoute roles={['SUPPLIER']}>
+                <SupplierApp />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<SupplierOverview />} />
+            <Route path="bookings" element={<BookingRequestsPage />} />
+            <Route path="stations" element={<MyStationsPage />} />
+            <Route path="terminals" element={<ChargingTerminalsPage />} />
+            <Route path="earnings" element={<EarningsPage />} />
+            <Route path="notifications" element={<SupplierNotificationsPage />} />
+            <Route path="profile" element={<SupplierProfilePage />} />
+          </Route>
 
-        {/* ── Admin routes ── */}
-        <Route path="/admin" element={<AdminApp />}>
-          <Route index element={<AdminOverview />} />
-          <Route path="users" element={<ManageUsersPage />} />
-          <Route path="suppliers" element={<ManageSuppliersPage />} />
-          <Route path="stations" element={<ManageStationsPage />} />
-          <Route path="terminals" element={<ManageTerminalsPage />} />
-          <Route path="bookings" element={<ManageBookingsPage />} />
-          <Route path="reports" element={<AdminReportsPage />} />
-          <Route path="settings" element={<SystemSettingsPage />} />
-        </Route>
+          {/* ── Admin routes (super admin accounts only) ── */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <AdminApp />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminOverview />} />
+            <Route path="users" element={<ManageUsersPage />} />
+            <Route path="suppliers" element={<ManageSuppliersPage />} />
+            <Route path="stations" element={<ManageStationsPage />} />
+            <Route path="terminals" element={<ManageTerminalsPage />} />
+            <Route path="bookings" element={<ManageBookingsPage />} />
+            <Route path="reports" element={<AdminReportsPage />} />
+            <Route path="settings" element={<SystemSettingsPage />} />
+          </Route>
 
-        {/* ── 404 ── */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
+          {/* ── 404 ── */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

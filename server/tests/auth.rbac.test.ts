@@ -198,7 +198,7 @@ describe('Auth module - ownership', () => {
       requestedStartTime: new Date('2026-11-20T10:00:00.000Z'),
       requestedEndTime: new Date('2026-11-20T12:00:00.000Z'),
       priceSnapshot: { amount: 300, currency: 'PKR', billingType: 'PER_KWH' },
-      status: 'PENDING',
+      status: 'PENDING_SUPPLIER',
       paymentStatus: 'UNPAID',
     }).save();
 

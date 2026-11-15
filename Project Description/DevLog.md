@@ -466,6 +466,161 @@ Keep entries short and informative. Do not overwrite previous entries.
   - Backend: `cd server && npm run lint` (`tsc --noEmit`) -> passed with 0 errors.
   - Backend: `cd server && npm run build` -> passed.
 - **Status:** Completed.
-- **Notes:** Phase 2 exit criteria met: all auth tests pass and protected routes enforce JWT + RBAC + ownership. Next step: Phase 3 supplier management (station/terminal CRUD) and customer vehicle management.
+- **Notes:** Phase 2 exit criteria met: all auth tests pass and protected routes enforce JWT + RBAC + ownership. Next step: frontend auth integration and supplier/customer management workflows.
+
+### [2026-11-15] - Frontend Phase 3: Authentication Integration
+
+- **Objective:** Wire the React frontend to the real backend auth API with session state, protected routes, and authenticated dashboard behavior.
+- **Changes:**
+  - Added `client/src/services/api.ts` (fetch wrapper: base URL, credentials, `ApiResponse` unwrap, `ApiError`) and `client/src/services/auth.ts` (register/login/me/logout/forgot-password).
+  - Added `client/src/context/AuthContext.tsx` (`AuthProvider`, `useAuth`) with session restore via `/api/auth/me`, and `client/src/components/auth/ProtectedRoute.tsx` for auth/role guarding of `/customer`, `/supplier`, and `/admin`.
+  - Updated `client/src/App.tsx` to provide auth context and enforce role-protected dashboard routes; removed demo bypass route and deleted `DemoAccessPage` assets.
+  - Wired `LoginPage`, `RegisterSelectPage`, `CustomerRegisterPage`, `SupplierRegisterPage`, and `ForgotPasswordPage` to auth actions/API with loading/error states and role-based navigation.
+  - Updated `DashboardLayout` to show signed-in user identity/role badge and perform real logout; added supporting styles in `client/src/index.css`.
+  - Backend support for frontend flow: registration endpoints now issue tokens and set auth cookies (`server/src/modules/auth/service.ts`, `server/src/modules/auth/controller.ts`) so register establishes a session.
+  - Added frontend test setup (`client/vitest.config.ts`, scripts) and tests for AuthContext, ProtectedRoute, LoginPage, and RegisterSelectPage.
+- **Files Created/Modified:**
+  - Client: `client/src/services/api.ts`, `client/src/services/auth.ts`, `client/src/context/AuthContext.tsx`, `client/src/components/auth/ProtectedRoute.tsx`, auth pages, `client/src/components/auth/AuthFrame.tsx`, `client/src/components/layout/DashboardLayout.tsx`, `client/src/App.tsx`, `client/src/types/index.ts`, `client/src/index.css`, `client/vitest.config.ts`, `client/package.json`, `package.json`, test files; removed `client/src/pages/public/DemoAccessPage.tsx` and `client/src/pages/public/demo-access.css`.
+  - Server: `server/src/modules/auth/service.ts`, `server/src/modules/auth/controller.ts`.
+- **Verification:**
+  - Client: `cd client && npx vitest run` -> 4 test files passed, 12 tests passed (before Phase 4 additions).
+  - Client: `cd client && npm run build` -> passed.
+  - Client: `cd client && npm run lint` -> passed with non-blocking fast-refresh warning(s).
+  - Server regression: `cd server && npx vitest run` -> 9 test files passed, 44 tests passed.
+- **Status:** Completed.
+
+### [2026-11-15] - Backend/Frontend Phase 4: Supplier Stations & Terminals Management
+
+- **Objective:** Implement supplier-owned station and terminal CRUD on the backend and wire supplier frontend management pages to the new APIs.
+- **Changes:**
+  - Backend stations module: create/list/get/update/delete endpoints (`/api/stations`) scoped to the authenticated supplier profile, with express-validator request validation and ownership enforcement.
+  - Backend terminals module: nested terminal routes under stations (`/api/stations/:stationId/terminals` create/list and update/delete/status toggle) plus direct `/api/terminals` operations for supplier-owned terminals; creation under another supplier's station is denied (403).
+  - Mounted station and terminal routes in `server/src/routes/index.ts`.
+  - Frontend: added `client/src/services/stations.ts` API wrappers; rewired `MyStationsPage` to list/create/delete stations with a GeoJSON-coordinates/pricing/hours form and exported client-side validation; rewired `ChargingTerminalsPage` to manage terminals per selected station (create, status/availability toggle, delete).
+  - Added workspace form styles in `client/src/index.css`.
+- **Files Created/Modified:**
+  - Server: `server/src/modules/stations/{routes,controller,service,validation}.ts`, `server/src/modules/terminals/{routes,controller,service,validation}.ts`, `server/src/routes/index.ts`, `server/tests/supplier.stations.test.ts` (new).
+  - Client: `client/src/services/stations.ts` (new), `client/src/pages/supplier/MyStationsPage.tsx`, `client/src/pages/supplier/ChargingTerminalsPage.tsx`, `client/src/pages/supplier/MyStationsPage.test.tsx` (new), `client/src/index.css`.
+- **Verification:**
+  - Server: `cd server && npx vitest run tests/supplier.stations.test.ts` -> 1 file passed, 6 tests passed (covers supplier create/list-own, terminal create under own station, 403 for other supplier's station, terminal/station update-delete flows).
+  - Server: `cd server && npx vitest run` -> 10 test files passed, 50 tests passed.
+  - Server: `cd server && npm run lint` (`tsc --noEmit`) and `npm run build` -> passed.
+  - Client: `cd client && npx vitest run` -> 5 test files passed, 17 tests passed (includes station form validation tests).
+  - Client: `cd client && npm run lint` -> passed with oxlint warnings (fast-refresh exports and set-state-in-effect in data-loading pages; no errors).
+  - Client: `cd client && npm run build` -> passed.
+- **Status:** Completed.
+- **Notes:** Phase 4 exit criteria met. Next step: customer vehicle CRUD + frontend wiring, then booking workflows and customer station discovery/map integration.
+
+### [2026-11-15] - Backend/Frontend Phase 5: Customer Vehicles & Bookings Foundation
+
+- **Objective:** Implement customer vehicle management and the bookings data foundation (backend + frontend wiring) with validated creation rules.
+- **Changes:**
+  - Backend vehicles module (`/api/vehicles`, `CUSTOMER` RBAC): create/list/get/update/delete scoped to the authenticated customer.
+  - Backend bookings module (`/api/bookings`, `CUSTOMER` RBAC): create booking, list own bookings, get booking by id. Booking creation validates requested time window, vehicle ownership, station/terminal existence and station-terminal relationship, connector compatibility, terminal availability/status, and overlapping-booking capacity (rejects insufficient availability with 409). Captures supplier/price snapshot and generates booking references.
+  - Mounted vehicle and booking routes in `server/src/routes/index.ts`.
+  - Frontend: added `client/src/services/vehicles.ts` and `client/src/services/bookings.ts`; rewired `MyVehiclesPage` to load/create/delete vehicles via API (replacing sample data); rewired `MyBookingsPage` to load and display customer bookings from API with status-based filtering.
+- **Files Created/Modified:**
+  - Server: `server/src/modules/vehicles/{routes,controller,service,validation}.ts`, `server/src/modules/bookings/{routes,controller,service,validation}.ts`, `server/src/routes/index.ts`, `server/tests/customer.vehicles-bookings.test.ts` (new).
+  - Client: `client/src/services/vehicles.ts` (new), `client/src/services/bookings.ts` (new), `client/src/pages/customer/MyVehiclesPage.tsx`, `client/src/pages/customer/MyBookingsPage.tsx`.
+  - Docs: `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:**
+  - Server: `cd server && npx vitest run tests/customer.vehicles-bookings.test.ts` -> 1 file passed, 4 tests passed (vehicle create linked to customer, list own vehicles only, booking create validates ownership/compatibility and rejects insufficient availability, list own bookings only).
+  - Server: `cd server && npx vitest run` -> 11 test files passed, 54 tests passed.
+  - Server: `cd server && npm run lint` (`tsc --noEmit`) and `npm run build` -> passed.
+  - Client: `cd client && npx vitest run` -> 5 test files passed, 17 tests passed.
+  - Client: `cd client && npm run lint` -> passed with oxlint warnings only (fast-refresh/set-state-in-effect patterns; no errors).
+  - Client: `cd client && npm run build` -> passed.
+- **Status:** Completed.
+- **Notes:** Phase 5 exit criteria met. Next step: customer station discovery/search APIs and booking creation UI flow, then booking lifecycle actions and map integration.
+
+### [2026-11-15] - Backend/Frontend Phase 6: Station Discovery, Search & Interactive Map
+
+- **Objective:** Implement station discovery/search (geospatial + filters) and routing on the backend, and integrate Leaflet mapping with live discovery on the frontend.
+- **Changes:**
+  - Backend discovery module (`/api/discovery`, authenticated): geospatial discovery via MongoDB 2dsphere `$geoNear` (lat/lng/radius) with optional city/text query and terminal-aware filters (available, connector, minimum power, max price); returns stations with matched terminals, availability counts, and distance.
+  - Backend routing module (`/api/routes`, authenticated): computes driving route via OSRM (`OSRM_BASE_URL` configurable, default public server) and returns distance, duration, and GeoJSON LineString geometry.
+  - Mounted discovery and routing routes in `server/src/routes/index.ts`.
+  - Frontend: installed `leaflet`, `react-leaflet`, `@types/leaflet`; added `client/src/services/discovery.ts`; rewrote `FindStationsPage` to load live discovery data with geolocation/manual search, availability/power filters, list↔map selection sync, and route polyline rendering; added `StationMap` (Leaflet/react-leaflet) and map layout styling updates.
+  - Frontend tests focus on jsdom-safe logic/rendering: `FindStationsPage.test.tsx` validates filter/ranking logic and renders page with mocked map/service.
+- **Files Created/Modified:**
+  - Server: `server/src/modules/discovery/{routes,controller,service}.ts` (new), `server/src/modules/routes/{routes,controller,service}.ts` (new), `server/src/routes/index.ts`, `server/tests/discovery.routes.test.ts` (new).
+  - Client: `client/src/services/discovery.ts` (new), `client/src/pages/customer/StationMap.tsx` (new), `client/src/pages/customer/FindStationsPage.tsx`, `client/src/pages/customer/FindStationsPage.test.tsx` (new), `client/src/index.css`, `client/package.json`, `client/package-lock.json`.
+  - Docs: `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:**
+  - Server: `cd server && npx vitest run tests/discovery.routes.test.ts` -> 1 file passed, 3 tests passed (radius + available terminals, connector/power filters, route distance/geometry with mocked fetch).
+  - Server: `cd server && npm run lint` (`tsc --noEmit`) and `npm run build` -> passed.
+  - Server full suite: `cd server && npx vitest run` -> 11 files passed / 1 failed, 56 tests passed / 1 failed (transient timeout in pre-existing `tests/auth.password.test.ts` "resets the password..." at 5s under load; file passes when run alone: 3/3).
+  - Client: `cd client && npx vitest run` -> 6 files passed, 21 tests passed.
+  - Client: `cd client && npm run lint` -> passed with oxlint warnings only (existing fast-refresh/set-state-in-effect patterns).
+  - Client: `cd client && npm run build` -> passed (Vite chunk-size warning due to Leaflet bundle).
+- **Status:** Completed.
+- **Notes:** Phase 6 exit criteria met (discovery+routing tests pass, map integration complete). Next step: booking creation UI flow from discovery and booking lifecycle actions.
+
+### [2026-11-15] - Backend/Frontend Phase 7: Booking Workflow State Machine
+
+- **Objective:** Implement the end-to-end booking workflow state machine, conflict-safe booking creation, and core customer/supplier booking UI flows.
+- **Changes:**
+  - Updated booking status model to `PENDING_SUPPLIER`, `ACCEPTED_AWAITING_PAYMENT`, `REJECTED`, `CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`, `EXPIRED` (`server/src/types/index.ts`, booking model defaults) and aligned existing model/tests (`tests/booking.model.test.ts`, `tests/customer.vehicles-bookings.test.ts`, `tests/auth.rbac.test.ts`) to new statuses.
+  - Reworked booking service/controller/routes for customer+supplier workflows: create booking with price snapshot and per-terminal locking/conflict prevention; role-aware listing/get; transitions for accept/reject/pay/cancel/expire/start/complete with ownership/role checks (`/api/bookings/:id/accept|reject|pay|cancel|expire|start|complete`).
+  - Frontend: extended `client/src/services/bookings.ts` with transition actions; added customer booking request flow in `FindStationsPage` (vehicle selection, terminal selection, time window, validation, confirm request, route support, payment stub note) and `MyBookingsPage` pay-now action/status handling; rewired supplier `BookingRequestsPage` to live API accept/reject with status badges.
+  - Added frontend validation/badge tests: `client/src/pages/customer/BookingFlow.test.tsx`; updated `FindStationsPage` tests/mocks for new dependencies.
+- **Files Created/Modified:**
+  - Server: `server/src/types/index.ts`, `server/src/modules/bookings/{model,service,controller,routes}.ts`, `server/tests/booking.workflow.test.ts` (new), `server/tests/booking.model.test.ts`, `server/tests/customer.vehicles-bookings.test.ts`, `server/tests/auth.rbac.test.ts`.
+  - Client: `client/src/services/bookings.ts`, `client/src/pages/customer/FindStationsPage.tsx`, `client/src/pages/customer/MyBookingsPage.tsx`, `client/src/pages/supplier/BookingRequestsPage.tsx`, `client/src/pages/customer/FindStationsPage.test.tsx`, `client/src/pages/customer/BookingFlow.test.tsx` (new).
+  - Docs: `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:**
+  - Server: `cd server && npx vitest run tests/booking.workflow.test.ts tests/booking.model.test.ts tests/customer.vehicles-bookings.test.ts` -> 3 files passed, 18 tests passed (creation `PENDING_SUPPLIER`, accept/reject, concurrent same-terminal conflict -> one succeeds, cancel/expiry/payment/start/complete transitions).
+  - Server: `cd server && npm run lint` (`tsc --noEmit`) and `npm run build` -> passed.
+  - Server: `cd server && npx vitest run` -> 13 files passed, 62 tests passed.
+  - Client: `cd client && npx vitest run` -> 7 files passed, 26 tests passed (includes booking form validation and status badge tests).
+  - Client: `cd client && npm run lint` -> passed with oxlint warnings only (fast-refresh/export and set-state-in-effect patterns; unused-import in MyBookingsPage cleaned up).
+  - Client: `cd client && npm run build` -> passed (Vite chunk-size warning due to Leaflet bundle).
+- **Status:** Completed.
+- **Notes:** Phase 7 exit criteria met (state machine/concurrency tests pass, booking flows wired). Payment remains a stubbed transition; next steps are real payment integration and deeper role-dashboard data wiring.
+
+### [2026-11-15] - Backend/Frontend Phase 8: Payments & Supplier Earnings
+
+- **Objective:** Implement payment records/state transitions (integration-deferred but complete records/UI) and supplier earnings computed from confirmed payments.
+- **Changes:**
+  - **Payments backend:** Implemented payment model/service/controller/routes (`server/src/modules/payments/*`, registered `/api/payments`). Payment records are created/ensured on booking acceptance; initiation moves to `PROCESSING`; success finalization sets payment `PAID` and booking `CONFIRMED`/`PAID`; failure sets payment `FAILED` while booking remains `ACCEPTED_AWAITING_PAYMENT` with `paymentStatus=FAILED` (retryable). Added webhook-ready/idempotent processing structure (`/api/payments/webhooks/:provider`, providerReference/idempotency handling).
+  - **Booking integration:** `accept` now ensures a payment record exists; `pay` transition uses payment initiate+success flow for compatibility (`server/src/modules/bookings/service.ts`).
+  - **Supplier earnings:** Added earnings calculation (`gross`, platform fee, `netPayable`) and API (`GET /api/payments/earnings/me`) derived from confirmed/paid payments with pending/failed amounts.
+  - **Frontend:** Added `client/src/services/payments.ts`; `MyBookingsPage` now supports payment flow (initiate → processing step → complete/simulate failure) and displays payment status; `EarningsPage` wired to real earnings API data.
+  - **Tests:** Added `server/tests/payments.earnings.test.ts` covering payment creation/acceptance flow, success confirming booking, failure keeping booking awaiting payment with FAILED state + retry, supplier earnings API, and earnings calculation utility.
+- **Files Created/Modified:**
+  - Server: `server/src/modules/payments/{model,service,controller,routes,validation}.ts`, `server/src/routes/index.ts`, `server/src/modules/bookings/service.ts`, `server/tests/payments.earnings.test.ts` (new).
+  - Client: `client/src/services/payments.ts` (new), `client/src/pages/customer/MyBookingsPage.tsx`, `client/src/pages/supplier/EarningsPage.tsx`.
+  - Docs: `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:**
+  - Server: `cd server && npx vitest run tests/payments.earnings.test.ts tests/booking.workflow.test.ts` -> 2 files passed, 8 tests passed.
+  - Server: `cd server && npm run lint` (`tsc --noEmit`) and `npm run build` -> passed.
+  - Server: `cd server && npx vitest run` -> **14 files passed, 66 tests passed**.
+  - Client: `cd client && npm run build` -> passed (Vite chunk-size warning due to Leaflet bundle).
+  - Client: `cd client && npm run lint` -> passed with **oxlint warnings only** (pre-existing fast-refresh/export and set-state-in-effect patterns).
+  - Client: `cd client && npx vitest run` -> **7 files passed, 26 tests passed**.
+- **Status:** Completed.
+- **Notes:** Phase 8 exit criteria met (payment state tests pass; earnings calculations verified). External gateway redirect/checkout and signed webhook verification remain deferred; payment flow uses stubbed initiate/confirm endpoints with idempotent records.
+
+### [2026-11-15] - Backend/Frontend Phase 9: Notifications
+
+- **Objective:** Implement notification records, delivery hooks for booking/payment events, and user-facing notification UI.
+- **Changes:**
+  - **Backend notifications module:** Added `server/src/modules/notifications/{model,service,controller,routes}.ts` and registered `/api/notifications`. Supports listing notifications for the authenticated user, marking one/all as read, with ownership enforcement (users cannot read/modify others' notifications).
+  - **Event hooks:** Booking submit creates notifications for customer and supplier; accept/reject/cancel create relevant notifications; payment success/failure create payment update notifications for customer and supplier (`server/src/modules/bookings/service.ts`, `server/src/modules/payments/service.ts`). Supplier recipients resolved from supplier profile → user mapping.
+  - **Frontend:** Added `client/src/services/notifications.ts`; rewired `CustomerNotificationsPage` and `SupplierNotificationsPage` to load real notifications with read/mark-all actions.
+  - **Tests:** Added `server/tests/notifications.test.ts` covering notification creation on booking submit and accept/reject, and authorization preventing access to other users' notifications.
+- **Files Created/Modified:**
+  - Server: `server/src/modules/notifications/{model,service,controller,routes}.ts` (new), `server/src/routes/index.ts`, `server/src/modules/bookings/service.ts`, `server/src/modules/payments/service.ts`, `server/tests/notifications.test.ts` (new).
+  - Client: `client/src/services/notifications.ts` (new), `client/src/pages/customer/CustomerNotificationsPage.tsx`, `client/src/pages/supplier/SupplierNotificationsPage.tsx`.
+  - Docs: `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:**
+  - Server: `cd server && npx vitest run tests/notifications.test.ts --hookTimeout=180000 --testTimeout=120000` -> **1 file passed, 3 tests passed**.
+  - Server: `cd server && npm run lint` (`tsc --noEmit`) and `npm run build` -> passed.
+  - Server targeted regression: `cd server && npx vitest run tests/payments.earnings.test.ts tests/booking.workflow.test.ts --hookTimeout=180000` -> **2 files passed, 8 tests passed**.
+  - Client: `cd client && npm run build` -> passed (Vite chunk-size warning due to Leaflet bundle).
+  - Client: `cd client && npx vitest run` -> **7 files passed, 26 tests passed**.
+- **Status:** Completed.
+- **Notes:** Phase 9 exit criteria met (notification tests pass). A concurrent full server `vitest run` in this environment encountered mongodb-memory-server hook timeouts/cascading failures under load; changed/targeted suites passed.
 
 <!-- AI agents: Add every new development entry below this line. -->
+

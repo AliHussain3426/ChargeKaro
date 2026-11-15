@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ArrowLeft, ArrowUpRight, CircleCheck, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowLeft, CircleCheck, ShieldCheck, Zap } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import './auth.css';
 
@@ -8,8 +8,6 @@ interface AuthFrameProps {
   description: string;
   storyTitle?: string;
   storyCopy?: string;
-  previewTo?: string;
-  previewLabel?: string;
   children: ReactNode;
 }
 
@@ -18,8 +16,6 @@ export default function AuthFrame({
   description,
   storyTitle = 'Make every charging stop easier to plan.',
   storyCopy = 'Keep your vehicle, station details, and booking information in one clear place.',
-  previewTo = '/demo',
-  previewLabel = 'View demo workspace',
   children,
 }: AuthFrameProps) {
   const location = useLocation();
@@ -43,10 +39,6 @@ export default function AuthFrame({
           <Link to="/" className="auth-back"><ArrowLeft className="size-4" /> Back to GreenCharge</Link>
           <div className="auth-heading-group"><h1 className="auth-heading">{title}</h1><p className="auth-subheading">{description}</p></div>
           {children}
-          <div className="auth-bypass" aria-label="Prototype dashboard shortcut">
-            <div><span className="auth-bypass-label">Explore first</span><p>View the workspace before creating an account.</p></div>
-            <Link to={previewTo} className="auth-bypass-link">{previewLabel}<ArrowUpRight className="size-4" /></Link>
-          </div>
         </div>
       </main>
     </div>

@@ -1,14 +1,21 @@
-// Phase 1 scaffold for the vehicles module.
+// Vehicles module
+//
+// Customer-owned vehicle management routes.
 
 import { Router } from 'express';
+import { authenticate, authorize } from '../../middleware/auth.js';
+import { UserRole } from '../../types/index.js';
+import vehiclesController from './controller.js';
+import { validateCreateVehicle, validateUpdateVehicle } from './validation.js';
 
 const router = Router();
 
-// GET    /api/vehicles
-// POST   /api/vehicles
-// GET    /api/vehicles/:vehicleId
-// PATCH  /api/vehicles/:vehicleId
-// DELETE /api/vehicles/:vehicleId
-// arrive with the vehicles module implementation phase.
+router.use(authenticate, authorize(UserRole.CUSTOMER));
+
+router.post('/', validateCreateVehicle, vehiclesController.createVehicle);
+router.get('/', vehiclesController.listVehicles);
+router.get('/:vehicleId', vehiclesController.getVehicle);
+router.patch('/:vehicleId', validateUpdateVehicle, vehiclesController.updateVehicle);
+router.delete('/:vehicleId', vehiclesController.deleteVehicle);
 
 export default router;

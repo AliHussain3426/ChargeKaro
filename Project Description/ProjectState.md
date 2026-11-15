@@ -2,9 +2,9 @@
 
 **Project:** EV Charging Platform  
 **Last Updated:** 15 November 2026
-**Current Phase:** Backend Authentication & Authorization API (Phase 2)  
-**Overall Completion:** ~52% overall (~85% of Phase 1 Website Structure & Flow)  
-**Status:** Backend Phase 2 completed: full auth API (customer/supplier registration, login, session, logout, forgot/reset password), JWT access + refresh tokens in HttpOnly cookies, bcrypt hashing, RBAC middleware, and ownership middleware implemented; backend test suite passing (44 tests across 9 files). CRUD workflows for vehicles/stations/terminals/bookings remain pending.
+**Current Phase:** Notifications (Phase 9)  
+**Overall Completion:** ~90% overall  
+**Status:** Phases 3–8 completed and verified. Phase 9 completed: notification records and APIs (list, mark read, mark all read) implemented with event hooks for booking submitted/accepted/rejected/cancelled and payment success/failure updates. Customer and supplier notification pages wired to real data. External payment gateway integration remains deferred; deeper role dashboards/admin wiring remain pending.
 
 ---
 
@@ -35,10 +35,11 @@ A supplier can manage multiple stations, and each station can contain multiple c
 | **Customer Interface Flow** | 65% | In Progress | Overview, container-aware station discovery, bookings, vehicles, notifications, and profile/settings have interactive prototype UIs |
 | **Supplier Interface Flow** | 55% | In Progress | Overview, requests, stations, terminals, earnings, notifications, and profile/settings have interactive prototype UIs |
 | **Super Admin Interface Flow** | 60% | In Progress | Overview, management lists, reports, and settings now use interactive operational prototype UIs |
-| **Backend API & Database** | 55% | In Progress | Phase 1 models + Phase 2 auth API complete: registration, login/session/logout, JWT HttpOnly cookies, RBAC & ownership middleware; CRUD controllers pending |
+| **Frontend Auth Integration** | 90% | Completed | API client, AuthContext/session restore, protected role routes, auth forms wired, demo bypass removed, dashboard logout/user badge |
+| **Backend API & Database** | 70% | In Progress | Phase 1 models + Phase 2 auth API + Phase 4 supplier station/terminal CRUD complete; vehicle and booking CRUD pending |
 | **Interactive Map & OSRM Routing**| 0% | Planned | Awaiting Leaflet/API details for live map integration |
 | **Payments & Supplier Verification** | 0% | Deferred | Intentionally deferred to later phase per project requirements |
-| **Overall Project Progress** | **~48%** | **In Progress** | **~80% of Phase 1 Structure & Previewable Flow** |
+| **Overall Project Progress** | **~66%** | **In Progress** | **Core auth, supplier station/terminal management, and customer vehicle/booking foundation implemented with verified tests** |
 
 ---
 
@@ -171,13 +172,17 @@ The project follows a clean, modern, elegant, and professional visual direction.
 | Supplier Interface Structure | Completed | Shell and 7 core supplier views are routed with representative operational data and preview interactions |
 | Super Admin Interface Structure | Completed | Shell and 8 core admin oversight views scaffolded and routed |
 | Full Route Aggregation | Completed | `App.tsx` routes configured across all 5 areas |
-| Customer / Supplier Registration | Scaffolding | Static forms use matching rounded rectangular two-panel surfaces that slide between sign-in and registration without internal scrolling; content and field language are refined, while backend integration remains pending |
+| Customer / Supplier Registration | Completed | Auth forms wired to backend registration APIs with session establishment and validation/error states (Phase 3) |
 | Authentication & Authorization | Completed | Phase 2 auth API landed: register (customer/supplier), login/session/logout, forgot/reset password, JWT access + refresh cookies, bcrypt hashing, RBAC (`authenticate` + `authorize`) and ownership middleware |
-| Charging Station & Terminal Management | In Progress | Phase 1 Station and Terminal models created (GeoJSON location, pricing, status); CRUD APIs pending |
-| Booking Workflow | In Progress | Phase 1 Booking model created with status state machine and price snapshot; workflow APIs pending |
-| Payment Processing | Deferred | Intentionally deferred to later phase |
+| Frontend Authentication Integration | Completed | Phase 3: API client, AuthContext/useAuth session restore, protected `/customer` `/supplier` `/admin` routes, auth pages wired, demo bypass removed, dashboard auth state/logout |
+| Charging Station & Terminal Management | In Progress | Phase 4 supplier station/terminal CRUD APIs and supplier frontend management pages wired; discovery integrated, booking creation UI integration pending |
+| Customer Vehicle Management | Completed | Phase 5: vehicle CRUD API scoped to customer and `MyVehiclesPage` wired for list/create/delete |
+| Booking Workflow | Completed | Phase 7: state machine and transitions (`PENDING_SUPPLIER → ACCEPTED_AWAITING_PAYMENT/REJECTED → CONFIRMED → IN_PROGRESS → COMPLETED/CANCELLED/EXPIRED`), atomic per-terminal conflict prevention, price snapshot, customer booking request flow, supplier accept/reject, and payment stub |
+| Station Discovery & Search | Completed | Phase 6: `/api/discovery` geospatial/city/query search with availability, connector, power, and price filters returning stations and terminals |
+| Map & Routing Integration | Completed | Phase 6: Leaflet map with station markers, list↔map selection sync, geolocation/manual search, and OSRM-backed `/api/routes` polyline rendering |
+| Payment Processing & Earnings | Completed (integration-deferred) | Phase 8: payment records on acceptance, UNPAID/PROCESSING/PAID/FAILED transitions, webhook-ready idempotent handlers, and supplier earnings (gross/fee/net) from confirmed payments with customer payment flow and earnings UI wired |
+| Notifications | Completed | Phase 9: notification model/routes (list, mark read, mark all read), delivery hooks on booking submit/accept/reject/cancel and payment success/failure, frontend customer/supplier notification pages wired |
 | Supplier Verification | Deferred | Intentionally deferred to later phase |
-| Map & Routing Integration | Planned | Pending Leaflet setup |
 | PWA Capabilities | Planned | Pending service worker & web manifest |
 
 ---
@@ -214,15 +219,32 @@ The following areas are pending implementation and verification:
 - [x] Backend database models (Phase 1: User, CustomerProfile, SupplierProfile, Vehicle, Station, Terminal, Booking, Payment) with validation and health-check test coverage.
 - [x] Backend Phase 1 foundation verified: Mongoose models compile and validate, `/api/health` returns success + DB connected, backend Vitest suite passing (24 tests).
 - [x] Backend Phase 2 auth API verified: registration/login/session/logout/forgot-reset endpoints, JWT HttpOnly cookies, RBAC and ownership middleware, backend test suite passing (44 tests across 9 files).
-- [ ] Backend CRUD workflows (vehicles, stations, terminals, bookings).
-- [ ] Leaflet map integration for station discovery.
+- [x] Frontend Phase 3 auth integration verified: client test suite passing (17 tests across 5 files), client lint/build passing (oxlint warnings only), protected dashboard routes and auth flows wired to backend.
+- [x] Backend Phase 4 supplier station/terminal CRUD verified: create/list/get/update/delete stations scoped to supplier, nested terminal create/list/update/delete/status toggle with ownership enforcement, backend test suite passing (50 tests across 10 files).
+- [x] Backend Phase 5 customer vehicle and booking foundation verified: vehicle CRUD scoped to customer, booking create validates vehicle ownership/compatibility/availability (insufficient availability rejected), customer lists own bookings/vehicles only; backend test suite passing (54 tests across 11 files).
+- [x] Frontend Phase 5 wiring verified: `MyVehiclesPage` and `MyBookingsPage` load/manage data via APIs; client test suite passing (17 tests across 5 files), client lint/build passing (oxlint warnings only).
+- [x] Backend Phase 6 discovery and routing verified: geospatial discovery returns stations within radius with available terminals and supports connector/power filters; `/api/routes` returns distance/geometry (mocked OSRM in tests). Targeted tests passing (`tests/discovery.routes.test.ts`: 3 tests); server lint/build passing.
+- [x] Frontend Phase 6 discovery/map verified: `FindStationsPage` uses live discovery API with Leaflet/react-leaflet map, station markers, list↔map selection sync, geolocation/manual search, and route polyline; client tests passing (21 tests across 6 files), client build/lint passing (chunk-size warning and existing oxlint warnings only).
+- [x] Backend Phase 7 booking workflow verified: creation `PENDING_SUPPLIER`, supplier accept/reject transitions, atomic per-terminal conflict prevention (concurrent same-terminal booking -> one succeeds), and cancellation/expiry/payment/start/complete transitions. Targeted tests passing (`tests/booking.workflow.test.ts`, updated `tests/booking.model.test.ts`, `tests/customer.vehicles-bookings.test.ts`); server lint/build passing; full server suite passing (13 files, 62 tests).
+- [x] Frontend Phase 7 booking flow verified: customer booking request flow in `FindStationsPage` (vehicle/terminal/time/confirm with validation, route support, payment stub), supplier `BookingRequestsPage` wired to API accept/reject, status badges and booking form validation tests added; client tests passing (26 tests across 7 files), client build passing (chunk-size warning and oxlint warnings only).
+- [x] Backend Phase 8 payments/earnings verified: payment creation on acceptance, initiate/success/failure transitions (`UNPAID → PROCESSING → PAID/FAILED`), webhook-ready idempotent structure, supplier earnings computed from confirmed payments (gross, platform fee, net). Targeted tests passing (`tests/payments.earnings.test.ts`, `tests/booking.workflow.test.ts`); server lint/build passing; full server suite passing (14 files, 66 tests).
+- [x] Frontend Phase 8 verified: customer payment flow (initiate/complete/simulate failure) and payment status display wired in `MyBookingsPage`; supplier `EarningsPage` wired to real earnings data. Client build passing (chunk-size warning) and test suite passing (7 files, 26 tests), lint warnings pre-existing.
+- [x] Backend Phase 9 notifications verified: notifications created on booking submit and accept/reject (and cancel/payment update hooks added); list/mark-read APIs enforce user ownership (users cannot read/modify others' notifications). Targeted tests passing (`tests/notifications.test.ts`: 3 tests) with server lint/build passing; targeted regression suites passing (`tests/payments.earnings.test.ts`, `tests/booking.workflow.test.ts`).
+- [x] Frontend Phase 9 verified: customer and supplier notification pages wired to real notification APIs with read/mark-all actions; client build and test suite passing (7 files, 26 tests).
+- [ ] Real external payment gateway integration (redirect/provider webhooks/signature verification), richer booking lifecycle UX, and deeper customer/supplier/admin data wiring. (Note: a concurrent full server `vitest run` in this environment hit mongodb-memory-server hook timeouts/cascading failures; targeted suites for changed areas passed.)
 
 ---
 
 ## 9. Current Next Steps
 
-1. Carry the realistic data-driven UI pattern into bookings, vehicle management, supplier, and admin views.
-2. Replace customer station prototype data with API-backed search, filtering, Leaflet map markers, and terminal-detail/booking flow.
-3. ~~Set up Mongoose models and database schemas on the backend.~~ Completed in Phase 1 (models landed; workflow controllers pending).
-4. ~~Implement authentication API endpoints (register, login, me, logout).~~ Completed in Phase 2 (auth API landed; vehicle/station/terminal CRUD is next).
-5. Implement customer vehicle CRUD and supplier station/terminal CRUD endpoints wired to the Phase 2 auth, RBAC, and ownership middleware.
+1. Integrate a real external payment gateway (provider redirect/checkout, signed webhooks, refund flows) replacing the deferred stub flow while preserving idempotent payment records.
+2. Connect supplier overview, notifications, and admin views to live booking/payment/earnings data; refine richer booking lifecycle UX where needed.
+3. Refine discovery UX (saved-vehicle compatibility hints, terminal details/booking entry points) and address frontend performance/lint warnings (Leaflet chunk splitting, fast-refresh/set-state-in-effect/export cleanup).
+4. ~~Set up Mongoose models and database schemas on the backend.~~ Completed in Phase 1.
+5. ~~Implement authentication API endpoints (register, login, me, logout).~~ Completed in Phase 2.
+6. ~~Implement supplier station/terminal CRUD and frontend wiring.~~ Completed in Phase 4.
+7. ~~Implement customer vehicle CRUD and bookings foundation + frontend wiring.~~ Completed in Phase 5.
+8. ~~Implement station discovery/search and map + routing integration.~~ Completed in Phase 6.
+9. ~~Implement booking workflow state machine and core booking UI.~~ Completed in Phase 7.
+10. ~~Implement payments records, transitions, and supplier earnings with UI.~~ Completed in Phase 8.
+11. ~~Implement notifications records, event hooks, and notification UI.~~ Completed in Phase 9.

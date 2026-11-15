@@ -81,7 +81,7 @@ const bookingSchema = new Schema(
     status: {
       type: String,
       enum: BookingStatus,
-      default: BookingStatus.PENDING,
+      default: BookingStatus.PENDING_SUPPLIER,
     },
     paymentStatus: {
       type: String,

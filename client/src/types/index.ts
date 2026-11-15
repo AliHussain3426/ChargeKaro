@@ -14,6 +14,8 @@ export interface User {
   phone?: string;
   avatar?: string;
   createdAt: string;
+  accountStatus?: string;
+  verificationStatus?: string;
 }
 
 export interface ApiResponse<T = unknown> {

@@ -1,3 +1,5 @@
-// Phase 1 scaffold for the payments module.
+// Payments module
+//
+// Request validation for payment workflows (extend as gateway integration is added).
 
 export {};

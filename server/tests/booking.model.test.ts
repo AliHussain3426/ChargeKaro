@@ -19,7 +19,7 @@ function buildValidBookingInput() {
       currency: 'PKR',
       billingType: PricingType.PER_KWH,
     },
-    status: BookingStatus.PENDING,
+    status: BookingStatus.PENDING_SUPPLIER,
     paymentStatus: PaymentStatus.UNPAID,
   };
 }
@@ -33,19 +33,20 @@ describe('Booking model', () => {
     await stopTestDatabase();
   });
 
-  it('defaults new bookings to the PENDING status', () => {
+  it('defaults new bookings to the PENDING_SUPPLIER status', () => {
     const booking = new Booking(buildValidBookingInput());
 
-    expect(booking.status).toBe(BookingStatus.PENDING);
+    expect(booking.status).toBe(BookingStatus.PENDING_SUPPLIER);
     expect(booking.paymentStatus).toBe(PaymentStatus.UNPAID);
     expect(booking.validateSync()).toBeUndefined();
   });
 
   it.each([
-    BookingStatus.PENDING,
-    BookingStatus.ACCEPTED,
+    BookingStatus.PENDING_SUPPLIER,
+    BookingStatus.ACCEPTED_AWAITING_PAYMENT,
     BookingStatus.REJECTED,
     BookingStatus.CONFIRMED,
+    BookingStatus.IN_PROGRESS,
     BookingStatus.CANCELLED,
     BookingStatus.EXPIRED,
     BookingStatus.COMPLETED,
