@@ -1,17 +1,20 @@
 // Payments module
 //
-// Payment records, status transitions, webhook-ready idempotent processing,
-// and supplier earnings calculations.
+// Payment records, provider-agnostic initiation/verification, webhook processing
+// with signature verification + replay/dedupe protection, and supplier earnings.
 
 import crypto from 'crypto';
 import { Payment } from './model.js';
+import { PaymentWebhookEvent } from './webhookEvent.model.js';
 import { Booking } from '../bookings/model.js';
 import { SupplierProfile } from '../auth/model.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { BookingStatus, PaymentStatus } from '../../types/index.js';
 import { notificationService } from '../notifications/service.js';
+import { env } from '../../config/env.js';
+import { getPaymentProvider, getWebhookSecret } from './providers/index.js';
 
-const PLATFORM_FEE_RATE = 0.1; // 10%
+const PLATFORM_FEE_RATE = env.PLATFORM_COMMISSION_RATE ?? 0.1; // configurable (SRS policy pending confirmation)
 
 function generateProviderReference(prefix = 'pay'): string {
   return `${prefix}_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
@@ -30,6 +33,52 @@ async function requireSupplierProfile(userId: string) {
     throw new AppError('Supplier profile not found', 404);
   }
   return profile as any;
+}
+
+async function applyPaidState(payment: any) {
+  if (payment.status === PaymentStatus.PAID) {
+    const booking = await Booking.findById(payment.bookingId).exec();
+    return { payment, booking };
+  }
+  payment.status = PaymentStatus.PAID;
+  payment.processedAt = new Date();
+  payment.failureReason = undefined;
+  await payment.save();
+
+  const booking = await Booking.findById(payment.bookingId).exec();
+  if (!booking) throw new AppError('Booking not found', 404);
+  if (booking.status === BookingStatus.ACCEPTED_AWAITING_PAYMENT) {
+    (booking as any).status = BookingStatus.CONFIRMED;
+  }
+  (booking as any).paymentStatus = PaymentStatus.PAID;
+  await booking.save();
+  try {
+    const { settlementService } = await import('./settlement.service.js');
+    await settlementService.reconcileForPayment(payment._id.toString(), 'payment_confirmed');
+  } catch {
+    // settlement reconciliation is best-effort here; admin/supplier reconciliation can recover
+  }
+  await notificationService.notifyPaymentUpdate(booking, PaymentStatus.PAID);
+  return { payment, booking };
+}
+
+async function applyFailedState(payment: any, reason?: string) {
+  if (payment.status === PaymentStatus.PAID) {
+    const booking = await Booking.findById(payment.bookingId).exec();
+    return { payment, booking };
+  }
+  payment.status = PaymentStatus.FAILED;
+  payment.processedAt = new Date();
+  payment.failureReason = reason ?? 'Payment failed';
+  await payment.save();
+
+  const booking = await Booking.findById(payment.bookingId).exec();
+  if (booking) {
+    (booking as any).paymentStatus = PaymentStatus.FAILED;
+    await booking.save();
+    await notificationService.notifyPaymentUpdate(booking, PaymentStatus.FAILED);
+  }
+  return { payment, booking };
 }
 
 export const paymentService = {
@@ -60,17 +109,19 @@ export const paymentService = {
       return existingActive;
     }
 
+    const provider = opts.provider ?? env.PAYMENT_PROVIDER ?? 'sandbox';
     const payment = await new Payment({
       bookingId: booking._id,
       customerId: booking.customerId,
       supplierId: booking.supplierId,
-      provider: opts.provider ?? 'stub',
+      provider,
       providerReference: generateProviderReference('booking'),
       idempotencyKey: opts.idempotencyKey,
       amount: booking.priceSnapshot.amount,
-      currency: booking.priceSnapshot.currency,
+      currency: booking.priceSnapshot.currency ?? env.PAYMENT_CURRENCY,
       billingType: booking.priceSnapshot.billingType,
       status: PaymentStatus.UNPAID,
+      providerEventIds: [],
     }).save();
 
     return payment;
@@ -86,7 +137,7 @@ export const paymentService = {
       throw new AppError('Booking is not awaiting payment', 400);
     }
 
-    const payment = await this.createOrGetForBooking(bookingId, { idempotencyKey: opts.idempotencyKey });
+    const payment = await this.createOrGetForBooking(bookingId, { idempotencyKey: opts.idempotencyKey, provider: env.PAYMENT_PROVIDER });
 
     if (payment.status === PaymentStatus.PAID) {
       if (booking.status === BookingStatus.ACCEPTED_AWAITING_PAYMENT) {
@@ -97,18 +148,25 @@ export const paymentService = {
       return { payment, booking };
     }
 
+    const provider = getPaymentProvider(payment.provider);
+    const initiation = await provider.initiate(payment as any, { booking, clientUrl: env.CLIENT_URL });
+    (payment as any).provider = initiation.provider || provider.name;
+    (payment as any).providerReference = initiation.providerReference || (payment as any).providerReference;
+    if (initiation.providerSessionId) (payment as any).providerSessionId = initiation.providerSessionId;
+    if (initiation.checkoutUrl) (payment as any).checkoutUrl = initiation.checkoutUrl;
+
     if (payment.status === PaymentStatus.UNPAID || payment.status === PaymentStatus.FAILED) {
       (payment as any).status = PaymentStatus.PROCESSING;
       (payment as any).failureReason = undefined;
-      await payment.save();
     }
+    await payment.save();
 
-    // Payment flow is integration-deferred: client confirms success/failure (stub/redirect)
-    // and webhooks can also drive finalization idempotently.
+    // Never mark paid based on client input. Final state is set by server-verified
+    // provider confirmation (webhook or verified completion flow).
     return { payment, booking };
   },
 
-  async finalizeSuccess(paymentOrReference: { paymentId?: string; providerReference?: string; provider?: string; bookingId?: string }) {
+  async finalizeSuccess(paymentOrReference: { paymentId?: string; providerReference?: string; bookingId?: string }, actor?: { userId?: string; role?: string }) {
     let payment: any = null;
     if (paymentOrReference.providerReference) {
       payment = await Payment.findOne({ providerReference: paymentOrReference.providerReference } as any).exec();
@@ -119,29 +177,34 @@ export const paymentService = {
     }
     if (!payment) throw new AppError('Payment not found', 404);
 
+    if (actor?.userId && actor.role === 'CUSTOMER' && payment.customerId.toString() !== actor.userId) {
+      throw new AppError('Forbidden: payment access denied', 403);
+    }
     if (payment.status === PaymentStatus.PAID) {
       const booking = await Booking.findById(payment.bookingId).exec();
       return { payment, booking };
     }
-
-    (payment as any).status = PaymentStatus.PAID;
-    (payment as any).processedAt = new Date();
-    (payment as any).failureReason = undefined;
-    await payment.save();
-
-    const booking = await Booking.findById(payment.bookingId).exec();
-    if (!booking) throw new AppError('Booking not found', 404);
-    if (booking.status === BookingStatus.ACCEPTED_AWAITING_PAYMENT) {
-      (booking as any).status = BookingStatus.CONFIRMED;
+    if (![PaymentStatus.PROCESSING, PaymentStatus.UNPAID].includes(payment.status)) {
+      const booking = await Booking.findById(payment.bookingId).exec();
+      return { payment, booking };
     }
-    (booking as any).paymentStatus = PaymentStatus.PAID;
-    await booking.save();
 
-    await notificationService.notifyPaymentUpdate(booking, PaymentStatus.PAID);
+    const provider = getPaymentProvider(payment.provider);
+    const verified = await provider.verifyPayment(payment);
+    // Sandbox/server-verified completion: allow confirming an initiated/processing payment.
+    // For real providers, webhooks or provider API verification should be the source of truth.
+    if (verified.status === 'paid' || (provider.name === 'sandbox' && verified.status === 'processing')) {
+      return applyPaidState(payment);
+    }
+    if (verified.status === 'failed') {
+      return applyFailedState(payment, verified.reason);
+    }
+    // remain processing/unpaid
+    const booking = await Booking.findById(payment.bookingId).exec();
     return { payment, booking };
   },
 
-  async finalizeFailure(paymentOrReference: { paymentId?: string; providerReference?: string; bookingId?: string; reason?: string }) {
+  async finalizeFailure(paymentOrReference: { paymentId?: string; providerReference?: string; bookingId?: string; reason?: string }, actor?: { userId?: string; role?: string }) {
     let payment: any = null;
     if (paymentOrReference.providerReference) {
       payment = await Payment.findOne({ providerReference: paymentOrReference.providerReference } as any).exec();
@@ -152,57 +215,60 @@ export const paymentService = {
     }
     if (!payment) throw new AppError('Payment not found', 404);
 
+    if (actor?.userId && actor.role === 'CUSTOMER' && payment.customerId.toString() !== actor.userId) {
+      throw new AppError('Forbidden: payment access denied', 403);
+    }
     if (payment.status === PaymentStatus.PAID) {
-      // idempotent: do not downgrade a paid payment
       const booking = await Booking.findById(payment.bookingId).exec();
       return { payment, booking };
     }
 
-    (payment as any).status = PaymentStatus.FAILED;
-    (payment as any).processedAt = new Date();
-    (payment as any).failureReason = paymentOrReference.reason ?? 'Payment failed';
-    await payment.save();
-
-    const booking = await Booking.findById(payment.bookingId).exec();
-    if (booking) {
-      (booking as any).paymentStatus = PaymentStatus.FAILED;
-      // Booking remains ACCEPTED_AWAITING_PAYMENT on payment failure per requirements
-      await booking.save();
-      await notificationService.notifyPaymentUpdate(booking, PaymentStatus.FAILED);
+    const provider = getPaymentProvider(payment.provider);
+    const verified = await provider.verifyPayment(payment);
+    const reason = paymentOrReference.reason ?? verified.reason ?? 'Payment failed';
+    if (verified.status === 'paid') {
+      return applyPaidState(payment);
     }
-
+    // Only allow failure transition for initiated payments (server-verified context)
+    if ([PaymentStatus.PROCESSING, PaymentStatus.UNPAID, PaymentStatus.FAILED].includes(payment.status)) {
+      return applyFailedState(payment, reason);
+    }
+    const booking = await Booking.findById(payment.bookingId).exec();
     return { payment, booking };
   },
 
-  async handleWebhook(provider: string, payload: any) {
-    const providerReference = String(payload?.providerReference ?? payload?.data?.id ?? payload?.id ?? '').trim();
-    const eventId = String(payload?.eventId ?? payload?.event_id ?? '').trim();
-    const outcome = String(payload?.status ?? payload?.outcome ?? '').toLowerCase();
-    if (!providerReference && !payload?.bookingId) {
-      throw new AppError('Webhook payload missing payment reference', 400);
+  async handleWebhook(providerName: string, payload: any, rawBody?: Buffer, headers: Record<string, string | string[] | undefined> = {}) {
+    const provider = getPaymentProvider(providerName);
+    const secret = getWebhookSecret(provider.name);
+
+    if (!rawBody || rawBody.length === 0) {
+      throw new AppError('Missing raw webhook payload for signature verification', 400);
     }
 
-    // Idempotency: if we've already seen this providerReference in a terminal state, return it.
-    let payment = providerReference
-      ? await Payment.findOne({ provider, providerReference } as any).exec()
-      : null;
+    const event = await provider.verifyAndParseWebhook({ rawBody, headers, body: payload, secret });
 
-    if (!payment && payload?.bookingId) {
-      payment = await Payment.findOne({ bookingId: payload.bookingId } as any).sort({ createdAt: -1 }).exec();
+    // Replay/event dedupe protection
+    const eventHash = crypto.createHash('sha256').update(rawBody).digest('hex');
+    const existingEvent = await PaymentWebhookEvent.findOne({ provider: event.provider, eventId: event.eventId } as any).exec();
+    if (existingEvent) {
+      const payment = existingEvent.paymentId ? await Payment.findById(existingEvent.paymentId).exec() : null;
+      const booking = payment ? await Booking.findById((payment as any).bookingId).exec() : null;
+      return { payment, booking, idempotent: true, eventId: event.eventId, replayed: true };
     }
 
-    if (payment && (payment.status === PaymentStatus.PAID || payment.status === PaymentStatus.FAILED)) {
-      const booking = await Booking.findById(payment.bookingId).exec();
-      return { payment, booking, idempotent: true, eventId: eventId || undefined };
+    let payment: any = null;
+    if (event.providerReference) {
+      payment = await Payment.findOne({ providerReference: event.providerReference } as any).exec();
     }
-
+    if (!payment && event.bookingId) {
+      payment = await Payment.findOne({ bookingId: event.bookingId } as any).sort({ createdAt: -1 }).exec();
+    }
     if (!payment) {
-      if (payload?.bookingId) {
-        payment = await this.createOrGetForBooking(String(payload.bookingId), { provider });
-        if (providerReference) {
-          // ensure deterministic reference for this provider event if not set
-          (payment as any).provider = provider;
-          (payment as any).providerReference = providerReference;
+      if (event.bookingId) {
+        payment = await this.createOrGetForBooking(String(event.bookingId), { provider: event.provider });
+        if (event.providerReference) {
+          payment.provider = event.provider;
+          payment.providerReference = event.providerReference;
           await payment.save();
         }
       } else {
@@ -210,16 +276,44 @@ export const paymentService = {
       }
     }
 
-    if (outcome === 'success' || outcome === 'paid' || outcome === 'succeeded') {
-      return { ...(await this.finalizeSuccess({ paymentId: payment._id.toString(), providerReference })), idempotent: false, eventId: eventId || undefined };
-    }
-    if (outcome === 'failed' || outcome === 'failure') {
-      return { ...(await this.finalizeFailure({ paymentId: payment._id.toString(), providerReference, reason: payload?.reason })), idempotent: false, eventId: eventId || undefined };
+    // Payment-level idempotency guard
+    if (Array.isArray(payment.providerEventIds) && payment.providerEventIds.includes(event.eventId)) {
+      const booking = await Booking.findById(payment.bookingId).exec();
+      return { payment, booking, idempotent: true, eventId: event.eventId };
     }
 
-    // Unknown/non-terminal webhook: acknowledge without changing state
-    const booking = await Booking.findById(payment.bookingId).exec();
-    return { payment, booking, idempotent: true, eventId: eventId || undefined };
+    let result: any = { payment, booking: await Booking.findById(payment.bookingId).exec(), idempotent: true, eventId: event.eventId };
+    if (event.outcome === 'success') {
+      result = { ...(await applyPaidState(payment)), idempotent: false, eventId: event.eventId };
+    } else if (event.outcome === 'failed') {
+      result = { ...(await applyFailedState(payment, event.reason)), idempotent: false, eventId: event.eventId };
+    }
+
+    // Record processed event (unique index enforces dedupe under races)
+    try {
+      await PaymentWebhookEvent.create({
+        provider: event.provider,
+        eventId: event.eventId,
+        providerReference: event.providerReference,
+        paymentId: payment._id,
+        outcome: event.outcome,
+        payloadHash: eventHash,
+        processedAt: new Date(),
+      } as any);
+    } catch (err: any) {
+      // duplicate key => replay-safe idempotent response
+      if (!(err && err.code === 11000)) throw err;
+      result.idempotent = true;
+      result.replayed = true;
+    }
+
+    if (!Array.isArray(payment.providerEventIds)) payment.providerEventIds = [];
+    if (!payment.providerEventIds.includes(event.eventId)) {
+      payment.providerEventIds.push(event.eventId);
+      await payment.save();
+    }
+
+    return result;
   },
 
   async listPaymentsForCustomer(userId: string) {
@@ -260,7 +354,7 @@ export const paymentService = {
 
     return {
       ...totals,
-      currency: paidPayments[0]?.currency ?? 'PKR',
+      currency: paidPayments[0]?.currency ?? env.PAYMENT_CURRENCY ?? 'PKR',
       paidCount: paidPayments.length,
       pendingAmount,
       failedAmount,

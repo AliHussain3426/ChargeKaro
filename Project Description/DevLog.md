@@ -662,3 +662,24 @@ Keep entries short and informative. Do not overwrite previous entries.
 
 <!-- AI agents: Add every new development entry below this line. -->
 
+
+### [2026-11-15] - P0.4 Settlement & Payout Domain Implementation (Backend, Verified)
+
+- **Objective:** Implement P0.4 settlement/payout domain with accurate financial calculations, refund deductions, supplier/admin APIs, reconciliation, and auditable internal payout workflow (no fake bank transfers).
+- **Changes:**
+  - **Domain/models:** Added Settlement (per eligible provider-confirmed payment, unique paymentId) and Payout models with supplier/booking/payment refs, gross, configurable platformFeeRate snapshot, platform fee, refund deductions, other deductions, net payable, currency, settlement period, status, payout ref, timestamps, and auditable adjustments/status history (server/src/modules/payments/settlement.model.ts, payout.model.ts).
+  - **Calculation/reconciliation:** Implemented settlement.service.ts computing Net Payable = Gross - Platform Fee - Refund Deductions - Other Approved Deductions (rounded, non-negative), fee on retained amount (gross - succeeded refunds) to avoid negatives, configurable commission via PLATFORM_COMMISSION_RATE (default  .1, SRS policy pending), succeeded-refund-only deductions, pending/failed payment exclusion, idempotent per-payment/supplier reconciliation, and auditable recalculation on refund-after-accrual/approval/processing.
+  - **Lifecycle/APIs/authz:** Settlement states PENDING/CALCULATED/APPROVED/PROCESSING/PAID/FAILED/CANCELLED; payout states PENDING/APPROVED/PROCESSING/PAID/FAILED/CANCELLED with validated transitions. Supplier APIs: GET /api/payments/settlements/me, /settlements/balance/me, /payouts/me. Admin APIs: list/get/reconcile/approve settlements and list/create/update payout status under /api/admin/*. RBAC/supplier isolation enforced. **PAID explicitly rejected without verified external payout/provider confirmation; no bank transfer simulated/claimed.**
+  - **Integration:** Best-effort reconciliation hooks on confirmed payment (service.ts) and succeeded refund (efund.service.ts); routes/controllers/admin wiring added; env/config/docs updated.
+  - **Tests:** Added server/tests/payments.settlements.test.ts (10 tests) covering calculation, full/partial/multiple refunds, failed/pending/failed-refund exclusion, idempotent reconciliation, refund-after-approval/processing adjustment, RBAC/isolation, and invalid payout transitions/no fake PAID.
+- **Files:**
+  - Added: server/src/modules/payments/{settlement.model.ts,payout.model.ts,settlement.service.ts,settlement.controller.ts}, server/tests/payments.settlements.test.ts.
+  - Modified: server/src/modules/payments/{service.ts,refund.service.ts,routes.ts}, server/src/modules/admin/routes.ts, server/src/config/env.ts, server/.env.example, EV_CHARGING_COMPLETE_AUDIT/{IMPLEMENTATION_PROGRESS.md,IMPLEMENTED_FEATURES.md,REMAINING_BLOCKERS.md,SECURITY_TEST_REPORT.md,FINAL_PRODUCTION_READINESS_REPORT.md}.
+- **Verification:**
+  - cd server && npm run lint -> **PASS**.
+  - cd server && npm run build -> **PASS**.
+  - cd server && npx vitest run tests/payments.settlements.test.ts --hookTimeout=180000 --testTimeout=120000 -> **PASS (1 file, 10 tests)**.
+  - cd server && npx vitest run --hookTimeout=180000 --testTimeout=120000 -> **PASS (20 files, 97 tests)**.
+  - Client lint/build/tests not rerun (no client changes this unit).
+- **Status:** Completed (P0.4 implemented and verified for internal/manual settlement+payout workflow).
+- **Notes/Blockers:** Commission/payout policy pending SRS confirmation (PLATFORM_COMMISSION_RATE configurable, default 0.1). Live payment provider adapters/credentials, provider-specific webhook/refund reconciliation, and real payout provider with verified external confirmation remain blocked (B-001/B-006). Next: P0 hardening when creds/policy available, then P1 (auth lifecycle, profile persistence, security hardening/IDOR matrix/audit logs, Playwright) and frontend settlement/refund UI if in scope.

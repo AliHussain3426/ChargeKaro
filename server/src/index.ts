@@ -27,9 +27,23 @@ app.use(
   })
 );
 
-// Body parsers
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+// Body parsers (capture raw body for payment webhook signature verification)
+app.use(
+  express.json({
+    limit: '10mb',
+    verify: (req: any, _res, buf) => {
+      req.rawBody = Buffer.from(buf);
+    },
+  })
+);
+app.use(
+  express.urlencoded({
+    extended: true,
+    verify: (req: any, _res, buf) => {
+      req.rawBody = Buffer.from(buf);
+    },
+  })
+);
 app.use(cookieParser());
 
 // API routes

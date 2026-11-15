@@ -30,13 +30,21 @@ const paymentSchema = new Schema(
     provider: {
       type: String,
       required: true,
-      default: 'stub',
+      default: 'sandbox',
       trim: true,
     },
     providerReference: {
       type: String,
       required: true,
       unique: true,
+      trim: true,
+    },
+    providerSessionId: {
+      type: String,
+      trim: true,
+    },
+    checkoutUrl: {
+      type: String,
       trim: true,
     },
     idempotencyKey: {
@@ -74,6 +82,10 @@ const paymentSchema = new Schema(
       type: Number,
       min: [0, 'Refund amount cannot be negative'],
     },
+    providerEventIds: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
@@ -90,6 +102,8 @@ export interface PaymentDocument extends Document {
   supplierId: Types.ObjectId;
   provider: string;
   providerReference: string;
+  providerSessionId?: string;
+  checkoutUrl?: string;
   idempotencyKey?: string;
   amount: number;
   currency: string;
@@ -98,6 +112,7 @@ export interface PaymentDocument extends Document {
   failureReason?: string;
   processedAt?: Date;
   refundAmount?: number;
+  providerEventIds: string[];
   createdAt: Date;
   updatedAt: Date;
 }

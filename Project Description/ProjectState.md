@@ -2,9 +2,9 @@
 
 **Project:** EV Charging Platform  
 **Last Updated:** 15 November 2026
-**Current Phase:** Final Integration & Release Readiness (Phase 11)  
-**Overall Completion:** ~97% overall  
-**Status:** Phases 3–10 completed and verified. Phase 11 completed: added `client/.env.example`, implemented basic PWA manifest/service worker shell registration, wired customer/supplier overview dashboards to live APIs, and added backend E2E integration test for the full journey (register → vehicle → find station → book → supplier accept → payment → completion). Production builds and full automated test suites pass for server and client (client lint has pre-existing oxlint warnings only). External payment gateway integration remains deferred by design.
+**Current Phase:** Post-Phase 11 hardening — P0 payments/settlements (P0.1–P0.4 backend foundation verified)  
+**Overall Completion:** ~97% overall (core product baseline) with additional P0 backend progress in progress tracking  
+**Status:** Phases 3–11 baseline completed and verified. Post-Phase 11 P0 implementation (2026-11-15): provider-agnostic sandbox/HMAC payment initiation+webhook verification/dedupe foundation (P0.1/P0.2), sandbox-backed refund domain/service/API with authorization+idempotency+concurrency safety (P0.3), and settlement/payout domain with configurable commission, refund-aware idempotent reconciliation, RBAC, and internal/manual payout workflow (P0.4, **no fake bank transfers / no `PAID` without verified external confirmation**) implemented and verified. **Server regression now 20 files, 97 tests PASS** (lint/build PASS). Client baseline remains 7 files/26 tests, lint/build PASS with pre-existing warnings (not rerun this unit). Live provider adapters/credentials, real payout confirmation, P1 auth/security/E2E, and P2/P3 remain pending/blocked. See `EV_CHARGING_COMPLETE_AUDIT/IMPLEMENTATION_PROGRESS.md`.
 
 ---
 

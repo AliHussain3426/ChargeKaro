@@ -27,10 +27,14 @@ export async function initiatePayment(req: Request, res: Response, next: NextFun
 
 export async function confirmPaymentSuccess(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { payment, booking } = await paymentService.finalizeSuccess({
-      bookingId: req.params.bookingId as string,
-      providerReference: req.body?.providerReference as string | undefined,
-    });
+    const authReq = req as AuthenticatedRequest;
+    const { payment, booking } = await paymentService.finalizeSuccess(
+      {
+        bookingId: req.params.bookingId as string,
+        providerReference: req.body?.providerReference as string | undefined,
+      },
+      { userId: authReq.userId, role: authReq.user?.role }
+    );
     res.json({ success: true, message: 'Payment completed successfully', data: { payment, booking } });
   } catch (error) {
     next(error);
@@ -39,11 +43,15 @@ export async function confirmPaymentSuccess(req: Request, res: Response, next: N
 
 export async function confirmPaymentFailure(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { payment, booking } = await paymentService.finalizeFailure({
-      bookingId: req.params.bookingId as string,
-      providerReference: req.body?.providerReference as string | undefined,
-      reason: req.body?.reason as string | undefined,
-    });
+    const authReq = req as AuthenticatedRequest;
+    const { payment, booking } = await paymentService.finalizeFailure(
+      {
+        bookingId: req.params.bookingId as string,
+        providerReference: req.body?.providerReference as string | undefined,
+        reason: req.body?.reason as string | undefined,
+      },
+      { userId: authReq.userId, role: authReq.user?.role }
+    );
     res.json({ success: true, message: 'Payment failed', data: { payment, booking } });
   } catch (error) {
     next(error);
@@ -52,8 +60,9 @@ export async function confirmPaymentFailure(req: Request, res: Response, next: N
 
 export async function handleWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const provider = (req.params.provider as string) || 'stub';
-    const result = await paymentService.handleWebhook(provider, req.body ?? {});
+    const provider = (req.params.provider as string) || 'sandbox';
+    const rawBody = (req as any).rawBody as Buffer | undefined;
+    const result = await paymentService.handleWebhook(provider, req.body ?? {}, rawBody, req.headers as any);
     res.json({ success: true, message: 'Webhook processed', data: result });
   } catch (error) {
     next(error);

@@ -1,0 +1,19 @@
+# Remaining Blockers & External Dependencies
+
+**Date:** 2026-11-15
+
+| ID | Blocker / dependency | Impacted work | What is needed | Safe interim approach (per rules) |
+|---|---|---|---|---|
+| B-001 | Payment provider credentials & account (e.g. Stripe/JazzCash/Easypaisa or selected Pakistan-compatible gateway) | P0.1/P0.3/P0.4 real provider checkout, live provider-specific webhook verification, real refund API/webhook reconciliation, real payout provider execution/confirmation | Provider selection + sandbox/live API keys/secrets, webhook signing secret, return/callback URLs, supported currency/payment methods, payout rails/confirmation mechanism | Provider-agnostic architecture + sandbox/HMAC adapter, signed webhook verification/dedupe/idempotency, sandbox-backed refund workflow, and internal/manual settlement+payout records implemented/tested; configure real adapter+SDK+secrets and verified payout confirmation for activation; **do not claim live activation or bank transfer** |
+| B-002 | Email delivery provider (SMTP/API: e.g. SendGrid, SES, Resend) | P1.1 password reset delivery, P1.2 email verification, P2 security/booking emails | Provider credentials, verified sender/domain, templates/policy | Implement dispatch abstraction + token flows + UI; use configurable dev/mock adapter and log-safe test hooks; record delivery only on confirmed provider response |
+| B-003 | SMS/OTP provider (e.g. Twilio/local gateway) | P1.3 phone verification | Provider credentials, sender configuration, regional compliance | Provider-independent OTP architecture (secure hash/expiry/limits/cooldown) with configurable adapter; **do not claim OTP delivered without provider confirmation** |
+| B-004 | Push notification service (e.g. FCM/Web Push VAPID) | P2 multi-channel notifications | Service credentials/VAPID keys, client permission flow | Implement dispatch abstraction and in-app/realtime fallback; enable push only when configured |
+| B-005 | File/media storage provider or approved storage (Cloudinary/S3/local secure adapter) | P2.8 secure uploads, P2.5 verification docs, station/profile images | Provider credentials/bucket/config, access policy for private docs | Secure upload abstraction with validation and protected access; local dev adapter acceptable if isolated and documented |
+| B-006 | Business/policy decisions | P0.4 settlements (commission %, payout schedule/approval policy), refund policies, verification gates, booking reschedule rules, reviews moderation/scope | Product/finance/compliance confirmation | `PLATFORM_COMMISSION_RATE` implemented as configurable default (0.1) with auditable settlement calculations/history; final commission, payout schedule, and financial policy still require SRS/business confirmation |
+| B-007 | Real routing/geocoding/charger hardware integrations (if required beyond current) | Discovery parity, live telemetry/session energy | Provider keys, hardware/vendor APIs | Keep OSRM/geospatial abstractions configurable; mock/provider-failure handling; **no fabricated live telemetry or hardware control** |
+| B-008 | Multi-instance/shared infrastructure for rate limiting & realtime scale | Production-grade rate limiting, Socket.IO scaling | Redis/shared store, deployment topology | Correct single-instance implementation first; document shared-store requirement for clustered prod |
+
+## Classification guidance (to apply per feature)
+- **BLOCKED BY EXTERNAL DEPENDENCY:** requires credentials/provider/hardware/policy not available in repo.
+- **DEFERRED BY SCOPE:** not required by approved SRS scope (must cite evidence/decision).
+- **PARTIALLY IMPLEMENTED / NOT VERIFIED:** code exists but incomplete or lacking executed evidence.
