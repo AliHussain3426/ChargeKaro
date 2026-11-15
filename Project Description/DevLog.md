@@ -405,3 +405,34 @@ Keep entries short and informative. Do not overwrite previous entries.
 - **Status:** Completed.
 
 <!-- AI agents: Add every new development entry below this line. -->
+
+### [2026-11-15] - Backend Phase 1: Database Models, Health Check & Test Foundation
+
+- **Objective:** Implement Phase 1 of the EV Charging Platform backend: connect Express to MongoDB via Mongoose, create core domain models, extend the health endpoint with a DB connectivity check, and establish the modular backend structure plus automated test foundation.
+- **Changes:**
+  - Created the modular backend folder structure under `server/src/modules/` with per-module `model.ts`, `service.ts`, `controller.ts`, `routes.ts`, and `validation.ts` scaffolds for the auth, vehicles, stations, terminals, bookings, and payments modules.
+  - Added Mongoose models:
+    - User with polymorphic role (`CUSTOMER`, `SUPPLIER`, `ADMIN`) and referenced `CustomerProfile` / `SupplierProfile` documents.
+    - Vehicle with customer ownership, battery capacity, connector types, and maximum charging power.
+    - Station with supplier ownership, GeoJSON `Point` location (validated longitude/latitude ranges), pricing, and operating hours, plus a `2dsphere` geospatial index.
+    - Terminal with station ownership, connector, charging power, pricing, availability, and operational status (`AVAILABLE`, `OCCUPIED`, `UNAVAILABLE`, `MAINTENANCE`).
+    - Booking with customer/vehicle/station/terminal references, status state machine (`PENDING`, `ACCEPTED`, `REJECTED`, `CONFIRMED`, `CANCELLED`, `EXPIRED`, `COMPLETED`) and price snapshot.
+    - Payment with booking reference, provider reference, amount, currency, and status tracking.
+  - Extended `GET /api/health` with a MongoDB connectivity check (`database.status: connected`, HTTP 503 when disconnected).
+  - Refactored `connectDB` to accept an optional connection string and rethrow connection errors instead of exiting the process.
+  - App entry now starts the listener only when `NODE_ENV !== 'test'`.
+  - Extended shared backend types with domain enums (`UserRole`, `AccountStatus`, `VerificationStatus`, `VehicleCategory`, `BookingStatus`, `PaymentStatus`, `TerminalStatus`, `PricingType`).
+- **Files Created/Modified:**
+  - `server/src/modules/auth/*` (model, service, controller, routes, validation)
+  - `server/src/modules/vehicles/*`, `server/src/modules/stations/*`, `server/src/modules/terminals/*`, `server/src/modules/bookings/*`, `server/src/modules/payments/*` (model plus scaffold files)
+  - `server/src/config/db.ts`, `server/src/index.ts`, `server/src/routes/health.ts`, `server/src/routes/index.ts`, `server/src/types/index.ts`
+  - `server/package.json`, `server/vitest.config.ts`
+  - `server/tests/*` (user, station, terminal, booking, health tests plus mongo helper)
+- **Verification:**
+  - Backend: `cd server && npx vitest run` -> 5 test files passed, 24 tests passed (Vitest + Supertest + mongodb-memory-server).
+  - Backend: `cd server && npm run lint` (`tsc --noEmit`) -> passed with 0 errors.
+  - Backend: `cd server && npm run build` -> passed (dist emitted).
+- **Status:** Completed.
+- **Notes:** Phase 1 exit criteria met: all Phase 1 tests pass, models compile and validate correctly, and `/api/health` returns success with a connected database status. Next step: Phase 2 authentication module implementation (register/login/logout, JWT sessions, auth middleware).
+
+<!-- AI agents: Add every new development entry below this line. -->

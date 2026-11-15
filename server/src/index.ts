@@ -47,7 +47,10 @@ async function start(): Promise<void> {
   });
 }
 
-start().catch(console.error);
+// Only boot the server when the entry point is executed directly.
+// Test environments (Vitest) import the app without starting a listener.
+if (env.NODE_ENV !== 'test') {
+  start().catch(console.error);
+}
 
 export default app;
-
