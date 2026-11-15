@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EV Charging Complete Audit Dashboard</title>
+  <style>
+    :root { --bg:#f4f8f7; --card:#ffffff; --ink:#18332f; --muted:#4a6661; --primary:#0b7d68; --warn:#b45309; --bad:#b91c1c; --ok:#166534; --border:#d7e4df; }
+    body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif; background:var(--bg); color:var(--ink); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    .sub { color: var(--muted); margin: 0 0 20px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .v { font-size: 24px; font-weight: 700; margin-top: 4px; }
+    .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+    h2 { font-size: 18px; margin: 22px 0 10px; }
+    table { width:100%; border-collapse: collapse; background:var(--card); border:1px solid var(--border); border-radius: 12px; overflow:hidden; }
+    th, td { padding: 10px 12px; border-bottom:1px solid var(--border); text-align:left; vertical-align: top; font-size: 14px; }
+    th { background:#eef6f3; font-size: 12px; text-transform: uppercase; letter-spacing:.03em; color: var(--muted); }
+    tr:last-child td { border-bottom:0; }
+    .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+    .p-pass { background:#dcfce7; color:#166534; } .p-warn { background:#fef3c7; color:#92400e; } .p-fail { background:#fee2e2; color:#991b1b; } .p-nt { background:#e5e7eb; color:#374151; }
+    ul { margin: 8px 0 0 18px; }
+    .note { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>EV Charging Complete Audit Dashboard</h1>
+    <p class="sub">Project: GreenCharge (MERN) · Audit date: 2026-11-15 · Evidence-based automated verification + source inspection</p>
+
+    <div class="grid">
+      <div class="card"><div class="k">Automated tests executed</div><div class="v ok">99</div><div class="note">73 server + 26 client</div></div>
+      <div class="card"><div class="k">Passed / Failed</div><div class="v ok">99 / 0</div><div class="note">Recorded successful runs</div></div>
+      <div class="card"><div class="k">Builds & Lints</div><div class="v ok">PASS</div><div class="note">Client lint: warnings only</div></div>
+      <div class="card"><div class="k">npm audit vulnerabilities</div><div class="v ok">0</div><div class="note">Server and client</div></div>
+      <div class="card"><div class="k">Overall health</div><div class="v warn">GOOD (MVP)</div><div class="note">Not production-hardened for real payments</div></div>
+    </div>
+
+    <h2>Executed verification</h2>
+    <table>
+      <tr><th>Area</th><th>Command</th><th>Result</th></tr>
+      <tr><td>Server lint</td><td><code>npm run lint</code></td><td><span class="pill p-pass">PASS</span></td></tr>
+      <tr><td>Server build</td><td><code>npm run build</code></td><td><span class="pill p-pass">PASS</span></td></tr>
+      <tr><td>Server tests</td><td><code>vitest run</code></td><td><span class="pill p-pass">17 files, 73 passed</span></td></tr>
+      <tr><td>Client lint</td><td><code>npm run lint</code></td><td><span class="pill p-warn">PASS (warnings)</span></td></tr>
+      <tr><td>Client build</td><td><code>npm run build</code></td><td><span class="pill p-pass">PASS</span> (chunk warning)</td></tr>
+      <tr><td>Client tests</td><td><code>vitest run</code></td><td><span class="pill p-pass">7 files, 26 passed</span></td></tr>
+      <tr><td>E2E journey (API)</td><td><code>tests/e2e.journey.test.ts</code></td><td><span class="pill p-pass">PASS</span></td></tr>
+    </table>
+
+    <h2>Key findings (priority)</h2>
+    <table>
+      <tr><th>ID</th><th>Severity</th><th>Status</th><th>Finding</th><th>Recommendation</th></tr>
+      <tr><td>SEC-001</td><td><span class="pill p-fail">High</span></td><td><span class="pill p-fail">FAIL</span></td><td>Payment webhooks lack cryptographic signature verification (stub/deferred).</td><td>Implement signed webhook verification and provider integration before production exposure.</td></tr>
+      <tr><td>SEC-002</td><td><span class="pill p-warn">Medium</span></td><td><span class="pill p-fail">FAIL</span></td><td>No rate limiting / abuse protection observed.</td><td>Add throttling, lockout/backoff, monitoring.</td></tr>
+      <tr><td>SEC-003</td><td><span class="pill p-warn">Medium</span></td><td><span class="pill p-warn">PARTIAL</span></td><td>Explicit input/query sanitization hardening not observed.</td><td>Add sanitization and negative security tests.</td></tr>
+      <tr><td>DEF-004</td><td><span class="pill p-warn">Medium</span></td><td><span class="pill p-nt">NOT IMPL.</span></td><td>Real payment gateway/refunds deferred (stub flow).</td><td>Integrate provider, refunds, verified webhooks.</td></tr>
+      <tr><td>DEF-005</td><td><span class="pill p-warn">Medium</span></td><td><span class="pill p-nt">NOT TESTED</span></td><td>No Playwright browser E2E / exhaustive UI control testing.</td><td>Add browser E2E and UI interaction matrix.</td></tr>
+      <tr><td>DEF-010</td><td><span class="pill p-nt">Low</span></td><td><span class="pill p-nt">NOT TESTED</span></td><td>Responsiveness and PWA install/offline runtime behavior.</td><td>Run viewport/device/PWA validation.</td></tr>
+    </table>
+
+    <h2>Data isolation</h2>
+    <div class="card">
+      <strong>No confirmed leakage</strong> in executed automated tests. RBAC/ownership/notification isolation and admin PII guards verified in covered flows.
+      <ul>
+        <li>Gaps: exhaustive IDOR/BOLA fuzzing and multi-browser/account-switch stale-state tests not executed.</li>
+      </ul>
+    </div>
+
+    <h2>Untested areas</h2>
+    <div class="card">
+      <ul>
+        <li>Playwright click-through of all UI controls, visual/responsive screenshots, real device testing</li>
+        <li>PWA install/offline behavior on devices</li>
+        <li>Real payment gateway, signed provider webhooks, live OSRM behavior</li>
+        <li>Load/performance profiling and full API negative/fuzz security matrix</li>
+      </ul>
+      <p class="note">This dashboard summarizes evidence-based results only and does not claim 100% coverage. See markdown reports in <code>EV_CHARGING_COMPLETE_AUDIT/</code> for details.</p>
+    </div>
+  </div>
+</body>
+</html>

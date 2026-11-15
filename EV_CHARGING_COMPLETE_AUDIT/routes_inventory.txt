@@ -1,0 +1,240 @@
+﻿---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\admin\routes.ts---
+import { Router } from 'express';
+import { authenticate, authorize } from '../../middleware/auth.js';
+import { UserRole } from '../../types/index.js';
+import adminController from './controller.js';
+
+const router = Router();
+
+router.use(authenticate, authorize(UserRole.ADMIN));
+
+router.get('/overview', adminController.getOverview);
+router.get('/users', adminController.listUsers);
+router.patch('/users/:userId', adminController.updateUser);
+
+router.get('/suppliers', adminController.listSuppliers);
+router.patch('/suppliers/:supplierId', adminController.updateSupplier);
+
+router.get('/stations', adminController.listStations);
+router.get('/terminals', adminController.listTerminals);
+router.get('/bookings', adminController.listBookings);
+
+router.get('/reports', adminController.getReports);
+router.get('/settings', adminController.getSettings);
+router.put('/settings', adminController.updateSettings);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\auth\routes.ts---
+// Auth module
+//
+// Phase 2: authentication routes wiring validators, controllers, and auth
+// middleware into the /api/auth surface.
+
+import { Router } from 'express';
+import {
+  validateRegisterCustomer,
+  validateRegisterSupplier,
+  validateLogin,
+  validateForgotPassword,
+  validateResetPassword,
+} from './validation.js';
+import {
+  registerCustomer,
+  registerSupplier,
+  login,
+  refresh,
+  me,
+  logout,
+  forgotPassword,
+  resetPassword,
+} from './controller.js';
+import { authenticate } from '../../middleware/auth.js';
+
+const router = Router();
+
+/**
+ * Public auth routes
+ */
+router.post('/register/customer', validateRegisterCustomer, registerCustomer);
+router.post('/register/supplier', validateRegisterSupplier, registerSupplier);
+router.post('/login', validateLogin, login);
+router.post('/forgot-password', validateForgotPassword, forgotPassword);
+router.post('/reset-password', validateResetPassword, resetPassword);
+
+/**
+ * Protected auth routes
+ */
+router.post('/refresh', authenticate, refresh);
+router.get('/me', authenticate, me);
+router.post('/logout', authenticate, logout);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\bookings\routes.ts---
+// Bookings module
+//
+// Booking routes for customers and suppliers.
+
+import { Router } from 'express';
+import { authenticate, authorize } from '../../middleware/auth.js';
+import { UserRole } from '../../types/index.js';
+import bookingsController from './controller.js';
+import { validateCreateBooking } from './validation.js';
+
+const router = Router();
+
+router.use(authenticate);
+
+// Customer
+router.post('/', authorize(UserRole.CUSTOMER), validateCreateBooking, bookingsController.createBooking);
+router.post('/:bookingId/pay', authorize(UserRole.CUSTOMER), bookingsController.payBooking);
+
+// Supplier
+router.post('/:bookingId/accept', authorize(UserRole.SUPPLIER), bookingsController.acceptBooking);
+router.post('/:bookingId/reject', authorize(UserRole.SUPPLIER), bookingsController.rejectBooking);
+router.post('/:bookingId/start', authorize(UserRole.SUPPLIER), bookingsController.startBooking);
+router.post('/:bookingId/complete', authorize(UserRole.SUPPLIER), bookingsController.completeBooking);
+
+// Shared (role-specific behavior enforced in controller/service)
+router.get('/', authorize(UserRole.CUSTOMER, UserRole.SUPPLIER), bookingsController.listBookings);
+router.get('/:bookingId', authorize(UserRole.CUSTOMER, UserRole.SUPPLIER), bookingsController.getBooking);
+router.post('/:bookingId/cancel', authorize(UserRole.CUSTOMER, UserRole.SUPPLIER), bookingsController.cancelBooking);
+router.post('/:bookingId/expire', authorize(UserRole.CUSTOMER, UserRole.SUPPLIER), bookingsController.expireBooking);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\discovery\routes.ts---
+import { Router } from 'express';
+import { authenticate } from '../../middleware/auth.js';
+import discoveryController from './controller.js';
+
+const router = Router();
+
+router.use(authenticate);
+router.get('/stations', discoveryController.searchStations);
+router.get('/', discoveryController.searchStations);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\notifications\routes.ts---
+import { Router } from 'express';
+import { authenticate } from '../../middleware/auth.js';
+import notificationsController from './controller.js';
+
+const router = Router();
+
+router.use(authenticate);
+
+router.get('/', notificationsController.listNotifications);
+router.post('/read-all', notificationsController.markAllNotificationsRead);
+router.post('/:notificationId/read', notificationsController.markNotificationRead);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\payments\routes.ts---
+// Payments module
+//
+// Payment initiation/finalization, webhooks, payment records, and supplier earnings.
+
+import { Router } from 'express';
+import { authenticate, authorize } from '../../middleware/auth.js';
+import { UserRole } from '../../types/index.js';
+import paymentsController from './controller.js';
+
+const router = Router();
+
+// Webhook-ready endpoint (provider callbacks) - typically verified by signature in production
+router.post('/webhooks/:provider', paymentsController.handleWebhook);
+
+router.use(authenticate);
+
+router.post('/bookings/:bookingId/initiate', authorize(UserRole.CUSTOMER), paymentsController.initiatePayment);
+router.post('/bookings/:bookingId/success', authorize(UserRole.CUSTOMER), paymentsController.confirmPaymentSuccess);
+router.post('/bookings/:bookingId/failure', authorize(UserRole.CUSTOMER), paymentsController.confirmPaymentFailure);
+
+router.get('/earnings/me', authorize(UserRole.SUPPLIER), paymentsController.getSupplierEarnings);
+router.get('/', authorize(UserRole.CUSTOMER), paymentsController.listPayments);
+router.get('/:paymentId', authorize(UserRole.CUSTOMER, UserRole.SUPPLIER), paymentsController.getPayment);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\routes\routes.ts---
+import { Router } from 'express';
+import { authenticate } from '../../middleware/auth.js';
+import routesController from './controller.js';
+
+const router = Router();
+
+router.use(authenticate);
+router.get('/', routesController.getRoute);
+router.get('/directions', routesController.getRoute);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\stations\routes.ts---
+// Stations module
+//
+// Supplier-owned station management routes.
+
+import { Router } from 'express';
+import { authenticate, authorize } from '../../middleware/auth.js';
+import { authorizeSupplierStation } from '../../middleware/ownership.js';
+import { UserRole } from '../../types/index.js';
+import stationsController from './controller.js';
+import { validateCreateStation, validateUpdateStation } from './validation.js';
+import terminalRoutes from '../terminals/routes.js';
+
+const router = Router();
+
+router.use(authenticate, authorize(UserRole.SUPPLIER));
+
+router.post('/', validateCreateStation, stationsController.createStation);
+router.get('/', stationsController.listStations);
+router.get('/:stationId', authorizeSupplierStation, stationsController.getStation);
+router.patch('/:stationId', authorizeSupplierStation, validateUpdateStation, stationsController.updateStation);
+router.delete('/:stationId', authorizeSupplierStation, stationsController.deleteStation);
+
+// Nested terminal routes: /api/stations/:stationId/terminals
+router.use('/:stationId/terminals', authorizeSupplierStation, terminalRoutes);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\terminals\routes.ts---
+// Terminals module
+//
+// Routes for supplier-owned terminal management.
+// Mounted under /api/stations/:stationId/terminals (station ownership enforced upstream)
+// and also usable for direct terminal operations when mounted with appropriate middleware.
+
+import { Router } from 'express';
+import terminalsController from './controller.js';
+import {
+  validateCreateTerminal,
+  validateUpdateTerminal,
+  validateTerminalStatus,
+} from './validation.js';
+
+const router = Router({ mergeParams: true });
+
+router.post('/', validateCreateTerminal, terminalsController.createTerminal);
+router.get('/', terminalsController.listTerminals);
+router.patch('/:terminalId', validateUpdateTerminal, terminalsController.updateTerminal);
+router.patch('/:terminalId/status', validateTerminalStatus, terminalsController.updateTerminalStatus);
+router.delete('/:terminalId', terminalsController.deleteTerminal);
+
+export default router;
+---C:\Users\HAJI LAPTOP g55\Documents\ChargeKaro\StartUp-Showdown-Project\server\src\modules\vehicles\routes.ts---
+// Vehicles module
+//
+// Customer-owned vehicle management routes.
+
+import { Router } from 'express';
+import { authenticate, authorize } from '../../middleware/auth.js';
+import { UserRole } from '../../types/index.js';
+import vehiclesController from './controller.js';
+import { validateCreateVehicle, validateUpdateVehicle } from './validation.js';
+
+const router = Router();
+
+router.use(authenticate, authorize(UserRole.CUSTOMER));
+
+router.post('/', validateCreateVehicle, vehiclesController.createVehicle);
+router.get('/', vehiclesController.listVehicles);
+router.get('/:vehicleId', vehiclesController.getVehicle);
+router.patch('/:vehicleId', validateUpdateVehicle, vehiclesController.updateVehicle);
+router.delete('/:vehicleId', vehiclesController.deleteVehicle);
+
+export default router;
