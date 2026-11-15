@@ -1,10 +1,55 @@
+import { useEffect, useMemo, useState } from 'react';
 import { CalendarCheck } from 'lucide-react';
 import AdminListWorkspace from '@/components/dashboard/AdminListWorkspace';
+import { listAdminBookings, type AdminBooking } from '@/services/admin';
 
-const rows = [
-  { name: 'BK-1024 · Ayesha Khan', meta: 'Gulberg Charge Hub · Thu, 14 Nov · 10:30–11:30', status: 'Confirmed', value: 'PKR 1,440', group: 'Confirmed' },
-  { name: 'BK-1025 · Hassan Ali', meta: 'Gulberg Charge Hub · Fri, 15 Nov · 14:00–15:00', status: 'Pending', value: 'PKR 1,200', group: 'Pending' },
-  { name: 'BK-1017 · Zara Malik', meta: 'DHA Phase 5 EV Stop · Mon, 04 Nov · 18:00–19:00', status: 'Completed', value: 'PKR 720', group: 'Completed' },
-];
+function formatRange(startIso: string, endIso: string): string {
+  const start = new Date(startIso);
+  const end = new Date(endIso);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '—';
+  return `${start.toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}–${end.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`;
+}
 
-export default function ManageBookingsPage() { return <AdminListWorkspace title="Bookings" description="Oversee charging session requests and their platform status." itemLabel="Booking" tabs={['All bookings', 'Pending', 'Confirmed', 'Completed']} rows={rows} icon={CalendarCheck} />; }
+function toRow(b: AdminBooking) {
+  const customer = b.customerId as any;
+  const station = b.stationId as any;
+  const status = b.status || 'UNKNOWN';
+  const group = ['PENDING_SUPPLIER', 'ACCEPTED_AWAITING_PAYMENT'].includes(status)
+    ? 'Pending'
+    : ['CONFIRMED', 'IN_PROGRESS'].includes(status)
+      ? 'Confirmed'
+      : status === 'COMPLETED'
+        ? 'Completed'
+        : 'Other';
+  return {
+    name: `${b.bookingReference} · ${customer?.name || 'Customer'}`,
+    meta: `${station?.name || 'Station'} · ${formatRange(b.requestedStartTime, b.requestedEndTime)}`,
+    status: status.replace(/_/g, ' '),
+    value: b.priceSnapshot ? `${b.priceSnapshot.currency} ${b.priceSnapshot.amount}` : '—',
+    group,
+  };
+}
+
+export default function ManageBookingsPage() {
+  const [items, setItems] = useState<AdminBooking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await listAdminBookings();
+        if (!cancelled) setItems(data);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load bookings.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const rows = useMemo(() => items.map(toRow), [items]);
+  return <AdminListWorkspace title="Bookings" description="Oversee charging session requests and their platform status." itemLabel="Booking" tabs={['All bookings', 'Pending', 'Confirmed', 'Completed', 'Other']} rows={rows} icon={CalendarCheck} loading={loading} error={error} live />;
+}

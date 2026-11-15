@@ -2,9 +2,9 @@
 
 **Project:** EV Charging Platform  
 **Last Updated:** 15 November 2026
-**Current Phase:** Notifications (Phase 9)  
-**Overall Completion:** ~90% overall  
-**Status:** Phases 3–8 completed and verified. Phase 9 completed: notification records and APIs (list, mark read, mark all read) implemented with event hooks for booking submitted/accepted/rejected/cancelled and payment success/failure updates. Customer and supplier notification pages wired to real data. External payment gateway integration remains deferred; deeper role dashboards/admin wiring remain pending.
+**Current Phase:** Final Integration & Release Readiness (Phase 11)  
+**Overall Completion:** ~97% overall  
+**Status:** Phases 3–10 completed and verified. Phase 11 completed: added `client/.env.example`, implemented basic PWA manifest/service worker shell registration, wired customer/supplier overview dashboards to live APIs, and added backend E2E integration test for the full journey (register → vehicle → find station → book → supplier accept → payment → completion). Production builds and full automated test suites pass for server and client (client lint has pre-existing oxlint warnings only). External payment gateway integration remains deferred by design.
 
 ---
 
@@ -182,6 +182,8 @@ The project follows a clean, modern, elegant, and professional visual direction.
 | Map & Routing Integration | Completed | Phase 6: Leaflet map with station markers, list↔map selection sync, geolocation/manual search, and OSRM-backed `/api/routes` polyline rendering |
 | Payment Processing & Earnings | Completed (integration-deferred) | Phase 8: payment records on acceptance, UNPAID/PROCESSING/PAID/FAILED transitions, webhook-ready idempotent handlers, and supplier earnings (gross/fee/net) from confirmed payments with customer payment flow and earnings UI wired |
 | Notifications | Completed | Phase 9: notification model/routes (list, mark read, mark all read), delivery hooks on booking submit/accept/reject/cancel and payment success/failure, frontend customer/supplier notification pages wired |
+| Super Admin Module | Completed | Phase 10: admin-only oversight APIs (overview aggregates, users/suppliers/stations/terminals/bookings, reports, settings) and admin frontend pages wired to live data |
+| PWA & Release Readiness | Completed (baseline) | Phase 11: `client/.env.example`, web manifest + basic service worker shell registration, customer/supplier overviews wired to live data, E2E journey integration test, production builds/lint/tests verified |
 | Supplier Verification | Deferred | Intentionally deferred to later phase |
 | PWA Capabilities | Planned | Pending service worker & web manifest |
 
@@ -231,7 +233,11 @@ The following areas are pending implementation and verification:
 - [x] Frontend Phase 8 verified: customer payment flow (initiate/complete/simulate failure) and payment status display wired in `MyBookingsPage`; supplier `EarningsPage` wired to real earnings data. Client build passing (chunk-size warning) and test suite passing (7 files, 26 tests), lint warnings pre-existing.
 - [x] Backend Phase 9 notifications verified: notifications created on booking submit and accept/reject (and cancel/payment update hooks added); list/mark-read APIs enforce user ownership (users cannot read/modify others' notifications). Targeted tests passing (`tests/notifications.test.ts`: 3 tests) with server lint/build passing; targeted regression suites passing (`tests/payments.earnings.test.ts`, `tests/booking.workflow.test.ts`).
 - [x] Frontend Phase 9 verified: customer and supplier notification pages wired to real notification APIs with read/mark-all actions; client build and test suite passing (7 files, 26 tests).
-- [ ] Real external payment gateway integration (redirect/provider webhooks/signature verification), richer booking lifecycle UX, and deeper customer/supplier/admin data wiring. (Note: a concurrent full server `vitest run` in this environment hit mongodb-memory-server hook timeouts/cascading failures; targeted suites for changed areas passed.)
+- [x] Backend Phase 10 admin verified: admin-only RBAC enforced on `/api/admin/*`, admin oversight updates reject customer/supplier PII modification without permission, and overview aggregates/reports return counts and oversight data. Targeted tests passing (`tests/admin.module.test.ts`: 3 tests) with server lint/build passing; regression suites passing (`tests/notifications.test.ts`).
+- [x] Frontend Phase 10 admin verified: Admin overview, users, suppliers, stations, terminals, bookings, reports, and system settings pages wired to live admin APIs; client build and test suite passing (7 files, 26 tests).
+- [x] Phase 11 integration/release readiness verified: `client/.env.example` added; PWA manifest (`client/public/manifest.webmanifest`), basic service worker (`client/public/sw.js`), manifest link and production SW registration added; customer and supplier overview dashboards wired to live APIs; backend E2E journey test added (`server/tests/e2e.journey.test.ts`).
+- [x] Final verification: server `npm run lint`, `npm run build`, `npx vitest run` -> **17 files, 73 tests passed**. Client `npm run lint` -> passed with pre-existing oxlint warnings only; `npm run build` -> passed (Vite chunk-size warning, Leaflet bundle); `npx vitest run` -> **7 files, 26 tests passed**.
+- [ ] Real external payment gateway integration (redirect/provider webhooks/signature verification, refunds) remains deferred by design; optional further UI/perf polish (code-splitting, lint warning cleanup).
 
 ---
 
@@ -248,3 +254,5 @@ The following areas are pending implementation and verification:
 9. ~~Implement booking workflow state machine and core booking UI.~~ Completed in Phase 7.
 10. ~~Implement payments records, transitions, and supplier earnings with UI.~~ Completed in Phase 8.
 11. ~~Implement notifications records, event hooks, and notification UI.~~ Completed in Phase 9.
+12. ~~Implement Super Admin backend and frontend oversight views.~~ Completed in Phase 10.
+13. ~~Final integration, PWA baseline, E2E journey test, and release verification.~~ Completed in Phase 11.

@@ -9,6 +9,7 @@ import discoveryRoutes from '../modules/discovery/routes.js';
 import routingRoutes from '../modules/routes/routes.js';
 import paymentRoutes from '../modules/payments/routes.js';
 import notificationRoutes from '../modules/notifications/routes.js';
+import adminRoutes from '../modules/admin/routes.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { UserRole } from '../types/index.js';
 
@@ -23,6 +24,7 @@ router.use('/discovery', discoveryRoutes);
 router.use('/routes', routingRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/admin', adminRoutes);
 
 // Direct terminal operations (ownership enforced per terminal)
 router.use(

@@ -622,5 +622,43 @@ Keep entries short and informative. Do not overwrite previous entries.
 - **Status:** Completed.
 - **Notes:** Phase 9 exit criteria met (notification tests pass). A concurrent full server `vitest run` in this environment encountered mongodb-memory-server hook timeouts/cascading failures under load; changed/targeted suites passed.
 
+### [2026-11-15] - Backend/Frontend Phase 10: Super Admin Module
+
+- **Objective:** Implement admin-only backend oversight/reporting/settings APIs and wire Super Admin frontend views to live data.
+- **Changes:**
+  - **Backend admin module:** Added `server/src/modules/admin/{model,service,controller,routes}.ts` and registered `/api/admin` (protected by `authenticate` + `authorize(ADMIN)`). Provides overview aggregate counts, user/supplier/station/terminal/booking oversight lists, reports (counts/revenue/recent bookings), and system settings (get/update). Oversight update endpoints reject customer/supplier PII modification attempts without permission (403) while allowing non-PII oversight fields.
+  - **Frontend admin wiring:** Added `client/src/services/admin.ts`; refactored `AdminListWorkspace` to support loading/error/live states; wired `AdminOverview`, `ManageUsersPage`, `ManageSuppliersPage`, `ManageStationsPage`, `ManageTerminalsPage`, `ManageBookingsPage`, `AdminReportsPage`, and `SystemSettingsPage` to live admin APIs.
+  - **Tests:** Added `server/tests/admin.module.test.ts` covering admin-only RBAC enforcement, PII modification rejection (with allowed non-PII oversight update), and overview aggregates/oversight data.
+- **Files Created/Modified:**
+  - Server: `server/src/modules/admin/{model,service,controller,routes}.ts` (new), `server/src/routes/index.ts`, `server/tests/admin.module.test.ts` (new).
+  - Client: `client/src/services/admin.ts` (new), `client/src/components/dashboard/AdminListWorkspace.tsx`, `client/src/pages/admin/{AdminOverview,ManageUsersPage,ManageSuppliersPage,ManageStationsPage,ManageTerminalsPage,ManageBookingsPage,AdminReportsPage,SystemSettingsPage}.tsx`.
+  - Docs: `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:**
+  - Server: `cd server && npx vitest run tests/admin.module.test.ts --hookTimeout=180000 --testTimeout=120000` -> **1 file passed, 3 tests passed** (RBAC, PII modification forbidden, overview aggregates).
+  - Server: `cd server && npm run lint` (`tsc --noEmit`) and `npm run build` -> passed.
+  - Server targeted regression: `cd server && npx vitest run tests/notifications.test.ts --hookTimeout=180000 --testTimeout=120000` -> **1 file passed, 3 tests passed**.
+  - Client: `cd client && npm run build` -> passed (Vite chunk-size warning due to Leaflet bundle).
+  - Client: `cd client && npx vitest run` -> **7 files passed, 26 tests passed**.
+- **Status:** Completed.
+- **Notes:** Phase 10 exit criteria met (admin tests pass; admin frontend wired). A concurrent full server `vitest run` in this environment encountered mongodb-memory-server hook timeouts/cascading failures under load; changed/targeted suites passed.
+
+### [2026-11-15] - Backend/Frontend Phase 11: Final Integration & Release Readiness
+
+- **Objective:** Complete final integration/wiring, add release-readiness artifacts (env/PWA), provide backend E2E journey coverage, and verify production builds/tests.
+- **Changes:**
+  - **Environment/PWA:** Added `client/.env.example`; added PWA baseline (`client/public/manifest.webmanifest`, `client/public/sw.js`), linked manifest/theme metadata in `client/index.html`, and registered service worker in production via `client/src/main.tsx`.
+  - **Frontend wiring:** Replaced static prototype customer and supplier overview dashboards with live-data views using existing APIs (`client/src/pages/customer/CustomerOverview.tsx`, `client/src/pages/supplier/SupplierOverview.tsx`) for vehicles/bookings/discovery and stations/terminals/bookings/earnings respectively.
+  - **E2E integration:** Added `server/tests/e2e.journey.test.ts` covering full journey: supplier setup → customer register → add vehicle → discover station → create booking → supplier accept → payment initiate/success → start → complete.
+  - **Docs:** Updated `Project Description/ProjectState.md` and `Project Description/DevLog.md` to reflect Phase 11 completion and verification.
+- **Files Created/Modified:**
+  - Client: `client/.env.example` (new), `client/public/manifest.webmanifest` (new), `client/public/sw.js` (new), `client/index.html`, `client/src/main.tsx`, `client/src/pages/customer/CustomerOverview.tsx`, `client/src/pages/supplier/SupplierOverview.tsx`.
+  - Server: `server/tests/e2e.journey.test.ts` (new).
+  - Docs: `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Verification:**
+  - Server: `cd server && npm run lint` (`tsc --noEmit`) -> passed; `npm run build` -> passed; `npx vitest run --hookTimeout=180000 --testTimeout=120000` -> **17 files passed, 73 tests passed** (includes `tests/e2e.journey.test.ts`).
+  - Client: `cd client && npm run lint` -> passed with **pre-existing oxlint warnings only** (fast-refresh exports, set-state-in-effect/data-load patterns); `npm run build` -> passed (Vite chunk-size warning due to Leaflet bundle; PWA assets emitted); `npx vitest run` -> **7 files passed, 26 tests passed**.
+- **Status:** Completed.
+- **Notes:** Phase 11 release-readiness baseline met (env example, PWA shell, key dashboard wiring, E2E journey, builds/tests green). External payment gateway integration remains deferred by design; optional follow-ups include bundle splitting/lint warning cleanup and gateway/webhook production hardening.
+
 <!-- AI agents: Add every new development entry below this line. -->
 

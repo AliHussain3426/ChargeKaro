@@ -1,4 +1,43 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Plug } from 'lucide-react';
 import AdminListWorkspace from '@/components/dashboard/AdminListWorkspace';
-const rows = [{ name: 'GC-01', meta: 'Gulberg Charge Hub · Type 2 · 45 kW', status: 'Available', value: 'PKR 75/kWh', group: 'Available' }, { name: 'GC-02', meta: 'Gulberg Charge Hub · CCS2 · 50 kW', status: 'In use', value: 'PKR 85/kWh', group: 'In use' }, { name: 'DHA-01', meta: 'DHA Phase 5 EV Stop · Type 2 · 22 kW', status: 'Offline', value: 'PKR 65/kWh', group: 'Offline' }];
-export default function ManageTerminalsPage() { return <AdminListWorkspace title="Terminals" description="Monitor connector compatibility, availability, and published rates across the network." itemLabel="Terminal" tabs={['All terminals', 'Available', 'In use', 'Offline']} rows={rows} icon={Plug} />; }
+import { listAdminTerminals, type AdminTerminal } from '@/services/admin';
+
+function toRow(t: AdminTerminal) {
+  const station = t.stationId as any;
+  const status = t.status || (t.availability ? 'AVAILABLE' : 'UNAVAILABLE');
+  const group = status === 'AVAILABLE' ? 'Available' : status === 'OCCUPIED' ? 'In use' : 'Offline';
+  const connectors = (t.connectorTypes || []).join(', ') || '—';
+  const price = t.pricing ? `${t.pricing.currency} ${t.pricing.amount}` : '—';
+  return {
+    name: t.name || 'Terminal',
+    meta: `${station?.name || 'Station'}${station?.city ? `, ${station.city}` : ''} · ${connectors} · ${t.maximumPowerKw ?? '—'} kW`,
+    status,
+    value: price,
+    group,
+  };
+}
+
+export default function ManageTerminalsPage() {
+  const [items, setItems] = useState<AdminTerminal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await listAdminTerminals();
+        if (!cancelled) setItems(data);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load terminals.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const rows = useMemo(() => items.map(toRow), [items]);
+  return <AdminListWorkspace title="Terminals" description="Monitor connector compatibility, availability, and published rates across the network." itemLabel="Terminal" tabs={['All terminals', 'Available', 'In use', 'Offline']} rows={rows} icon={Plug} loading={loading} error={error} live />;
+}
