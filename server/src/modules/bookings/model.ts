@@ -94,7 +94,6 @@ const bookingSchema = new Schema(
   }
 );
 
-bookingSchema.index({ bookingReference: 1 }, { unique: true });
 bookingSchema.index({ customerId: 1, status: 1 });
 bookingSchema.index({ terminalId: 1, requestedStartTime: 1 });
 

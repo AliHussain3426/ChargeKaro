@@ -62,13 +62,20 @@ const userSchema = new Schema(
       enum: VerificationStatus,
       default: VerificationStatus.UNVERIFIED,
     },
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1, accountStatus: 1 });
 
 export interface User extends Document {
@@ -79,6 +86,8 @@ export interface User extends Document {
   role: UserRole;
   accountStatus: AccountStatus;
   verificationStatus: VerificationStatus;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 }
 
 export const User = model<User>('User', userSchema);
@@ -104,8 +113,6 @@ const customerProfileSchema = new Schema(
     timestamps: true,
   }
 );
-
-customerProfileSchema.index({ user: 1 }, { unique: true });
 
 export interface CustomerProfile extends Document {
   user: Schema.Types.ObjectId;
@@ -149,8 +156,6 @@ const supplierProfileSchema = new Schema(
     timestamps: true,
   }
 );
-
-supplierProfileSchema.index({ user: 1 }, { unique: true });
 
 export interface SupplierProfile extends Document {
   user: Schema.Types.ObjectId;

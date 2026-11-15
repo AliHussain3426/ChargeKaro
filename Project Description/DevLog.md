@@ -436,3 +436,36 @@ Keep entries short and informative. Do not overwrite previous entries.
 - **Notes:** Phase 1 exit criteria met: all Phase 1 tests pass, models compile and validate correctly, and `/api/health` returns success with a connected database status. Next step: Phase 2 authentication module implementation (register/login/logout, JWT sessions, auth middleware).
 
 <!-- AI agents: Add every new development entry below this line. -->
+
+### [2026-11-15] - Backend Phase 2: Authentication & Authorization API
+
+- **Objective:** Implement Phase 2 of the EV Charging Platform backend: full authentication and authorization for customer and supplier accounts, including registration, login, session handling, password reset, JWT cookies, RBAC, and ownership enforcement.
+- **Changes:**
+  - Implemented the auth module end to end:
+    - Routes: `POST /api/auth/register/customer`, `POST /api/auth/register/supplier`, `POST /api/auth/login`, `POST /api/auth/refresh`, `GET /api/auth/me`, `POST /api/auth/logout`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`.
+    - Controllers with express-validator request validation and structured `ApiResponse` payloads.
+    - Services for registration (user + customer/supplier profile), login, token issuance, password reset, and user sanitization.
+    - express-validator chains using `exists()` for required fields and custom password-confirmation checks.
+  - Password security: bcrypt hashing (12 rounds) for all stored passwords; password reset tokens are generated with `crypto.randomBytes` and hidden from default queries (`select: false`).
+  - JWT issuing: access token (`JWT_EXPIRES_IN`) plus refresh token (`JWT_REFRESH_EXPIRES_IN`), both stored in HttpOnly cookies (`accessToken`, `refreshToken`) with secure flag in production, `SameSite=Lax`, and root path.
+  - Auth middleware: `authenticate` verifies JWT from cookie or Bearer header, loads the user, rejects inactive accounts, and attaches `req.user` / `req.userId`; `authorize(...roles)` enforces RBAC for CUSTOMER, SUPPLIER, and ADMIN.
+  - Ownership middleware: `authorizeCustomerVehicle`, `authorizeCustomerBooking`, `authorizeSupplierStation`, `authorizeSupplierTerminal` load the target resource and reject access for users who do not own it.
+  - Error handling integrated through the existing `AppError` + error handler pipeline (401/403/404/409 responses).
+  - Added `JWT_REFRESH_EXPIRES_IN` environment configuration and documented it in `.env.example`.
+  - Mounted the auth routes under `/api/auth`.
+- **Files Created/Modified:**
+  - `server/src/modules/auth/*` (service, controller, validation, routes implemented)
+  - `server/src/middleware/auth.ts`, `server/src/middleware/ownership.ts` (new)
+  - `server/src/utils/jwt.ts` (new)
+  - `server/src/config/env.ts`, `server/.env.example`, `server/src/routes/index.ts`
+  - `server/src/modules/auth/model.ts` (password reset fields)
+  - `server/tests/auth.register.test.ts`, `server/tests/auth.login.test.ts`, `server/tests/auth.password.test.ts`, `server/tests/auth.rbac.test.ts` (new)
+  - Cleaned up duplicate Mongoose index declarations on User, CustomerProfile, SupplierProfile, and Booking.
+- **Verification:**
+  - Backend: `cd server && npx vitest run` -> 9 test files passed, 44 tests passed.
+  - Backend: `cd server && npm run lint` (`tsc --noEmit`) -> passed with 0 errors.
+  - Backend: `cd server && npm run build` -> passed.
+- **Status:** Completed.
+- **Notes:** Phase 2 exit criteria met: all auth tests pass and protected routes enforce JWT + RBAC + ownership. Next step: Phase 3 supplier management (station/terminal CRUD) and customer vehicle management.
+
+<!-- AI agents: Add every new development entry below this line. -->

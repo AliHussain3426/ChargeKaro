@@ -2,9 +2,9 @@
 
 **Project:** EV Charging Platform  
 **Last Updated:** 15 November 2026
-**Current Phase:** Backend Foundation - Database Models + Health (Phase 1)  
-**Overall Completion:** ~50% overall (~85% of Phase 1 Website Structure & Flow)  
-**Status:** Backend Phase 1 foundation completed: Mongoose models for User, Vehicle, Station, Terminal, Booking, and Payment created and validated; `/api/health` extended with MongoDB connectivity check; backend Vitest + Supertest + mongodb-memory-server test suite passing (24 tests). Backend workflows (auth, CRUD, bookings) remain pending.
+**Current Phase:** Backend Authentication & Authorization API (Phase 2)  
+**Overall Completion:** ~52% overall (~85% of Phase 1 Website Structure & Flow)  
+**Status:** Backend Phase 2 completed: full auth API (customer/supplier registration, login, session, logout, forgot/reset password), JWT access + refresh tokens in HttpOnly cookies, bcrypt hashing, RBAC middleware, and ownership middleware implemented; backend test suite passing (44 tests across 9 files). CRUD workflows for vehicles/stations/terminals/bookings remain pending.
 
 ---
 
@@ -35,7 +35,7 @@ A supplier can manage multiple stations, and each station can contain multiple c
 | **Customer Interface Flow** | 65% | In Progress | Overview, container-aware station discovery, bookings, vehicles, notifications, and profile/settings have interactive prototype UIs |
 | **Supplier Interface Flow** | 55% | In Progress | Overview, requests, stations, terminals, earnings, notifications, and profile/settings have interactive prototype UIs |
 | **Super Admin Interface Flow** | 60% | In Progress | Overview, management lists, reports, and settings now use interactive operational prototype UIs |
-| **Backend API & Database** | 40% | In Progress | Phase 1 backend foundation completed: Mongoose models (User, Vehicle, Station, Terminal, Booking, Payment) with validation, `/api/health` DB check, and backend test suite passing; auth/workflow controllers pending |
+| **Backend API & Database** | 55% | In Progress | Phase 1 models + Phase 2 auth API complete: registration, login/session/logout, JWT HttpOnly cookies, RBAC & ownership middleware; CRUD controllers pending |
 | **Interactive Map & OSRM Routing**| 0% | Planned | Awaiting Leaflet/API details for live map integration |
 | **Payments & Supplier Verification** | 0% | Deferred | Intentionally deferred to later phase per project requirements |
 | **Overall Project Progress** | **~48%** | **In Progress** | **~80% of Phase 1 Structure & Previewable Flow** |
@@ -172,7 +172,7 @@ The project follows a clean, modern, elegant, and professional visual direction.
 | Super Admin Interface Structure | Completed | Shell and 8 core admin oversight views scaffolded and routed |
 | Full Route Aggregation | Completed | `App.tsx` routes configured across all 5 areas |
 | Customer / Supplier Registration | Scaffolding | Static forms use matching rounded rectangular two-panel surfaces that slide between sign-in and registration without internal scrolling; content and field language are refined, while backend integration remains pending |
-| Authentication & Authorization | In Progress | Phase 1 identity models created (User, CustomerProfile, SupplierProfile); auth API endpoints pending |
+| Authentication & Authorization | Completed | Phase 2 auth API landed: register (customer/supplier), login/session/logout, forgot/reset password, JWT access + refresh cookies, bcrypt hashing, RBAC (`authenticate` + `authorize`) and ownership middleware |
 | Charging Station & Terminal Management | In Progress | Phase 1 Station and Terminal models created (GeoJSON location, pricing, status); CRUD APIs pending |
 | Booking Workflow | In Progress | Phase 1 Booking model created with status state machine and price snapshot; workflow APIs pending |
 | Payment Processing | Deferred | Intentionally deferred to later phase |
@@ -213,7 +213,8 @@ The following areas are pending implementation and verification:
 - [~] Interactive state and mockup data for pages (customer station-list and overview prototypes complete; booking workflow remains pending).
 - [x] Backend database models (Phase 1: User, CustomerProfile, SupplierProfile, Vehicle, Station, Terminal, Booking, Payment) with validation and health-check test coverage.
 - [x] Backend Phase 1 foundation verified: Mongoose models compile and validate, `/api/health` returns success + DB connected, backend Vitest suite passing (24 tests).
-- [ ] Backend API endpoints & authentication controllers.
+- [x] Backend Phase 2 auth API verified: registration/login/session/logout/forgot-reset endpoints, JWT HttpOnly cookies, RBAC and ownership middleware, backend test suite passing (44 tests across 9 files).
+- [ ] Backend CRUD workflows (vehicles, stations, terminals, bookings).
 - [ ] Leaflet map integration for station discovery.
 
 ---
@@ -223,4 +224,5 @@ The following areas are pending implementation and verification:
 1. Carry the realistic data-driven UI pattern into bookings, vehicle management, supplier, and admin views.
 2. Replace customer station prototype data with API-backed search, filtering, Leaflet map markers, and terminal-detail/booking flow.
 3. ~~Set up Mongoose models and database schemas on the backend.~~ Completed in Phase 1 (models landed; workflow controllers pending).
-4. Implement authentication API endpoints (register, login, me, logout).
+4. ~~Implement authentication API endpoints (register, login, me, logout).~~ Completed in Phase 2 (auth API landed; vehicle/station/terminal CRUD is next).
+5. Implement customer vehicle CRUD and supplier station/terminal CRUD endpoints wired to the Phase 2 auth, RBAC, and ownership middleware.
