@@ -30,7 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthFrame title="Sign in to GreenCharge." description="Use your account details to manage charging plans, stations, or platform operations.">
+    <AuthFrame title="Sign in to ChargeKaro." description="Use your account details to manage charging plans, stations, or platform operations.">
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <div className="field"><label htmlFor="email">Email</label><input id="email" name="email" type="email" placeholder="you@example.com" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} aria-invalid={Boolean(error)} /></div>
         <div className="field"><label htmlFor="password">Password</label><input id="password" name="password" type="password" placeholder="Enter your password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(error)} /></div>
@@ -38,7 +38,7 @@ export default function LoginPage() {
         {error && <p className="form-error" role="alert">{error}</p>}
         <button className="gc-button gc-button-primary auth-submit" type="submit" disabled={submitting}>{submitting ? 'Signing in…' : 'Sign in'}</button>
       </form>
-      <p className="auth-footer">New to GreenCharge? <Link className="gc-link" to="/register">Create an account</Link></p>
+      <p className="auth-footer">New to ChargeKaro? <Link className="gc-link" to="/register">Create an account</Link></p>
     </AuthFrame>
   );
 }

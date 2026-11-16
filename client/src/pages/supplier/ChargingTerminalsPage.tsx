@@ -141,6 +141,14 @@ export default function ChargingTerminalsPage() {
     void loadTerminals(selectedStationId);
   }, [selectedStationId]);
 
+  useEffect(() => {
+    if (!loadingStations && stations.length === 0) {
+      setSelectedStationId('');
+      setTerminals([]);
+      setShowForm(false);
+    }
+  }, [loadingStations, stations.length]);
+
   function updateField<K extends keyof TerminalFormValues>(key: K, value: TerminalFormValues[K]) {
     setForm((current) => ({ ...current, [key]: value }));
     setErrors((current) => {
@@ -198,6 +206,8 @@ export default function ChargingTerminalsPage() {
     }
   }
 
+  const canManageTerminals = Boolean(selectedStationId) && !loadingStations;
+
   return (
     <div className="workspace-page">
       <header className="workspace-head">
@@ -206,14 +216,34 @@ export default function ChargingTerminalsPage() {
           <p>Review connector capacity and availability across your stations.</p>
         </div>
         <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
-          <button className="workspace-action workspace-action--secondary" type="button" onClick={() => void loadTerminals(selectedStationId)} disabled={!selectedStationId || loadingTerminals}>
+          <button
+            className="workspace-action workspace-action--secondary"
+            type="button"
+            onClick={() => void loadTerminals(selectedStationId)}
+            disabled={!canManageTerminals || loadingTerminals}
+          >
             <RefreshCw className="size-4" /> Refresh
           </button>
-          <button className="workspace-action" type="button" onClick={() => setShowForm((value) => !value)} disabled={!selectedStationId}>
+          <button
+            className="workspace-action"
+            type="button"
+            onClick={() => {
+              setError('');
+              setShowForm((value) => !value);
+            }}
+            disabled={!canManageTerminals}
+            title={!selectedStationId && !loadingStations ? 'Create a station before adding terminals' : undefined}
+          >
             <Plus className="size-4" /> {showForm ? 'Close form' : 'Add terminal'}
           </button>
         </div>
       </header>
+
+      {!loadingStations && stations.length === 0 && (
+        <div className="workspace-notice" role="status" style={{ marginBottom: '1rem' }}>
+          You need at least one station before you can add terminals. Create a station from <strong>My Stations</strong>, then return here to add terminals.
+        </div>
+      )}
 
       <section className="workspace-panel" style={{ marginBottom: '1.25rem' }}>
         <label className="workspace-field" style={{ maxWidth: '420px' }}>
@@ -310,9 +340,10 @@ export default function ChargingTerminalsPage() {
             </div>
             {error && <p className="form-error" role="alert">{error}</p>}
             <div className="workspace-form-actions">
-              <button className="workspace-action" type="submit" disabled={submitting}>
+              <button className="workspace-action" type="submit" disabled={submitting || !selectedStationId}>
                 {submitting ? <><Loader2 className="size-4 animate-spin" /> Creating…</> : 'Create terminal'}
               </button>
+              {Object.keys(errors).length > 0 && <span className="workspace-field-error">Please fix the highlighted fields.</span>}
             </div>
           </form>
         </section>

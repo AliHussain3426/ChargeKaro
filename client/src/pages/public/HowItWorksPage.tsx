@@ -5,7 +5,7 @@ import './public-pages.css';
 const journey = [
   {
     title: 'Start with your vehicle.',
-    copy: 'Add the vehicle you drive once. GreenCharge uses its connector and charging details to make the station list useful from the beginning.',
+    copy: 'Add the vehicle you drive once. ChargeKaro uses its connector and charging details to make the station list useful from the beginning.',
     responseTitle: 'Nissan Leaf · Type 2',
     response: 'Compatible charger types are ready to filter.',
   },
@@ -31,7 +31,7 @@ export default function HowItWorksPage() {
           <div>
             <p className="product-kicker"><Route className="size-4" /> A clearer charging journey</p>
             <h1>Know the stop before you make it.</h1>
-            <p className="product-hero-copy">GreenCharge turns a charging stop into a small set of useful decisions: choose the right station, request a compatible terminal, and follow the outcome in one place.</p>
+            <p className="product-hero-copy">ChargeKaro turns a charging stop into a small set of useful decisions: choose the right station, request a compatible terminal, and follow the outcome in one place.</p>
             <div className="product-hero-actions"><Link to="/register/customer" className="gc-button gc-button-primary">Create a driver account <ArrowRight className="size-4" /></Link><Link to="/demo" className="gc-button gc-button-secondary">Preview the app</Link></div>
           </div>
           <div className="product-stage">
@@ -53,7 +53,7 @@ export default function HowItWorksPage() {
       </section>
 
       <section className="product-statement gc-container">
-        <div><p className="product-kicker"><PlugZap className="size-4" /> Useful when plans change</p><h2>Every booking state stays visible.</h2><p>A request is not automatically a confirmed booking. GreenCharge deliberately distinguishes a request, supplier response, confirmation, cancellation, and completion.</p></div>
+        <div><p className="product-kicker"><PlugZap className="size-4" /> Useful when plans change</p><h2>Every booking state stays visible.</h2><p>A request is not automatically a confirmed booking. ChargeKaro deliberately distinguishes a request, supplier response, confirmation, cancellation, and completion.</p></div>
         <div className="signal-board"><div><CalendarClock className="size-5" /><b>Request sent</b><p>The terminal and time are waiting for the supplier response.</p></div><div><CircleCheck className="size-5" /><b>Accepted</b><p>Your next step becomes clear when the station accepts the request.</p></div><div><MapPin className="size-5" /><b>Confirmed</b><p>Use the station address, terminal details, and booking reference when you travel.</p></div><div><PlugZap className="size-5" /><b>Completed</b><p>Your history shows the finished session and any relevant records.</p></div></div>
       </section>
 

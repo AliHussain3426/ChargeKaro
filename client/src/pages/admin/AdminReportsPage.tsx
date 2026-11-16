@@ -33,7 +33,7 @@ export default function AdminReportsPage() {
     <div className="admin-page">
       <header className="workspace-head">
         <div>
-          <p className="admin-context">GreenCharge platform</p>
+          <p className="admin-context">ChargeKaro platform</p>
           <h1>Reports &amp; analytics</h1>
           <p>Live reporting for network activity, bookings, and payment value.</p>
         </div>

@@ -17,6 +17,16 @@ interface AuthUserResponse {
   createdAt?: string;
 }
 
+export interface AuthProfile {
+  id?: string;
+  businessName?: string;
+  businessDescription?: string;
+  businessAddress?: string;
+  verificationStatus?: string;
+  preferences?: Record<string, unknown>;
+  profileImage?: string;
+}
+
 export interface RegisterCustomerInput {
   name: string;
   email: string;
@@ -32,6 +42,14 @@ export interface RegisterSupplierInput {
   phone?: string;
   password: string;
   passwordConfirm: string;
+}
+
+export interface UpdateProfileInput {
+  name?: string;
+  phone?: string;
+  businessName?: string;
+  businessDescription?: string;
+  businessAddress?: string;
 }
 
 function normalizeUser(raw: AuthUserResponse): User {
@@ -70,8 +88,21 @@ export const authService = {
   },
 
   async me(): Promise<User> {
-    const data = await apiFetch<{ user: AuthUserResponse }>('/auth/me');
+    const data = await apiFetch<{ user: AuthUserResponse; profile?: AuthProfile | null }>('/auth/me');
     return normalizeUser(data.user);
+  },
+
+  async getProfile(): Promise<{ user: User; profile: AuthProfile | null }> {
+    const data = await apiFetch<{ user: AuthUserResponse; profile?: AuthProfile | null }>('/auth/profile');
+    return { user: normalizeUser(data.user), profile: data.profile ?? null };
+  },
+
+  async updateProfile(input: UpdateProfileInput): Promise<{ user: User; profile: AuthProfile | null }> {
+    const data = await apiFetch<{ user: AuthUserResponse; profile?: AuthProfile | null }>('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    });
+    return { user: normalizeUser(data.user), profile: data.profile ?? null };
   },
 
   async logout(): Promise<void> {

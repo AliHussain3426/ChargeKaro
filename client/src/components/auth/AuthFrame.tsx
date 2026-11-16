@@ -23,11 +23,11 @@ export default function AuthFrame({
 
   return (
     <div key={location.pathname} className={`auth-page auth-refined auth-page--${mode}`}>
-      <aside className="auth-story" aria-label="GreenCharge introduction">
+      <aside className="auth-story" aria-label="ChargeKaro introduction">
         <span className="auth-orbit auth-orbit-one" aria-hidden="true" />
         <span className="auth-orbit auth-orbit-two" aria-hidden="true" />
         <div className="auth-story-content">
-          <Link to="/" className="brand auth-brand"><span className="brand-mark"><Zap className="size-4 fill-current" /></span><span>GreenCharge</span><span className="auth-brand-country">Pakistan</span></Link>
+          <Link to="/" className="brand auth-brand"><span className="brand-mark"><Zap className="size-4 fill-current" /></span><span>ChargeKaro</span><span className="auth-brand-country">Pakistan</span></Link>
           <p className="auth-story-kicker"><ShieldCheck className="size-4" /> Clear charging, every step</p>
           <h1>{storyTitle}</h1>
           <p>{storyCopy}</p>
@@ -36,7 +36,7 @@ export default function AuthFrame({
       </aside>
       <main className="auth-main">
         <div className="auth-card auth-surface">
-          <Link to="/" className="auth-back"><ArrowLeft className="size-4" /> Back to GreenCharge</Link>
+          <Link to="/" className="auth-back"><ArrowLeft className="size-4" /> Back to ChargeKaro</Link>
           <div className="auth-heading-group"><h1 className="auth-heading">{title}</h1><p className="auth-subheading">{description}</p></div>
           {children}
         </div>

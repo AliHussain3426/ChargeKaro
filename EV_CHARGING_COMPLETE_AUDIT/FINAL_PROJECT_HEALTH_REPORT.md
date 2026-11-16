@@ -1,7 +1,7 @@
 # Final Project Health Report
 
 ## 1. Project and audit context
-- **Project:** EV Charging Platform (GreenCharge), MERN stack (MongoDB, Express 5, React 19, Node.js, TypeScript)
+- **Project:** EV Charging Platform (ChargeKaro), MERN stack (MongoDB, Express 5, React 19, Node.js, TypeScript)
 - **Audit date:** 2026-11-15
 - **Scope executed:** repository discovery, source inspection, config/security review, dependency audits, and automated build/lint/test execution. No production logic modified; audit artifacts created under `EV_CHARGING_COMPLETE_AUDIT/`.
 

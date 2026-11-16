@@ -5,7 +5,7 @@
  "seed": 1684860087,
  "input": {
   "kind": "commerce",
-  "brief": "GreenCharge Pakistan EV charging marketplace with customer station discovery, supplier operations, and platform administration",
+  "brief": "ChargeKaro Pakistan EV charging marketplace with customer station discovery, supplier operations, and platform administration",
   "theme": null,
   "screens": [
    "overview",

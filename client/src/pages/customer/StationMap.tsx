@@ -80,7 +80,7 @@ export default function StationMap({
             />
           );
         })}
-        {routePositions.length > 1 && <Polyline positions={routePositions} color="#0b7d68" weight={4} />}
+        {routePositions.length > 1 && <Polyline positions={routePositions} color="#1E3A8A" weight={4} />}
       </MapContainer>
     </div>
   );

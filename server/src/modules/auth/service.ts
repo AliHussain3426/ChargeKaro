@@ -50,6 +50,15 @@ export interface SanitizeUserSource {
   role: string;
   accountStatus: string;
   verificationStatus: string;
+  createdAt?: Date | string;
+}
+
+export interface UpdateProfileInput {
+  name?: string;
+  phone?: string;
+  businessName?: string;
+  businessDescription?: string;
+  businessAddress?: string;
 }
 
 export function sanitizeUser(user: SanitizeUserSource): Record<string, unknown> {
@@ -61,6 +70,7 @@ export function sanitizeUser(user: SanitizeUserSource): Record<string, unknown> 
     role: user.role,
     accountStatus: user.accountStatus,
     verificationStatus: user.verificationStatus,
+    createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
   };
 }
 
@@ -169,6 +179,82 @@ export const authService = {
       throw new AppError('User not found', 404);
     }
     return user;
+  },
+
+  async getMyProfile(userId: string) {
+    const user = await this.getAuthenticatedUser(userId);
+    let profile: Record<string, unknown> | null = null;
+
+    if (user.role === UserRole.CUSTOMER) {
+      const customerProfile = await CustomerProfile.findOne({ user: user._id } as any).exec();
+      if (customerProfile) {
+        profile = {
+          id: customerProfile._id.toString(),
+          preferences: customerProfile.preferences ?? {},
+          profileImage: customerProfile.profileImage,
+        };
+      }
+    } else if (user.role === UserRole.SUPPLIER) {
+      const supplierProfile = await SupplierProfile.findOne({ user: user._id } as any).exec();
+      if (supplierProfile) {
+        profile = {
+          id: supplierProfile._id.toString(),
+          businessName: supplierProfile.businessName,
+          businessDescription: supplierProfile.businessDescription,
+          businessAddress: supplierProfile.businessAddress,
+          verificationStatus: supplierProfile.verificationStatus,
+        };
+      }
+    }
+
+    return { user, profile };
+  },
+
+  async updateMyProfile(userId: string, input: UpdateProfileInput) {
+    const user = await this.getAuthenticatedUser(userId);
+
+    if (input.name !== undefined) user.name = input.name.trim();
+    if (input.phone !== undefined) {
+      const phone = input.phone.trim();
+      user.phone = phone ? phone : undefined;
+    }
+
+    await user.save();
+
+    let profile: Record<string, unknown> | null = null;
+    if (user.role === UserRole.CUSTOMER) {
+      const customerProfile = await CustomerProfile.findOne({ user: user._id } as any).exec();
+      if (customerProfile) {
+        profile = {
+          id: customerProfile._id.toString(),
+          preferences: customerProfile.preferences ?? {},
+          profileImage: customerProfile.profileImage,
+        };
+      }
+    } else if (user.role === UserRole.SUPPLIER) {
+      const supplierProfile = await SupplierProfile.findOne({ user: user._id } as any).exec();
+      if (supplierProfile) {
+        if (input.businessName !== undefined) supplierProfile.businessName = input.businessName.trim();
+        if (input.businessDescription !== undefined) {
+          const desc = input.businessDescription.trim();
+          supplierProfile.businessDescription = desc ? desc : undefined;
+        }
+        if (input.businessAddress !== undefined) {
+          const addr = input.businessAddress.trim();
+          supplierProfile.businessAddress = addr ? addr : undefined;
+        }
+        await supplierProfile.save();
+        profile = {
+          id: supplierProfile._id.toString(),
+          businessName: supplierProfile.businessName,
+          businessDescription: supplierProfile.businessDescription,
+          businessAddress: supplierProfile.businessAddress,
+          verificationStatus: supplierProfile.verificationStatus,
+        };
+      }
+    }
+
+    return { user, profile };
   },
 
   async requestPasswordReset(email: string) {

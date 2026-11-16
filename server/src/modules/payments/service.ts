@@ -35,8 +35,21 @@ async function requireSupplierProfile(userId: string) {
   return profile as any;
 }
 
+async function syncPaidChargingSessions(payment: any) {
+  try {
+    const { ChargingSession, ChargingSessionPaymentStatus } = await import('../chargingSessions/model.js');
+    await ChargingSession.updateMany(
+      { $or: [{ paymentId: payment._id }, { bookingId: payment.bookingId }] } as any,
+      { $set: { paymentStatus: ChargingSessionPaymentStatus.PAID } }
+    ).exec();
+  } catch {
+    // charging session sync is best-effort if module unavailable
+  }
+}
+
 async function applyPaidState(payment: any) {
   if (payment.status === PaymentStatus.PAID) {
+    await syncPaidChargingSessions(payment);
     const booking = await Booking.findById(payment.bookingId).exec();
     return { payment, booking };
   }
@@ -52,6 +65,7 @@ async function applyPaidState(payment: any) {
   }
   (booking as any).paymentStatus = PaymentStatus.PAID;
   await booking.save();
+  await syncPaidChargingSessions(payment);
   try {
     const { settlementService } = await import('./settlement.service.js');
     await settlementService.reconcileForPayment(payment._id.toString(), 'payment_confirmed');

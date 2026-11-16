@@ -1723,22 +1723,22 @@ The following colors are confirmed:
 
 | Design Element | HEX |
 |---|---|
-| Primary Brand | `#0B7D68` |
-| Main Page Background | `#E4F0F0` |
-| Card and Panel Surface | `#CCCECF` |
+| Primary Brand | `#1E3A8A` |
+| Main Page Background | `#F1F5F9` |
+| Card and Panel Surface | `#E2E8F0` |
 
 Supporting design colors:
 
 | Element | HEX |
 |---|---|
-| Primary Text | `#18332F` |
-| Secondary Text | `#52635F` |
-| Muted Text | `#74827F` |
-| Border | `#B8C5C2` |
+| Primary Text | `#0F172A` |
+| Secondary Text | `#475569` |
+| Muted Text | `#64748B` |
+| Border | `#CBD5E1` |
 | Success | `#25865B` |
 | Warning | `#B7791F` |
 | Danger | `#C44D4D` |
-| Information | `#3977A3` |
+| Information | `#2563EB` |
 
 The three confirmed colors form the visual foundation.
 
@@ -3152,9 +3152,9 @@ Do not directly manipulate data that belongs to another business module without 
 
 Follow the approved colors:
 
-- `#0B7D68`
-- `#E4F0F0`
-- `#CCCECF`
+- `#1E3A8A`
+- `#F1F5F9`
+- `#E2E8F0`
 
 Use the established typography, spacing, component patterns, and application layouts.
 
@@ -3328,9 +3328,9 @@ The frontend will provide one responsive application for mobile, tablet, and des
 
 The approved visual identity is based on:
 
-- Primary brand color: `#0B7D68`.
-- Page background: `#E4F0F0`.
-- Card surface: `#CCCECF`.
+- Primary brand color: `#1E3A8A`.
+- Page background: `#F1F5F9`.
+- Card surface: `#E2E8F0`.
 
 The design direction is light, clean, professional, consistent, and operationally clear.
 
@@ -3375,9 +3375,9 @@ This section provides a compact reference for developers, designers, technical c
 | Authentication | Secure backend-managed authentication |
 | Authorization | Role and resource ownership enforcement |
 | Notifications | In-app and supported external channels |
-| UI primary | `#0B7D68` |
-| UI background | `#E4F0F0` |
-| UI cards | `#CCCECF` |
+| UI primary | `#1E3A8A` |
+| UI background | `#F1F5F9` |
+| UI cards | `#E2E8F0` |
 | Typography | Inter |
 | Responsive support | Mobile, tablet, desktop |
 | Offline support | Limited and controlled PWA support |

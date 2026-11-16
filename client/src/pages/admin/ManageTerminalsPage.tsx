@@ -8,13 +8,25 @@ function toRow(t: AdminTerminal) {
   const status = t.status || (t.availability ? 'AVAILABLE' : 'UNAVAILABLE');
   const group = status === 'AVAILABLE' ? 'Available' : status === 'OCCUPIED' ? 'In use' : 'Offline';
   const connectors = (t.connectorTypes || []).join(', ') || '—';
-  const price = t.pricing ? `${t.pricing.currency} ${t.pricing.amount}` : '—';
+  const price = t.pricing ? `${t.pricing.currency} ${t.pricing.amount} / ${t.pricing.billingType}` : '—';
   return {
+    id: t._id,
     name: t.name || 'Terminal',
     meta: `${station?.name || 'Station'}${station?.city ? `, ${station.city}` : ''} · ${connectors} · ${t.maximumPowerKw ?? '—'} kW`,
     status,
     value: price,
     group,
+    details: [
+      { label: 'Terminal ID', value: t._id || '—' },
+      { label: 'Station', value: station?.name || '—' },
+      { label: 'City', value: station?.city || '—' },
+      { label: 'Charging method', value: t.chargingMethod || '—' },
+      { label: 'Connectors', value: connectors },
+      { label: 'Max power', value: t.maximumPowerKw != null ? `${t.maximumPowerKw} kW` : '—' },
+      { label: 'Availability', value: t.availability ? 'Available' : 'Unavailable' },
+      { label: 'Status', value: status },
+      { label: 'Pricing', value: price },
+    ],
   };
 }
 

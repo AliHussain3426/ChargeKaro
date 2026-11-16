@@ -1,12 +1,12 @@
 {
-  "name": "GreenCharge — EV Charging Platform",
-  "short_name": "GreenCharge",
+  "name": "ChargeKaro — EV Charging Platform",
+  "short_name": "ChargeKaro",
   "description": "Find, book, and manage EV charging across Pakistan.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#E4F0F0",
-  "theme_color": "#0B7D68",
+  "background_color": "#F1F5F9",
+  "theme_color": "#1E3A8A",
   "icons": [
     {
       "src": "/favicon.svg",

@@ -44,3 +44,11 @@ export const validateResetPassword = [
     .isLength({ min: 8, max: 128 })
     .custom((value, { req }) => value === req.body.password),
 ];
+
+export const validateUpdateProfile = [
+  body('name').optional().isString().trim().isLength({ min: 2, max: 80 }),
+  body('phone').optional({ values: 'falsy' }).isString().trim().isLength({ min: 5, max: 30 }),
+  body('businessName').optional().isString().trim().isLength({ min: 2, max: 120 }),
+  body('businessDescription').optional({ values: 'falsy' }).isString().trim().isLength({ max: 1000 }),
+  body('businessAddress').optional({ values: 'falsy' }).isString().trim().isLength({ max: 500 }),
+];

@@ -22,7 +22,11 @@ if (env.NODE_ENV === 'development') {
 // CORS
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin || origin === env.CLIENT_URL) return callback(null, true);
+      if (env.NODE_ENV !== 'production') return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );
@@ -56,7 +60,7 @@ app.use(errorHandler);
 // Start server
 async function start(): Promise<void> {
   await connectDB();
-  app.listen(env.PORT, () => {
+  app.listen(env.PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
   });
 }

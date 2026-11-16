@@ -37,7 +37,7 @@ Keep entries short and informative. Do not overwrite previous entries.
   - Consulted and loaded UI skill guidelines (`anthropics/frontend-design`, `shadcn-ui/shadcn`, `dammyjay93/interface-design`).
   - Scaffolding backend: Initialized Node.js + Express + TypeScript project at `server/` with `tsconfig.json`, security/logging/cookie middleware, environment config (`src/config/env.ts`), database connector (`src/config/db.ts`), global error and not-found handlers, shared types (`UserRole`, `ApiResponse`), and health check router (`/api/health`).
   - Scaffolding frontend: Initialized React 19 + TypeScript + Vite project at `client/` with `@tailwindcss/vite` and Tailwind CSS v4.
-  - Configured design tokens in `client/src/index.css` strictly adhering to project specifications: Primary (`#0B7D68`), Surfaces (`#CCCECF`, `#D8DADB`, `#E4F0F0`), Foreground/Muted texts, Inter font family, 4px spacing scale, and semantic feedback colors.
+  - Configured design tokens in `client/src/index.css` strictly adhering to project specifications: Primary (`#1E3A8A`), Surfaces (`#E2E8F0`, `#CBD5E1`, `#F1F5F9`), Foreground/Muted texts, Inter font family, 4px spacing scale, and semantic feedback colors.
   - Implemented responsive layout system: `PublicLayout` (sticky header, desktop links, mobile hamburger drawer, footer) and `DashboardLayout` (responsive collapsible sidebar, role indicator, top bar, and mobile bottom navigation bar).
   - Created public pages: `LandingPage.tsx`, `HowItWorksPage.tsx`, `ForCustomersPage.tsx`, `ForSuppliersPage.tsx`, `NotFoundPage.tsx`.
   - Created authentication pages: `LoginPage.tsx`, `RegisterSelectPage.tsx`, `CustomerRegisterPage.tsx`, `SupplierRegisterPage.tsx`, `ForgotPasswordPage.tsx`.
@@ -247,7 +247,7 @@ Keep entries short and informative. Do not overwrite previous entries.
 ### [2026-11-05] - Customer & Supplier Workspace UI Pass
 
 - **Objective:** Replace the customer and supplier dashboard placeholders with coherent, task-oriented workspace screens and refine account/settings experiences.
-- **Design direction:** Used the `framed-sheet` app-screen direction (seed `292149095`), mapped to GreenCharge's low-chroma mint frame. The signature is a quiet, inset white workspace with colour reserved for state and the primary action.
+- **Design direction:** Used the `framed-sheet` app-screen direction (seed `292149095`), mapped to ChargeKaro's low-chroma mint frame. The signature is a quiet, inset white workspace with colour reserved for state and the primary action.
 - **Changes:**
   - Rebuilt customer and supplier profile/settings pages as matching section-based settings views with saved-preview feedback, accessible toggles, and mobile stacking.
   - Added real prototype layouts for customer bookings, vehicles, and notifications.
@@ -362,7 +362,7 @@ Keep entries short and informative. Do not overwrite previous entries.
 
 ### [2026-11-06] - Product-Led Landing Page Redesign
 
-- **Objective:** Replace the generic marketing layout with a more distinctive, polished GreenCharge landing experience while preserving the established public routes and brand palette.
+- **Objective:** Replace the generic marketing layout with a more distinctive, polished ChargeKaro landing experience while preserving the established public routes and brand palette.
 - **Changes:**
   - Rebuilt `LandingPage.tsx` around a route-planning hero, using the product's station-discovery UI as the main visual rather than a generic illustration.
   - Added a clear product narrative across distinct route-flow, driver booking, supplier operations, support, and account-entry sections.
@@ -670,7 +670,8 @@ Keep entries short and informative. Do not overwrite previous entries.
   - **Domain/models:** Added Settlement (per eligible provider-confirmed payment, unique paymentId) and Payout models with supplier/booking/payment refs, gross, configurable platformFeeRate snapshot, platform fee, refund deductions, other deductions, net payable, currency, settlement period, status, payout ref, timestamps, and auditable adjustments/status history (server/src/modules/payments/settlement.model.ts, payout.model.ts).
   - **Calculation/reconciliation:** Implemented settlement.service.ts computing Net Payable = Gross - Platform Fee - Refund Deductions - Other Approved Deductions (rounded, non-negative), fee on retained amount (gross - succeeded refunds) to avoid negatives, configurable commission via PLATFORM_COMMISSION_RATE (default  .1, SRS policy pending), succeeded-refund-only deductions, pending/failed payment exclusion, idempotent per-payment/supplier reconciliation, and auditable recalculation on refund-after-accrual/approval/processing.
   - **Lifecycle/APIs/authz:** Settlement states PENDING/CALCULATED/APPROVED/PROCESSING/PAID/FAILED/CANCELLED; payout states PENDING/APPROVED/PROCESSING/PAID/FAILED/CANCELLED with validated transitions. Supplier APIs: GET /api/payments/settlements/me, /settlements/balance/me, /payouts/me. Admin APIs: list/get/reconcile/approve settlements and list/create/update payout status under /api/admin/*. RBAC/supplier isolation enforced. **PAID explicitly rejected without verified external payout/provider confirmation; no bank transfer simulated/claimed.**
-  - **Integration:** Best-effort reconciliation hooks on confirmed payment (service.ts) and succeeded refund (efund.service.ts); routes/controllers/admin wiring added; env/config/docs updated.
+  - **Integration:** Best-effort reconciliation hooks on confirmed payment (service.ts) and succeeded refund (
+efund.service.ts); routes/controllers/admin wiring added; env/config/docs updated.
   - **Tests:** Added server/tests/payments.settlements.test.ts (10 tests) covering calculation, full/partial/multiple refunds, failed/pending/failed-refund exclusion, idempotent reconciliation, refund-after-approval/processing adjustment, RBAC/isolation, and invalid payout transitions/no fake PAID.
 - **Files:**
   - Added: server/src/modules/payments/{settlement.model.ts,payout.model.ts,settlement.service.ts,settlement.controller.ts}, server/tests/payments.settlements.test.ts.
@@ -683,3 +684,90 @@ Keep entries short and informative. Do not overwrite previous entries.
   - Client lint/build/tests not rerun (no client changes this unit).
 - **Status:** Completed (P0.4 implemented and verified for internal/manual settlement+payout workflow).
 - **Notes/Blockers:** Commission/payout policy pending SRS confirmation (PLATFORM_COMMISSION_RATE configurable, default 0.1). Live payment provider adapters/credentials, provider-specific webhook/refund reconciliation, and real payout provider with verified external confirmation remain blocked (B-001/B-006). Next: P0 hardening when creds/policy available, then P1 (auth lifecycle, profile persistence, security hardening/IDOR matrix/audit logs, Playwright) and frontend settlement/refund UI if in scope.
+
+### [2026-11-16] - Demo Data Seeder & Admin Credentials
+
+- **Objective:** Give the team a repeatable, non-destructive way to populate the local MongoDB with an admin account and realistic demo data for all role dashboards.
+- **Changes:**
+  - Added `server/scripts/seed.ts`, an idempotent Mongoose seeder that upserts every document by a stable key (email, station/terminal/vehicle name, booking reference, provider reference, settings key) and never overwrites existing records. The seeded admin's role/account status are enforced on re-run so the documented credentials keep working.
+  - Seed data: one ADMIN, one demo SUPPLIER (with verified profile), one demo CUSTOMER (with profile), 4 stations with GeoJSON points, 7 terminals (including MAINTENANCE/OCCUPIED states), 2 vehicles, 8 bookings spanning the full status state machine, 5 payments (PAID/PROCESSING), 5 notifications, and global system settings.
+  - Added `npm run seed` to `server/package.json`.
+- **Files Created/Modified:** `server/scripts/seed.ts` (new), `server/package.json`, `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Demo credentials (local development only):** Admin `admin@chargekaro.pk` / `Admin@123`; Supplier `supplier@chargekaro.pk` / `Supplier@123`; Customer `customer@chargekaro.pk` / `Customer@123`.
+- **Verification:**
+  - `cd server && npm run seed` -> **PASS** (run twice; second run produced no duplicates - 5 users, 5 stations, 8 terminals, 2 vehicles, 8 bookings, 5 payments, 5 notifications, 1 settings document).
+  - Login verification through `authService.login` -> all three seeded accounts authenticate and return JWTs with the correct roles (ADMIN/SUPPLIER/CUSTOMER).
+  - Pre-existing user data (2 users, 1 station, 1 terminal) was preserved unchanged.
+- **Status:** Completed.
+- **Notes:** These are demo credentials for local development only; change the admin password before any deployment. Seed target is `env.MONGODB_URI` (default `mongodb://localhost:27017/ev-charging`).
+
+---
+
+### [2026-11-16] - Project Rename: GreenCharge to ChargeKaro
+
+- **Objective:** Rename the project branding from GreenCharge to ChargeKaro across the repository.
+- **Changes:** Replaced GreenCharge/greencharge branding references with ChargeKaro/chargekaro in frontend UI, auth/dashboard text, landing/marketing copy, manifest/service worker, package names, seed/demo data, admin defaults, support email/domain references, and project/audit documentation where applicable.
+- **Files:** package.json, package-lock.json, client/index.html, client/public/manifest.webmanifest, client/public/sw.js, client/src/**/*, server/scripts/seed.ts, server/src/modules/admin/model.ts, .taste-skill/direction.json, client/.taste-skill/direction.json, Project Description/DevLog.md, EV_CHARGING_COMPLETE_AUDIT/*, and related docs.
+- **Status:** Completed.
+- **Notes:** Historical log entries were bulk-updated for naming consistency. Run 
+pm install if package-lock normalization is needed; no functional logic changes intended.
+
+---
+
+### [2026-11-16] - Supplier "Add Terminal" Flow Check & UX Fix
+
+- **Objective:** Check the supplier terminal management ("add terminal" set) and fix the reported non-working button/flow.
+- **Changes:** Audited `client/src/pages/supplier/ChargingTerminalsPage.tsx`, station/terminal services, and backend terminal routes/controller/service/validation/model. Confirmed backend terminal API behavior via existing `server/tests/supplier.stations.test.ts` (6 tests passed). Improved terminal page UX: added `canManageTerminals` guard, clearer guidance when no stations exist (must create a station first), "Add terminal"/Refresh disabled state tied to station availability, form-close/open clears stale error, submit disabled when no station selected, and validation hint shown when form fields are invalid. Added effect to reset terminal state when stations become unavailable.
+- **Files:** `client/src/pages/supplier/ChargingTerminalsPage.tsx`, `Project Description/DevLog.md`.
+- **Status:** Completed (frontend UX/guard fix; backend terminal CRUD verified by existing tests).
+- **Notes:** "Add terminal" is intentionally unavailable until a supplier station is selected/exists because terminals belong to stations. Client TypeScript check (`npx tsc -b`) and server lint (`npm run lint`) passed. Live browser/manual E2E with running app+DB was not executed in this session.
+
+
+### [2026-11-16] - Dark Mode (Dark Blue & Gray Theme)
+
+- **Objective:** Add dark mode support to the frontend with a dark blue and gray visual theme.
+- **Changes:**
+  - Added ThemeContext (client/src/context/ThemeContext.tsx) with light/dark state, localStorage persistence (chargekaro-theme), system preference fallback (prefers-color-scheme), and document.documentElement .dark class + color-scheme synchronization.
+  - Applied initial theme early in client/src/main.tsx to reduce flash before hydration; wrapped app with ThemeProvider in client/src/App.tsx.
+  - Added theme toggle controls (sun/moon) to PublicLayout header actions and DashboardLayout topbar actions.
+  - Extended client/src/index.css with Tailwind v4 @custom-variant dark, dark token overrides (--color-*, shadows), dark --gc-* palette (dark blue + gray surfaces/text/borders), and targeted .dark overrides for core shells/components (site header, dashboard shell/canvas/sidebar/topbar, panels, settings/workspace surfaces, inputs, landing sections, mobile navigation).
+  - Added dark-mode overrides in client/src/components/auth/auth.css and client/src/components/layout/public-layout.css for authentication surfaces and public header/footer treatments.
+- **Files:** client/src/context/ThemeContext.tsx (new), client/src/main.tsx, client/src/App.tsx, client/src/components/layout/PublicLayout.tsx, client/src/components/layout/DashboardLayout.tsx, client/src/index.css, client/src/components/auth/auth.css, client/src/components/layout/public-layout.css, Project Description/ProjectState.md, Project Description/DevLog.md.
+- **Status:** Completed.
+- **Verification:** cd client && npx tsc -b --pretty false -> passed. cd client && npm run lint -> passed with pre-existing oxlint warnings only, plus src/context/ThemeContext.tsx eact(only-export-components) warning consistent with existing AuthContext pattern (no lint errors). Full client build/test suite not rerun in this task.
+- **Notes:** Dark theme prioritizes dark blue/gray surfaces and accents while preserving existing brand structure and role-based layouts. Some page-specific hardcoded colors may still need incremental refinement in follow-up UI passes; backend behavior unchanged.
+
+### [2026-11-16] - Dark Mode Visibility Tweak
+
+- **Objective:** Improve dark mode readability per feedback.
+- **Changes:** Lightened dark-mode grays for better visibility (secondary/muted text, borders/lines, and related UI accents) in client/src/index.css, client/src/components/auth/auth.css, and client/src/components/layout/public-layout.css.
+- **Files:** client/src/index.css, client/src/components/auth/auth.css, client/src/components/layout/public-layout.css, Project Description/DevLog.md.
+- **Status:** Completed.
+- **Verification:** cd client; npx tsc -b --pretty false -> passed.
+
+---
+
+### [2026-11-16] - Battery-Based EV Charging Billing System (Charging Sessions)
+
+- **Objective:** Integrate battery/SOC-based charging session calculation and payment billing into the existing ChargeKaro application (station worker start/complete flows, backend-authoritative calculations, bill/receipt generation, customer payment integration).
+- **Changes:**
+  - Added `server/src/modules/chargingSessions/` module: `ChargingSession` model/collection (booking/user/vehicle/station/terminal/supplier refs, initial/final SOC, session timestamps, ACTIVE/COMPLETED status, battery capacity snapshot, station PKR/kWh rate snapshot, energy consumed, total price, payment status, payment ref), service, controller, routes, and validation.
+  - Implemented worker/supplier APIs: start session for an existing booking with initial SOC (0–100), list/get supplier sessions, complete active session with final SOC (>= initial, <= 100) with backend-only calculations: `E = C × (SOCf - SOCi) / 100`, `Price = E × R`, decimal-safe rounding (kWh rounded to 4dp, currency to 2dp). Completion snapshots station rate/capacity, generates/updates billing payment record (initially UNPAID/Pending-equivalent), and updates booking/payment linkage.
+  - Enforced constraints in service: authorized supplier/station ownership checks, no multiple ACTIVE sessions per booking, active-session requirement for completion, SOC validation, battery capacity and station PKR/kWh rate required for calculation.
+  - Integrated payments: session completion creates/updates payment amount to calculated bill; payment confirmation flow (`applyPaidState`) now syncs linked charging session payment status to PAID. Payment remains PAID only after successful server/payment confirmation flow.
+  - Added customer/session APIs for listing own sessions and retrieving receipts (session/transaction ID, customer, vehicle/model/battery, station, initial/final SOC, energy, rate, total, start/completion times, payment status).
+  - Mounted `/api/charging-sessions` routes.
+  - Frontend: added `client/src/services/chargingSessions.ts`; updated supplier `BookingRequestsPage` to act as station-worker view for upcoming bookings, start session (initial SOC), view active sessions, complete session (final SOC), and view calculated bill/payment status; updated customer `MyBookingsPage` to show charging session status/SOC/energy/cost, pay calculated session bill via existing payment flow, and view previous receipts.
+- **Files:** `server/src/modules/chargingSessions/{model,service,controller,routes,validation}.ts` (new), `server/src/routes/index.ts`, `server/src/modules/payments/service.ts`, `client/src/services/chargingSessions.ts` (new), `client/src/pages/supplier/BookingRequestsPage.tsx`, `client/src/pages/customer/MyBookingsPage.tsx`, `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
+- **Status:** Completed (integrated into existing architecture; existing core flows preserved).
+- **Verification:** `cd server; npx tsc --noEmit` -> passed. `cd server; npx vitest run tests/booking.workflow.test.ts tests/payments.earnings.test.ts tests/e2e.journey.test.ts` -> 3 files, 9 tests passed. `cd client; npx tsc -b` -> passed (after removing unused import). `cd client; npm run build` -> passed (Vite chunk-size warning pre-existing). Full regression suite and live DB/manual E2E not rerun in this session.
+- **Notes:** Charging session billing is now calculated server-side from SOC and station rate snapshot at completion; session bill payments reuse existing booking payment endpoints/flow. "Station worker" actions are exposed through the supplier booking/session interface with supplier ownership authorization. Further UX/policy alignment (e.g. whether pre-accept payment is required before session start in all deployments) may be refined based on operational policy.
+
+### [2026-11-16] - Landing Page: Remove Driver and Station Sections
+
+- **Objective:** Remove the "driver" (For EV drivers) and "station/operator" sections from the home page as requested.
+- **Changes:** Removed #for-customers (EV drivers workspace/booking preview) and #for-suppliers (station operators workspace) sections from LandingPage. Updated hero "List a station" CTA to go directly to supplier registration, removed unused slot state/imports, and adjusted flow copy. Removed "For Customers" and "For Suppliers" links from public header/footer navigation and refreshed related footer copy.
+- **Files:** client/src/pages/public/LandingPage.tsx, client/src/components/layout/PublicLayout.tsx, Project Description/ProjectState.md, Project Description/DevLog.md.
+- **Status:** Completed.
+- **Verification:** cd client; npx tsc -b --pretty false -> passed. cd client; npx oxlint src/pages/public/LandingPage.tsx src/components/layout/PublicLayout.tsx -> 1 pre-existing warning in PublicLayout.tsx (set-state-in-effect, not introduced by this change). Build/test suite not rerun.
+- **Notes:** Home page now retains hero, how-it-works, about/help, and closing CTA sections. Former /#for-customers and /#for-suppliers anchors/sections no longer exist on the landing page.

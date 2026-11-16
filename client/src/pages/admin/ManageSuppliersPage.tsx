@@ -8,11 +8,22 @@ function toRow(s: AdminSupplier) {
   const group = verification === 'VERIFIED' ? 'Verified' : verification === 'PENDING' ? 'Pending' : verification === 'REJECTED' || verification === 'UNVERIFIED' ? 'Unverified' : 'Other';
   const user = s.user as any;
   return {
+    id: s._id,
     name: s.businessName || user?.name || 'Supplier',
     meta: `${user?.email || '—'} · ${s.stationCount ?? 0} station${(s.stationCount ?? 0) === 1 ? '' : 's'}`,
     status: verification,
     value: `${s.stationCount ?? 0} locations`,
     group,
+    details: [
+      { label: 'Supplier profile ID', value: s._id || '—' },
+      { label: 'Business name', value: s.businessName || '—' },
+      { label: 'Contact name', value: user?.name || '—' },
+      { label: 'Email', value: user?.email || '—' },
+      { label: 'User account status', value: user?.accountStatus || '—' },
+      { label: 'Verification', value: verification },
+      { label: 'Stations', value: String(s.stationCount ?? 0) },
+      { label: 'Created', value: s.createdAt ? new Date(s.createdAt).toLocaleString() : '—' },
+    ],
   };
 }
 

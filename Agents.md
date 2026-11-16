@@ -88,9 +88,9 @@ The project follows a clean, modern, professional, and elegant visual direction.
 
 Current established colors:
 
-- Primary: `#0b7d68`
-- Card surface: `#cccecf`
-- Page background: `#e4f0f0`
+- Primary: `#1E3A8A`
+- Card surface: `#E2E8F0`
+- Page background: `#F1F5F9`
 
 Preserve these established design decisions unless the team explicitly approves a change.
 

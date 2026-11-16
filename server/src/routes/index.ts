@@ -10,6 +10,7 @@ import routingRoutes from '../modules/routes/routes.js';
 import paymentRoutes from '../modules/payments/routes.js';
 import notificationRoutes from '../modules/notifications/routes.js';
 import adminRoutes from '../modules/admin/routes.js';
+import chargingSessionRoutes from '../modules/chargingSessions/routes.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { UserRole } from '../types/index.js';
 
@@ -25,6 +26,7 @@ router.use('/routes', routingRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
+router.use('/charging-sessions', chargingSessionRoutes);
 
 // Direct terminal operations (ownership enforced per terminal)
 router.use(

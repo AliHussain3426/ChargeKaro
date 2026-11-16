@@ -1,6 +1,6 @@
 # EV Charging Complete Audit — Executive Summary
 
-**Project:** EV Charging Platform (GreenCharge)  
+**Project:** EV Charging Platform (ChargeKaro)  
 **Stack:** MERN (MongoDB, Express.js 5, React 19, Node.js/TypeScript)  
 **Audit date:** 2026-11-15  
 **Audit type:** Evidence-based static inspection + executed automated tests/builds (no production logic modified)

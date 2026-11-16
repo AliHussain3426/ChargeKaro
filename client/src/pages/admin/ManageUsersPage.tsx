@@ -7,11 +7,21 @@ function toRow(user: AdminUser) {
   const role = user.role || 'USER';
   const group = role === 'CUSTOMER' ? 'Customers' : role === 'SUPPLIER' ? 'Suppliers' : role === 'ADMIN' ? 'Admins' : 'Other';
   return {
+    id: user._id || user.id,
     name: user.name || 'User',
     meta: `${user.email || '—'} · ${role.toLowerCase()}`,
     status: user.accountStatus || 'ACTIVE',
     value: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—',
     group,
+    details: [
+      { label: 'User ID', value: user._id || user.id || '—' },
+      { label: 'Email', value: user.email || '—' },
+      { label: 'Phone', value: user.phone || '—' },
+      { label: 'Role', value: role },
+      { label: 'Account status', value: user.accountStatus || '—' },
+      { label: 'Verification', value: user.verificationStatus || '—' },
+      { label: 'Joined', value: user.createdAt ? new Date(user.createdAt).toLocaleString() : '—' },
+    ],
   };
 }
 
@@ -36,5 +46,5 @@ export default function ManageUsersPage() {
   }, []);
 
   const rows = useMemo(() => users.map(toRow), [users]);
-  return <AdminListWorkspace title="Users" description="Review the people and organisations with access to GreenCharge." itemLabel="User" tabs={['All users', 'Customers', 'Suppliers', 'Admins']} rows={rows} icon={Users} loading={loading} error={error} live />;
+  return <AdminListWorkspace title="Users" description="Review the people and organisations with access to ChargeKaro." itemLabel="User" tabs={['All users', 'Customers', 'Suppliers', 'Admins']} rows={rows} icon={Users} loading={loading} error={error} live />;
 }

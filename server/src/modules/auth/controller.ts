@@ -146,11 +146,46 @@ export const refresh = async (req: Request, res: Response, next: NextFunction): 
 export const me = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = (req as AuthenticatedUserRequest).userId;
-    const user = await authService.getAuthenticatedUser(userId as string);
+    const { user, profile } = await authService.getMyProfile(userId as string);
     res.json({
       success: true,
       message: 'Authenticated user retrieved successfully',
-      data: { user: sanitizeUser(user as unknown as SanitizeUserSource) },
+      data: { user: sanitizeUser(user as unknown as SanitizeUserSource), profile },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = (req as AuthenticatedUserRequest).userId;
+    const { user, profile } = await authService.getMyProfile(userId as string);
+    res.json({
+      success: true,
+      message: 'Profile retrieved successfully',
+      data: { user: sanitizeUser(user as unknown as SanitizeUserSource), profile },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    handleValidationError(req);
+    const userId = (req as AuthenticatedUserRequest).userId;
+    const { user, profile } = await authService.updateMyProfile(userId as string, {
+      name: req.body.name,
+      phone: req.body.phone,
+      businessName: req.body.businessName,
+      businessDescription: req.body.businessDescription,
+      businessAddress: req.body.businessAddress,
+    });
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: { user: sanitizeUser(user as unknown as SanitizeUserSource), profile },
     });
   } catch (error) {
     next(error);
@@ -203,6 +238,8 @@ export const authController = {
   login,
   refresh,
   me,
+  getProfile,
+  updateProfile,
   logout,
   forgotPassword,
   resetPassword,

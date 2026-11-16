@@ -1,4 +1,4 @@
-# GreenCharge Implementation Progress
+# ChargeKaro Implementation Progress
 
 **Started:** 2026-11-15 (master implementation prompt execution)  
 **Baseline Git:** branch `main` @ `88e5e1f` (`deploy true and audit`) with pre-existing `M server/vitest.config.ts` preserved; `EV_CHARGING_COMPLETE_AUDIT/` contains prior audit artifacts + this implementation tracking.  

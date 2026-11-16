@@ -27,7 +27,7 @@ export default function AdminOverview() {
     <div className="admin-page admin-overview">
       <header className="overview-intro">
         <div>
-          <p className="overview-location"><Store className="size-4" /> GreenCharge platform</p>
+          <p className="overview-location"><Store className="size-4" /> ChargeKaro platform</p>
           <h1>Keep the network clear and accountable.</h1>
           <p>{counts ? `${counts.pendingBookings} booking request${counts.pendingBookings === 1 ? '' : 's'} awaiting supplier decisions across ${counts.stations} station${counts.stations === 1 ? '' : 's'}.` : 'Loading platform status…'}</p>
         </div>

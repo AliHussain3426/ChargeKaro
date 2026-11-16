@@ -5,7 +5,7 @@
  "seed": 292149095,
  "input": {
   "kind": "smb-admin",
-  "brief": "GreenCharge EV charging platform account profiles for drivers and station operators, and platform settings for administrators",
+  "brief": "ChargeKaro EV charging platform account profiles for drivers and station operators, and platform settings for administrators",
   "theme": "light",
   "screens": [
    "settings"

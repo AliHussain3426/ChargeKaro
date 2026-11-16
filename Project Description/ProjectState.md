@@ -1,10 +1,11 @@
 # PROJECT STATE
 
-**Project:** EV Charging Platform  
-**Last Updated:** 15 November 2026
+**Project:** ChargeKaro (EV Charging Platform)  
+**Last Updated:** 16 November 2026 (project renamed from GreenCharge to ChargeKaro; dark mode theme added)
 **Current Phase:** Post-Phase 11 hardening — P0 payments/settlements (P0.1–P0.4 backend foundation verified)  
 **Overall Completion:** ~97% overall (core product baseline) with additional P0 backend progress in progress tracking  
-**Status:** Phases 3–11 baseline completed and verified. Post-Phase 11 P0 implementation (2026-11-15): provider-agnostic sandbox/HMAC payment initiation+webhook verification/dedupe foundation (P0.1/P0.2), sandbox-backed refund domain/service/API with authorization+idempotency+concurrency safety (P0.3), and settlement/payout domain with configurable commission, refund-aware idempotent reconciliation, RBAC, and internal/manual payout workflow (P0.4, **no fake bank transfers / no `PAID` without verified external confirmation**) implemented and verified. **Server regression now 20 files, 97 tests PASS** (lint/build PASS). Client baseline remains 7 files/26 tests, lint/build PASS with pre-existing warnings (not rerun this unit). Live provider adapters/credentials, real payout confirmation, P1 auth/security/E2E, and P2/P3 remain pending/blocked. See `EV_CHARGING_COMPLETE_AUDIT/IMPLEMENTATION_PROGRESS.md`.
+**Status:** Phases 3-11 baseline completed and verified. Post-Phase 11 P0 implementation (2026-11-15): provider-agnostic sandbox/HMAC payment initiation+webhook verification/dedupe foundation (P0.1/P0.2), sandbox-backed refund domain/service/API with authorization+idempotency+concurrency safety (P0.3), and settlement/payout domain with configurable commission, refund-aware idempotent reconciliation, RBAC, and internal/manual payout workflow (P0.4, **no fake bank transfers / no `PAID` without verified external confirmation**) implemented and verified. **Server regression now 20 files, 97 tests PASS** (lint/build PASS). Client baseline remains 7 files/26 tests, lint/build PASS with pre-existing warnings (not rerun this unit). Frontend dark mode (dark blue + gray palette) with toggle/persistence added 2026-11-16 and verified via client `tsc -b`/`oxlint` (warnings pre-existing/pattern-consistent). Live provider adapters/credentials, real payout confirmation, P1 auth/security/E2E, and P2/P3 remain pending/blocked. See `EV_CHARGING_COMPLETE_AUDIT/IMPLEMENTATION_PROGRESS.md`.  
+**Latest feature (2026-11-16):** Battery-based EV charging billing system implemented (ChargingSession model/module, SOC start/complete APIs, backend `E=C×(SOCf-SOCi)/100` and `Price=E×R` calculations with snapshots, session bill/payment integration, receipts, and supplier/customer dashboard wiring). Verified: server `tsc` + targeted booking/payment/e2e tests (3 files, 9 tests) PASS; client `tsc -b` + `vite build` PASS.
 
 ---
 
@@ -29,7 +30,7 @@ A supplier can manage multiple stations, and each station can contain multiple c
 | Milestone / Component | Progress | Status | Notes |
 |---|---|---|---|
 | **Repository Setup & Tooling** | 95% | Completed | React 19 + Vite + Tailwind v4 frontend; Express 5 + TS backend; builds passing |
-| **Design System & Tokens** | 90% | Completed | #0B7D68 primary, #CCCECF card surface, #E4F0F0 background, DM Sans / Manrope typography |
+| **Design System & Tokens** | 95% | Completed | #1E3A8A primary, #E2E8F0 card surface, #F1F5F9 background, DM Sans / Manrope typography; dark mode (dark blue + gray palette) with toggle and persisted preference |
 | **Public Navigation & Marketing** | 90% | Completed | A bespoke route-planning landing page, one-page public navigation, demo access, and 404 pages |
 | **Authentication UI** | 80% | Completed | Login, Register Select, Customer Register, Supplier Register, Forgot Password; matching surfaces and mobile-safe input/layout rules |
 | **Customer Interface Flow** | 65% | In Progress | Overview, container-aware station discovery, bookings, vehicles, notifications, and profile/settings have interactive prototype UIs |
@@ -78,6 +79,7 @@ The current verified repository structure includes:
 │   │   └── index.css                        # Design system CSS variables and theme tokens
 │   └── vite.config.ts                       # Vite configuration with path aliases & API proxy
 └── server/                                  # Backend API server (Express + TS + Mongoose)
+    ├── scripts/                             # Idempotent demo data seeder (seed.ts)
     ├── src/
     │   ├── config/                          # Environment variables & DB connection
     │   ├── middleware/                      # Error handler & 404 handler
@@ -144,14 +146,14 @@ The project follows a clean, modern, elegant, and professional visual direction.
 
 | Purpose | Token / Value | Verification |
 |---|---|---|
-| Primary | `#0B7D68` | Configured in `client/src/index.css` |
-| Primary Hover | `#096B59` | Configured in `client/src/index.css` |
-| Primary Light | `#D0EBE5` | Configured in `client/src/index.css` |
-| Card Surface | `#CCCECF` | Configured in `client/src/index.css` |
-| Elevated Surface | `#D8DADB` | Configured in `client/src/index.css` |
-| Page Background | `#E4F0F0` | Configured in `client/src/index.css` |
-| Foreground (Dark) | `#18332F` | Configured in `client/src/index.css` |
-| Border | `#B8C5C2` | Configured in `client/src/index.css` |
+| Primary | `#1E3A8A` | Configured in `client/src/index.css` |
+| Primary Hover | `#1E40AF` | Configured in `client/src/index.css` |
+| Primary Light | `#DBEAFE` | Configured in `client/src/index.css` |
+| Card Surface | `#E2E8F0` | Configured in `client/src/index.css` |
+| Elevated Surface | `#CBD5E1` | Configured in `client/src/index.css` |
+| Page Background | `#F1F5F9` | Configured in `client/src/index.css` |
+| Foreground (Dark) | `#0F172A` | Configured in `client/src/index.css` |
+| Border | `#CBD5E1` | Configured in `client/src/index.css` |
 
 ### Design Priorities
 - Light, accessible palette avoiding dark-first AI tropes.
@@ -185,6 +187,7 @@ The project follows a clean, modern, elegant, and professional visual direction.
 | Super Admin Module | Completed | Phase 10: admin-only oversight APIs (overview aggregates, users/suppliers/stations/terminals/bookings, reports, settings) and admin frontend pages wired to live data |
 | PWA & Release Readiness | Completed (baseline) | Phase 11: `client/.env.example`, web manifest + basic service worker shell registration, customer/supplier overviews wired to live data, E2E journey integration test, production builds/lint/tests verified |
 | Supplier Verification | Deferred | Intentionally deferred to later phase |
+| Demo Seed Data | Completed | `npm run seed` in `server/` populates local MongoDB with an ADMIN, demo supplier/customer, stations, terminals, vehicles, bookings, payments, notifications and system settings without overwriting existing records |
 | PWA Capabilities | Planned | Pending service worker & web manifest |
 
 ---
@@ -199,14 +202,14 @@ The following areas have been verified against the actual repository source code
 - [x] Backend TypeScript check passing (`npx tsc --noEmit`).
 - [x] `client/` workspace initialized with Vite, React 19, and TypeScript.
 - [x] Frontend dependencies installed and verified (`react-router-dom`, `lucide-react`, `@tailwindcss/vite`, `tailwindcss`).
-- [x] Design system variables configured in `client/src/index.css` (#0B7D68, #CCCECF, #E4F0F0).
+- [x] Design system variables configured in `client/src/index.css` (#1E3A8A, #E2E8F0, #F1F5F9).
 - [x] Public layouts and marketing pages created.
 - [x] Auth layout forms created.
-- [x] Public header navigation scrolls to Home, How It Works, For Customers, For Suppliers, and About / Helpline sections on the landing page; former standalone public URLs redirect to the matching section.
+- [x] Public header navigation scrolls to Home, How It Works, and About / Helpline sections on the landing page.
 - [x] Authentication surfaces are rounded and borderless, use matching rectangular sizing without internal form-card scrolling, and slide between sign-in and registration with reduced-motion-safe fallbacks.
 - [x] About / Helpline provides both an in-page support-email copy action and an email-client link.
 - [x] Dashboard navigation uses a slim, high-contrast inset rail that automatically expands on pointer or keyboard focus, smoothly shifts the desktop workspace, and collapses when that interaction ends; mobile uses a primary bottom navigation for everyday tasks plus a separate More drawer for secondary tools, with safe-area-aware content spacing so actions cannot sit behind it.
-- [x] The landing page presents the product through animated route-planning, driver booking, and supplier workspace UI rather than generic marketing blocks; it has been visually checked at 1440px desktop, 820px tablet, and 390px mobile widths.
+- [x] The landing page presents the product through animated route-planning, how-it-works, and support sections (driver and station/operator marketing sections removed 2026-11-16 per request).
 - [x] Customer dashboard includes prototype booking filters, a vehicle setup prompt, station discovery, and notification rows.
 - [x] Supplier dashboard includes prototype booking decisions, station and terminal management surfaces, earnings, and notification rows.
 - [x] Customer dashboard shell & pages created.
@@ -237,6 +240,7 @@ The following areas are pending implementation and verification:
 - [x] Frontend Phase 10 admin verified: Admin overview, users, suppliers, stations, terminals, bookings, reports, and system settings pages wired to live admin APIs; client build and test suite passing (7 files, 26 tests).
 - [x] Phase 11 integration/release readiness verified: `client/.env.example` added; PWA manifest (`client/public/manifest.webmanifest`), basic service worker (`client/public/sw.js`), manifest link and production SW registration added; customer and supplier overview dashboards wired to live APIs; backend E2E journey test added (`server/tests/e2e.journey.test.ts`).
 - [x] Final verification: server `npm run lint`, `npm run build`, `npx vitest run` -> **17 files, 73 tests passed**. Client `npm run lint` -> passed with pre-existing oxlint warnings only; `npm run build` -> passed (Vite chunk-size warning, Leaflet bundle); `npx vitest run` -> **7 files, 26 tests passed**.
+- [x] Demo data seeder verified: `cd server && npm run seed` executed twice; all three seeded accounts (admin/supplier/customer) authenticate through `authService.login` with correct roles, and pre-existing records were preserved. Demo credentials are documented in `DevLog.md` and `server/scripts/seed.ts` (local development only).
 - [ ] Real external payment gateway integration (redirect/provider webhooks/signature verification, refunds) remains deferred by design; optional further UI/perf polish (code-splitting, lint warning cleanup).
 
 ---

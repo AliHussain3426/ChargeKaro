@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { ChevronRight, Loader2, MapPin, Plus, Store, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Loader2, MapPin, Plus, Store, Trash2 } from 'lucide-react';
 import {
   createStation,
   deleteStation,
@@ -109,6 +109,7 @@ export default function MyStationsPage() {
   const [errors, setErrors] = useState<StationFormErrors>({});
   const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const hasErrors = useMemo(() => Object.keys(errors).length > 0, [errors]);
 
@@ -270,32 +271,48 @@ export default function MyStationsPage() {
         <section className="workspace-panel"><p>No stations yet. Add your first station to make it visible to drivers.</p></section>
       ) : (
         <section className="workspace-card-grid">
-          {stations.map((station) => (
-            <article className="workspace-panel workspace-card" key={station._id}>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3>{station.name}</h3>
-                  <p><MapPin className="mr-1 inline size-3" /> {station.address}{station.city ? `, ${station.city}` : ''}</p>
-                  <p className="text-sm" style={{ marginTop: '.35rem', color: 'var(--gc-ink-soft)' }}>
-                    {station.pricing.currency} {station.pricing.amount} / {station.pricing.billingType.replace(/_/g, ' ').toLowerCase()} · {station.operatingHours.opensAt}–{station.operatingHours.closesAt}
-                  </p>
-                  <p className="text-sm" style={{ marginTop: '.2rem', color: 'var(--gc-ink-soft)' }}>
-                    Coords: {station.location.coordinates[1].toFixed(4)}, {station.location.coordinates[0].toFixed(4)}
-                  </p>
+          {stations.map((station) => {
+            const expanded = expandedId === station._id;
+            return (
+              <article className="workspace-panel workspace-card" key={station._id}>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3>{station.name}</h3>
+                    <p><MapPin className="mr-1 inline size-3" /> {station.address}{station.city ? `, ${station.city}` : ''}</p>
+                    <p className="text-sm" style={{ marginTop: '.35rem', color: 'var(--gc-ink-soft)' }}>
+                      {station.pricing.currency} {station.pricing.amount} / {station.pricing.billingType.replace(/_/g, ' ').toLowerCase()} · {station.operatingHours.opensAt}–{station.operatingHours.closesAt}
+                    </p>
+                  </div>
+                  <span className="workspace-status">Active</span>
                 </div>
-                <span className="workspace-status">Active</span>
-              </div>
-              <div className="workspace-card-footer">
-                <span className="text-sm font-semibold"><Store className="mr-1 inline size-3" /> Managed by you</span>
-                <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-                  <button className="workspace-text-button" type="button" onClick={() => void handleDelete(station._id)} aria-label={`Delete ${station.name}`}>
-                    <Trash2 className="size-4" /> Delete
-                  </button>
-                  <span className="workspace-text-button" aria-hidden="true">Details <ChevronRight className="size-4" /></span>
+
+                {expanded && (
+                  <div className="admin-detail-grid" style={{ marginTop: '.75rem' }}>
+                    <div className="admin-detail-item"><span className="admin-detail-label">Station ID</span><strong>{station._id}</strong></div>
+                    <div className="admin-detail-item"><span className="admin-detail-label">City</span><strong>{station.city || '—'}</strong></div>
+                    <div className="admin-detail-item"><span className="admin-detail-label">Province</span><strong>{station.province || '—'}</strong></div>
+                    <div className="admin-detail-item"><span className="admin-detail-label">Country</span><strong>{station.country || '—'}</strong></div>
+                    <div className="admin-detail-item"><span className="admin-detail-label">Coordinates</span><strong>{station.location.coordinates[1].toFixed(5)}, {station.location.coordinates[0].toFixed(5)}</strong></div>
+                    <div className="admin-detail-item"><span className="admin-detail-label">Pricing</span><strong>{station.pricing.currency} {station.pricing.amount} ({station.pricing.billingType})</strong></div>
+                    <div className="admin-detail-item"><span className="admin-detail-label">Operating hours</span><strong>{station.operatingHours.opensAt} – {station.operatingHours.closesAt} ({station.operatingHours.timezone || 'local'})</strong></div>
+                    <div className="admin-detail-item" style={{ gridColumn: '1 / -1' }}><span className="admin-detail-label">Description</span><strong>{station.description || '—'}</strong></div>
+                  </div>
+                )}
+
+                <div className="workspace-card-footer">
+                  <span className="text-sm font-semibold"><Store className="mr-1 inline size-3" /> Managed by you</span>
+                  <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+                    <button className="workspace-text-button" type="button" onClick={() => void handleDelete(station._id)} aria-label={`Delete ${station.name}`}>
+                      <Trash2 className="size-4" /> Delete
+                    </button>
+                    <button className="workspace-text-button" type="button" onClick={() => setExpandedId(expanded ? null : station._id)}>
+                      {expanded ? <>Hide details <ChevronDown className="size-4" /></> : <>Details <ChevronRight className="size-4" /></>}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </section>
       )}
     </div>

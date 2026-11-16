@@ -798,8 +798,8 @@ Conceptual example:
   "short_name": "EV Platform",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#E4F0F0",
-  "theme_color": "#0B7D68",
+  "background_color": "#F1F5F9",
+  "theme_color": "#1E3A8A",
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -1367,9 +1367,9 @@ It will support desktop, tablet, and mobile interfaces through responsive layout
 
 The experience must preserve the approved design system:
 
-- Primary brand: `#0B7D68`
-- Page background: `#E4F0F0`
-- Card surface: `#CCCECF`
+- Primary brand: `#1E3A8A`
+- Page background: `#F1F5F9`
+- Card surface: `#E2E8F0`
 - Consistent typography and component styles.
 - Shared role-independent UI foundations.
 - Separate customer, supplier, and admin application shells.

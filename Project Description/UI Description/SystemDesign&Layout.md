@@ -85,11 +85,11 @@ The following three colors are the foundation of the platform's visual identity.
 
 | Token | HEX | Purpose |
 |---|---|---|
-| Primary Brand | `#0B7D68` | Primary actions, active navigation, brand elements |
-| Page Background | `#E4F0F0` | Main page and application background |
-| Card Surface | `#CCCECF` | Cards, content panels, and dashboard surfaces |
+| Primary Brand | `#1E3A8A` | Primary actions, active navigation, brand elements |
+| Page Background | `#F1F5F9` | Main page and application background |
+| Card Surface | `#E2E8F0` | Cards, content panels, and dashboard surfaces |
 
-### Primary Brand: `#0B7D68`
+### Primary Brand: `#1E3A8A`
 
 This is the main brand color.
 
@@ -110,13 +110,13 @@ The primary color should be visually meaningful. Do not apply it to every icon, 
 
 Suggested interaction variations:
 
-- Default: `#0B7D68`
+- Default: `#1E3A8A`
 - Hover: `#096856`
 - Pressed: `#075847`
 
 These are derived interaction shades, not replacements for the official brand color.
 
-### Page Background: `#E4F0F0`
+### Page Background: `#F1F5F9`
 
 This is the primary application canvas.
 
@@ -129,7 +129,7 @@ Use it for:
 
 The page background should remain visually calm and should not compete with the content.
 
-### Card Surface: `#CCCECF`
+### Card Surface: `#E2E8F0`
 
 This is the selected replacement for conventional white card surfaces.
 
@@ -157,14 +157,14 @@ These supporting values should be used carefully and consistently.
 
 | Token | Suggested HEX | Usage |
 |---|---|---|
-| Primary Text | `#18332F` | Headings and important text |
-| Secondary Text | `#52635F` | Descriptions and secondary information |
-| Muted Text | `#74827F` | Metadata and less prominent labels |
-| Border | `#B8C5C2` | Card boundaries, dividers, and field outlines |
+| Primary Text | `#0F172A` | Headings and important text |
+| Secondary Text | `#475569` | Descriptions and secondary information |
+| Muted Text | `#64748B` | Metadata and less prominent labels |
+| Border | `#CBD5E1` | Card boundaries, dividers, and field outlines |
 | Success | `#25865B` | Successful operations and completed actions |
 | Warning | `#B7791F` | Pending actions and attention-required states |
 | Danger | `#C44D4D` | Errors, rejected requests, and destructive actions |
-| Information | `#3977A3` | Informational messages and neutral notices |
+| Information | `#2563EB` | Informational messages and neutral notices |
 
 Supporting colors must never compete with the brand color.
 
@@ -384,7 +384,7 @@ Examples:
 
 Appearance:
 
-- Background: `#0B7D68`.
+- Background: `#1E3A8A`.
 - Foreground: white.
 - Clear hover and pressed states.
 - Moderate corner radius.
@@ -1617,9 +1617,9 @@ The EV Charging Platform must maintain one coherent design identity across its p
 
 The foundational visual direction is:
 
-- Primary brand: `#0B7D68`
-- Main background: `#E4F0F0`
-- Card and panel surfaces: `#CCCECF`
+- Primary brand: `#1E3A8A`
+- Main background: `#F1F5F9`
+- Card and panel surfaces: `#E2E8F0`
 - Typography: Inter
 - Visual style: clean, light, modern, and professional
 - Component style: restrained borders, moderate corner radii, subtle elevation

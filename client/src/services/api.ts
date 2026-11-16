@@ -1,7 +1,7 @@
 import type { ApiResponse } from '@/types';
 
 /**
- * Central API client for the GreenCharge backend.
+ * Central API client for the ChargeKaro backend.
  *
  * - Base URL comes from `VITE_API_BASE_URL` (defaults to `/api`, which the
  *   Vite dev server proxies to the backend).

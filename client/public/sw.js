@@ -1,5 +1,5 @@
 /* Basic service worker for PWA installability/offline shell (Phase 11). */
-const CACHE_NAME = 'greencharge-shell-v1';
+const CACHE_NAME = 'chargekaro-shell-v1';
 const APP_SHELL = ['/', '/index.html', '/favicon.svg', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {

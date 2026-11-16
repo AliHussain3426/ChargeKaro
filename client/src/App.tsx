@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 
 // Auth
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 // Layouts
@@ -52,9 +53,10 @@ import SystemSettingsPage from '@/pages/admin/SystemSettingsPage';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
           {/* ── Public routes ── */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<LandingPage />} />
@@ -125,7 +127,8 @@ export default function App() {
           {/* ── 404 ── */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

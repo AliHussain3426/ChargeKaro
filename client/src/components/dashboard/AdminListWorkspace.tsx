@@ -1,7 +1,9 @@
 import { useMemo, useState, type ComponentType } from 'react';
-import { Check, ChevronRight, Search } from 'lucide-react';
+import { ChevronRight, Search, X } from 'lucide-react';
 
-export type Row = { name: string; meta: string; status: string; value: string; group: string };
+export type RowDetail = { label: string; value: string };
+export type Row = { id?: string; name: string; meta: string; status: string; value: string; group: string; details?: RowDetail[] };
+
 interface AdminListWorkspaceProps {
   title: string;
   description: string;
@@ -14,21 +16,29 @@ interface AdminListWorkspaceProps {
   live?: boolean;
 }
 
+function statusTone(status: string): string {
+  if (status === 'Pending' || status === 'Attention' || status === 'PENDING' || status === 'UNVERIFIED') return 'workspace-status--warning';
+  if (['Offline', 'Suspended', 'Rejected', 'Cancelled', 'Expired', 'REJECTED', 'CANCELLED', 'EXPIRED', 'FAILED', 'SUSPENDED', 'UNAVAILABLE', 'MAINTENANCE'].includes(status)) return 'workspace-status--muted';
+  return '';
+}
+
 export default function AdminListWorkspace({ title, description, itemLabel, tabs, rows, icon: Icon, loading, error, live }: AdminListWorkspaceProps) {
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState(tabs[0] ?? 'All');
-  const [reviewed, setReviewed] = useState<number[]>([]);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+
   const visibleRows = useMemo(
-    () => rows.filter((row) => (activeTab === tabs[0] || row.group === activeTab) && `${row.name} ${row.meta}`.toLowerCase().includes(query.toLowerCase())),
+    () => rows.filter((row) => (activeTab === tabs[0] || row.group === activeTab) && `${row.name} ${row.meta} ${row.status} ${row.value}`.toLowerCase().includes(query.toLowerCase())),
     [activeTab, query, rows, tabs]
   );
-  const toggleReview = (index: number) => setReviewed((current) => (current.includes(index) ? current.filter((entry) => entry !== index) : [...current, index]));
+
+  const selected = selectedKey == null ? null : visibleRows.find((r) => (r.id ?? `${r.name}-${r.value}-${r.group}`) === selectedKey) ?? null;
 
   return (
     <div className="admin-page">
       <header className="workspace-head">
         <div>
-          <p className="admin-context">GreenCharge platform</p>
+          <p className="admin-context">ChargeKaro platform</p>
           <h1>{title}</h1>
           <p>{description}</p>
         </div>
@@ -49,7 +59,7 @@ export default function AdminListWorkspace({ title, description, itemLabel, tabs
         <div className="workspace-panel-head">
           <div>
             <h2>{loading ? 'Loading…' : `${visibleRows.length} ${itemLabel.toLowerCase()}${visibleRows.length === 1 ? '' : 's'}`}</h2>
-            <p>{live ? 'Platform oversight data from the admin API.' : 'Review actions update this front-end preview only.'}</p>
+            <p>{live ? 'Select an item to view full details.' : 'Select an item to view details (prototype data).'}</p>
           </div>
           <Icon className="size-5 text-primary" />
         </div>
@@ -59,24 +69,51 @@ export default function AdminListWorkspace({ title, description, itemLabel, tabs
         ) : (
           <>
             <ul className="workspace-list">
-              {visibleRows.map((row, index) => (
-                <li className="workspace-list-row admin-list-row" key={`${row.name}-${row.value}-${row.group}-${index}`}>
-                  <span className="workspace-row-icon"><Icon className="size-4" /></span>
-                  <div className="workspace-row-main"><strong>{row.name}</strong><span>{row.meta}</span></div>
-                  <span className="workspace-row-value">
-                    {row.value}
-                    <small><span className={`workspace-status ${row.status === 'Pending' || row.status === 'Attention' ? 'workspace-status--warning' : row.status === 'Offline' || row.status === 'Suspended' || row.status === 'Rejected' || row.status === 'Cancelled' || row.status === 'Expired' ? 'workspace-status--muted' : ''}`}>{row.status}</span></small>
-                  </span>
-                  <button type="button" onClick={() => toggleReview(index)} className={`admin-review ${reviewed.includes(index) ? 'is-reviewed' : ''}`}>
-                    {reviewed.includes(index) ? <><Check className="size-3" /> Reviewed</> : <>Review <ChevronRight className="size-3" /></>}
-                  </button>
-                </li>
-              ))}
+              {visibleRows.map((row, index) => {
+                const key = row.id ?? `${row.name}-${row.value}-${row.group}-${index}`;
+                const active = selectedKey === key;
+                return (
+                  <li className={`workspace-list-row admin-list-row ${active ? 'is-selected' : ''}`} key={key}>
+                    <span className="workspace-row-icon"><Icon className="size-4" /></span>
+                    <div className="workspace-row-main"><strong>{row.name}</strong><span>{row.meta}</span></div>
+                    <span className="workspace-row-value">
+                      {row.value}
+                      <small><span className={`workspace-status ${statusTone(row.status)}`}>{row.status}</span></small>
+                    </span>
+                    <button type="button" onClick={() => setSelectedKey(active ? null : key)} className="admin-review">
+                      {active ? <>Hide <X className="size-3" /></> : <>View details <ChevronRight className="size-3" /></>}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
             {visibleRows.length === 0 && <div className="workspace-empty"><strong>No matches</strong><p>Try another filter or search term.</p></div>}
           </>
         )}
       </section>
+
+      {selected && (
+        <section className="workspace-panel admin-detail-panel" aria-label={`${itemLabel} details`}>
+          <div className="workspace-panel-head">
+            <div>
+              <p className="admin-context">{itemLabel} details</p>
+              <h2>{selected.name}</h2>
+              <p>{selected.meta}</p>
+            </div>
+            <button type="button" className="admin-review" onClick={() => setSelectedKey(null)} aria-label="Close details"><X className="size-4" /></button>
+          </div>
+          <div className="admin-detail-grid">
+            <div className="admin-detail-item"><span className="admin-detail-label">Status</span><span className={`workspace-status ${statusTone(selected.status)}`}>{selected.status}</span></div>
+            <div className="admin-detail-item"><span className="admin-detail-label">Summary</span><strong>{selected.value}</strong></div>
+            {(selected.details && selected.details.length > 0 ? selected.details : [{ label: 'Info', value: 'No additional details available.' }]).map((d) => (
+              <div className="admin-detail-item" key={`${d.label}-${d.value}`}>
+                <span className="admin-detail-label">{d.label}</span>
+                <strong style={{ overflowWrap: 'anywhere' }}>{d.value || '—'}</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

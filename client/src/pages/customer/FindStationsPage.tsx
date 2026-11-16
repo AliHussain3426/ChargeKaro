@@ -239,7 +239,7 @@ export default function FindStationsPage() {
             <label style={{ display: 'flex', gap: '.4rem', alignItems: 'center', fontSize: '.78rem' }}>
               Min kW
               <input
-                style={{ width: '72px', minHeight: '30px', border: '1px solid #d7e4df', borderRadius: '8px', padding: '0 .4rem' }}
+                style={{ width: '72px', minHeight: '30px', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '0 .4rem' }}
                 value={filters.minPower}
                 onChange={(e) => setFilters((f) => ({ ...f, minPower: e.target.value }))}
                 inputMode="decimal"
@@ -277,7 +277,7 @@ export default function FindStationsPage() {
           )}
 
           {selectedStation && (
-            <div style={{ padding: '1rem 1.15rem', borderTop: '1px solid #e9f1ee' }}>
+            <div style={{ padding: '1rem 1.15rem', borderTop: '1px solid #F1F5F9' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.5rem', flexWrap: 'wrap' }}>
                 <strong>Book {selectedStation.name}</strong>
                 <button className="workspace-action" type="button" onClick={() => { setShowBooking((v) => !v); setError(''); }}>

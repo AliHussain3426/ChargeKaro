@@ -1,6 +1,6 @@
 # Missing & Incomplete Feature — Prioritized Implementation Roadmap
 
-**Project:** GreenCharge EV Charging Platform  
+**Project:** ChargeKaro EV Charging Platform  
 **Date:** 2026-11-15  
 **Basis:** `MISSING_INCOMPLETE_FEATURE_AUDIT.md`, `Requirements.md`, `UserFlow.md`, `WebsiteStructure.md`, `SystemArchitecture.md`, `techStack.md`, `ProjectState.md`, prior Phase 0 audit artifacts.  
 **Goal:** Close every identified missing/incomplete feature and verification gap in priority order while preserving architecture, RBAC/ownership guarantees, and data integrity.

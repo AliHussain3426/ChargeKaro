@@ -1,5 +1,5 @@
 {
-  "project": "EV Charging Platform (GreenCharge)",
+  "project": "EV Charging Platform (ChargeKaro)",
   "stack": ["MongoDB", "Express.js", "React.js", "Node.js", "TypeScript"],
   "auditDate": "2026-11-15",
   "auditType": "evidence-based static inspection and executed automated verification",

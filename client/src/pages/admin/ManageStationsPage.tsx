@@ -6,14 +6,27 @@ import { listAdminStations, type AdminStation } from '@/services/admin';
 function toRow(st: AdminStation) {
   const supplier = st.supplierId as any;
   const supplierName = supplier?.businessName || supplier?.user?.name || 'Supplier';
+  const supplierEmail = supplier?.user?.email || '—';
   const terminalCount = st.terminalCount ?? 0;
   const group = terminalCount > 0 ? 'With terminals' : 'No terminals';
+  const pricing = st.pricing ? `${st.pricing.currency} ${st.pricing.amount} / ${st.pricing.billingType}` : '—';
   return {
+    id: st._id,
     name: st.name || 'Station',
     meta: `${st.address || ''}${st.city ? `, ${st.city}` : ''} · ${supplierName}`,
     status: terminalCount > 0 ? 'ACTIVE' : 'Attention',
     value: `${terminalCount} terminal${terminalCount === 1 ? '' : 's'}`,
     group,
+    details: [
+      { label: 'Station ID', value: st._id || '—' },
+      { label: 'Address', value: st.address || '—' },
+      { label: 'City', value: st.city || '—' },
+      { label: 'Supplier', value: supplierName },
+      { label: 'Supplier email', value: supplierEmail },
+      { label: 'Terminals', value: String(terminalCount) },
+      { label: 'Pricing', value: pricing },
+      { label: 'Created', value: st.createdAt ? new Date(st.createdAt).toLocaleString() : '—' },
+    ],
   };
 }
 

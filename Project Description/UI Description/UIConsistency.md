@@ -360,28 +360,28 @@ The confirmed color palette is:
 
 | Token | HEX |
 |---|---|
-| Primary Brand | `#0B7D68` |
-| Page Background | `#E4F0F0` |
-| Card Surface | `#CCCECF` |
+| Primary Brand | `#1E3A8A` |
+| Page Background | `#F1F5F9` |
+| Card Surface | `#E2E8F0` |
 
 Supporting colors:
 
 | Token | HEX |
 |---|---|
-| Primary Text | `#18332F` |
-| Secondary Text | `#52635F` |
-| Muted Text | `#74827F` |
-| Border | `#B8C5C2` |
+| Primary Text | `#0F172A` |
+| Secondary Text | `#475569` |
+| Muted Text | `#64748B` |
+| Border | `#CBD5E1` |
 | Success | `#25865B` |
 | Warning | `#B7791F` |
 | Danger | `#C44D4D` |
-| Information | `#3977A3` |
+| Information | `#2563EB` |
 
 Use the centralized tokens or shared theme configuration.
 
 Never independently redefine the primary brand color on individual pages.
 
-The card surface `#CCCECF` is intentional. Do not replace it with pure white simply because another dashboard uses white cards.
+The card surface `#E2E8F0` is intentional. Do not replace it with pure white simply because another dashboard uses white cards.
 
 ## 6.2 Typography
 
@@ -432,18 +432,18 @@ For example, a conceptual token configuration:
 
 ```css
 :root {
-  --color-primary: #0B7D68;
-  --color-background: #E4F0F0;
-  --color-surface: #CCCECF;
+  --color-primary: #1E3A8A;
+  --color-background: #F1F5F9;
+  --color-surface: #E2E8F0;
 
-  --color-text-primary: #18332F;
-  --color-text-secondary: #52635F;
-  --color-border: #B8C5C2;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-border: #CBD5E1;
 
   --color-success: #25865B;
   --color-warning: #B7791F;
   --color-danger: #C44D4D;
-  --color-information: #3977A3;
+  --color-information: #2563EB;
 }
 ```
 

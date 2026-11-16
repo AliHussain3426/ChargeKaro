@@ -13,6 +13,7 @@ function formatRange(startIso: string, endIso: string): string {
 function toRow(b: AdminBooking) {
   const customer = b.customerId as any;
   const station = b.stationId as any;
+  const terminal = b.terminalId as any;
   const status = b.status || 'UNKNOWN';
   const group = ['PENDING_SUPPLIER', 'ACCEPTED_AWAITING_PAYMENT'].includes(status)
     ? 'Pending'
@@ -22,11 +23,27 @@ function toRow(b: AdminBooking) {
         ? 'Completed'
         : 'Other';
   return {
+    id: b._id,
     name: `${b.bookingReference} · ${customer?.name || 'Customer'}`,
     meta: `${station?.name || 'Station'} · ${formatRange(b.requestedStartTime, b.requestedEndTime)}`,
     status: status.replace(/_/g, ' '),
     value: b.priceSnapshot ? `${b.priceSnapshot.currency} ${b.priceSnapshot.amount}` : '—',
     group,
+    details: [
+      { label: 'Booking ID', value: b._id || '—' },
+      { label: 'Reference', value: b.bookingReference || '—' },
+      { label: 'Customer', value: customer?.name || '—' },
+      { label: 'Customer email', value: customer?.email || '—' },
+      { label: 'Station', value: station?.name || '—' },
+      { label: 'City', value: station?.city || '—' },
+      { label: 'Terminal', value: terminal?.name || '—' },
+      { label: 'Requested start', value: b.requestedStartTime ? new Date(b.requestedStartTime).toLocaleString() : '—' },
+      { label: 'Requested end', value: b.requestedEndTime ? new Date(b.requestedEndTime).toLocaleString() : '—' },
+      { label: 'Booking status', value: status },
+      { label: 'Payment status', value: b.paymentStatus || '—' },
+      { label: 'Amount', value: b.priceSnapshot ? `${b.priceSnapshot.currency} ${b.priceSnapshot.amount}` : '—' },
+      { label: 'Created', value: b.createdAt ? new Date(b.createdAt).toLocaleString() : '—' },
+    ],
   };
 }
 
