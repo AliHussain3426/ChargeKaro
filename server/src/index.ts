@@ -57,7 +57,7 @@ app.use('/api', routes);
 app.use(notFound);
 app.use(errorHandler);
 
-// Start server
+// Start server (only in non-serverless environments like local dev or Render)
 async function start(): Promise<void> {
   await connectDB();
   app.listen(env.PORT, '0.0.0.0', () => {
@@ -65,10 +65,25 @@ async function start(): Promise<void> {
   });
 }
 
-// Only boot the server when the entry point is executed directly.
-// Test environments (Vitest) import the app without starting a listener.
-if (env.NODE_ENV !== 'test') {
+// On Vercel (serverless), do NOT call app.listen().
+// Vercel imports this file and uses the exported `app` directly.
+// On local dev / Render, boot the server normally.
+const isVercel = process.env.VERCEL === '1';
+
+if (!isVercel && env.NODE_ENV !== 'test') {
   start().catch(console.error);
+}
+
+// For Vercel serverless: connect DB on first request via middleware
+if (isVercel) {
+  app.use(async (_req, _res, next) => {
+    try {
+      await connectDB();
+      next();
+    } catch (err) {
+      next(err);
+    }
+  });
 }
 
 export default app;
