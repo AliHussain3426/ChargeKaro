@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { env } from '../config/env.js';
 
@@ -9,7 +9,7 @@ const router = Router();
  *
  * Reports API liveness and MongoDB connectivity.
  */
-router.get('/', async (_req, res, next) => {
+router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const dbConnected = mongoose.connection.readyState === 1;
 

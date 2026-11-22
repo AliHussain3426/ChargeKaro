@@ -1043,3 +1043,19 @@ px tsc -b --noEmit PASS.
 - **Status:** Completed.
 - **Verification:** cd client && npm run -s build -> PASS (Vite build, pre-existing chunk-size warning only). cd client && npm run -s lint -> PASS with pre-existing warnings only (including existing set-state-in-effect warnings in notification pages).
 - **Notes:** Worktree contained many unrelated pre-existing modified/untracked files; this task intentionally changed only notification UI files, shared notification/workspace CSS, and shared project docs.
+
+
+---
+
+### [2026-11-22] - Fix Server TypeScript Build Errors on Render Deployment
+
+- **Objective:** Fix TypeScript compilation errors (`@types/express`, `@types/node`, `@types/jsonwebtoken`, `Buffer`, `crypto`, `fetch`) preventing server deployment on Render.
+- **Root Cause:**
+  1. Render runs `npm install` with `NODE_ENV=production`, causing npm to skip `devDependencies`. Because `@types/*` and `typescript` were located in `devDependencies`, `tsc` had no type definitions during build time.
+  2. `server/tsconfig.json` was missing `"types": ["node"]` and `"DOM"` in `compilerOptions.lib`, resulting in errors for `fetch`, `Buffer`, `process`, and `crypto`.
+- **Changes:**
+  - Moved type declaration packages (`@types/express`, `@types/node`, `@types/jsonwebtoken`, `@types/bcryptjs`, `@types/cookie-parser`, `@types/cors`, `@types/morgan`) and `typescript`, `tsx` to `dependencies` in `server/package.json`.
+  - Added `"types": ["node"]` and added `"DOM"` to `lib` in `server/tsconfig.json`.
+  - Added explicit parameter types `(req: Request, res: Response, next: NextFunction)` in `server/src/routes/health.ts`.
+- **Files:** `server/package.json`, `server/tsconfig.json`, `server/src/routes/health.ts`, `Project Description/DevLog.md`.
+- **Status:** Completed.
