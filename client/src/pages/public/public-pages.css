@@ -328,3 +328,25 @@
   .product-callout-inner { margin-inline: -16px; border-radius: 0; }
   .journey-row { padding: 2rem 0; }
 }
+
+.dark .product-page { color: #E2E8F0; }
+.dark .product-kicker { color: #93C5FD; }
+.dark .product-hero-copy { color: #CBD5E1; }
+.dark .product-stage { background: #13345E; }
+.dark .product-stage--night { background: #061326; }
+.dark .product-route-card,
+.dark .product-booking-preview,
+.dark .journey-step,
+.dark .product-support-panel,
+.dark .callout-panel,
+.dark .signal-board > div { background: #0D2447; color: #E2E8F0; border-color: #23466B; }
+.dark .signal-board { background: #23466B; }
+.dark .signal-board > div:nth-child(4n + 2),
+.dark .signal-board > div:nth-child(4n + 3) { background: #13345E; }
+.dark .signal-board b { color: #FFFFFF; }
+.dark .signal-board p { color: #CBD5E1; }
+.dark .product-callout-inner { background: #1E3A8A; color: #FFFFFF; }
+.dark .callout-panel p { color: #CBD5E1; }
+.dark .supplier-rail-row { border-color: #23466B; }
+.dark .supplier-rail-row b { color: #FFFFFF; }
+.dark .supplier-rail-row span { background: #1E3A8A; color: #BFDBFE; }

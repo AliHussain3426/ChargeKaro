@@ -287,7 +287,7 @@ export default function MyStationsPage() {
                 </div>
 
                 {expanded && (
-                  <div className="admin-detail-grid" style={{ marginTop: '.75rem' }}>
+                  <div className="admin-detail-grid workspace-inline-detail-grid">
                     <div className="admin-detail-item"><span className="admin-detail-label">Station ID</span><strong>{station._id}</strong></div>
                     <div className="admin-detail-item"><span className="admin-detail-label">City</span><strong>{station.city || '—'}</strong></div>
                     <div className="admin-detail-item"><span className="admin-detail-label">Province</span><strong>{station.province || '—'}</strong></div>

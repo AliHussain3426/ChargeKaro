@@ -28,6 +28,16 @@ async function registerSupplier(agent: request.Agent, suffix: string) {
     passwordConfirm: 'password123',
   });
   expect(res.status).toBe(201);
+  // Auto-approve supplier for tests (admin verification now required)
+  const _supplierEmail = res.body.data.user.email;
+  const { User: _U, SupplierProfile: _SP } = await import('../src/modules/auth/model.js');
+  const _sUser = await _U.findOne({ email: _supplierEmail }).exec();
+  if (_sUser) {
+    await _U.updateOne({ _id: _sUser._id }, { $set: { accountStatus: 'ACTIVE', verificationStatus: 'VERIFIED' } } as any).exec();
+    await _SP.updateOne({ user: _sUser._id }, { $set: { verificationStatus: 'VERIFIED' } } as any).exec();
+  }
+  const _login = await agent.post('/api/auth/login').send({ email: _supplierEmail, password: 'password123' });
+  expect(_login.status).toBe(200);
 }
 
 async function setupStationTerminal(supplier: request.Agent, terminalOverrides: Record<string, unknown> = {}) {

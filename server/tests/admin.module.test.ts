@@ -30,6 +30,16 @@ async function registerSupplier(agent: request.Agent, suffix: string) {
     passwordConfirm: 'password123',
   });
   expect(res.status).toBe(201);
+  // Auto-approve supplier for tests (admin verification now required)
+  const _supplierEmail = res.body.data.user.email;
+  const { User: _U, SupplierProfile: _SP } = await import('../src/modules/auth/model.js');
+  const _sUser = await _U.findOne({ email: _supplierEmail }).exec();
+  if (_sUser) {
+    await _U.updateOne({ _id: _sUser._id }, { $set: { accountStatus: 'ACTIVE', verificationStatus: 'VERIFIED' } } as any).exec();
+    await _SP.updateOne({ user: _sUser._id }, { $set: { verificationStatus: 'VERIFIED' } } as any).exec();
+  }
+  const _login = await agent.post('/api/auth/login').send({ email: _supplierEmail, password: 'password123' });
+  expect(_login.status).toBe(200);
   return res.body.data.user;
 }
 
@@ -175,5 +185,83 @@ describe('Admin module', () => {
     const reports = await admin.get('/api/admin/reports');
     expect(reports.status).toBe(200);
     expect(reports.body.data.reports.counts.bookings).toBe(1);
+  });
+
+  it('allows admin to suspend and delete users, and suspend/delete stations', async () => {
+    const adminSeed = request.agent(app);
+    const customer = request.agent(app);
+    const supplier = request.agent(app);
+    await registerCustomer(adminSeed, 'ops-admin');
+    await registerCustomer(customer, 'ops-customer');
+    await registerSupplier(supplier, 'ops-supplier');
+    await promoteToAdmin('customer.ops-admin@example.com');
+    const admin = await loginAs('customer.ops-admin@example.com');
+
+    const customerUser = await User.findOne({ email: 'customer.ops-customer@example.com' }).exec();
+    expect(customerUser).toBeTruthy();
+
+    const suspendRes = await admin.patch(`/api/admin/users/${customerUser!._id.toString()}`).send({ accountStatus: 'SUSPENDED' });
+    expect(suspendRes.status).toBe(200);
+
+    const blockedLogin = await request(app).post('/api/auth/login').send({ email: 'customer.ops-customer@example.com', password: 'password123' });
+    expect(blockedLogin.status).toBe(403);
+    expect(String(blockedLogin.body.message)).toMatch(/suspended/i);
+
+    const deleteRes = await admin.delete(`/api/admin/users/${customerUser!._id.toString()}`);
+    expect(deleteRes.status).toBe(200);
+    expect(await User.findById(customerUser!._id).exec()).toBeNull();
+
+    const { stationId } = await setupStationTerminal(supplier);
+    const suspendStation = await admin.patch(`/api/admin/stations/${stationId}`).send({ status: 'SUSPENDED' });
+    expect(suspendStation.status).toBe(200);
+    expect(suspendStation.body.data.station.status).toBe('SUSPENDED');
+
+    const reactivateStation = await admin.patch(`/api/admin/stations/${stationId}`).send({ status: 'ACTIVE' });
+    expect(reactivateStation.status).toBe(200);
+    expect(reactivateStation.body.data.station.status).toBe('ACTIVE');
+
+    const deleteStationBlocked = await admin.delete(`/api/admin/stations/${stationId}`);
+    expect(deleteStationBlocked.status).toBe(409); // has terminal
+
+    // remove terminal first via supplier agent then delete
+    const terminals = await supplier.get(`/api/stations/${stationId}/terminals`);
+    const terminalId = terminals.body.data.terminals[0]._id;
+    const delTerminal = await supplier.delete(`/api/terminals/${terminalId}`);
+    expect(delTerminal.status).toBe(200);
+
+    const deleteStation = await admin.delete(`/api/admin/stations/${stationId}`);
+    expect(deleteStation.status).toBe(200);
+  });
+
+  it('requires admin verification before supplier can login', async () => {
+    const adminSeed = request.agent(app);
+    await registerCustomer(adminSeed, 'verify-admin');
+    await promoteToAdmin('customer.verify-admin@example.com');
+    const admin = await loginAs('customer.verify-admin@example.com');
+
+    const supplierReg = await request(app).post('/api/auth/register/supplier').send({
+      name: 'Pending Supplier',
+      businessName: 'Pending Business',
+      email: 'pending.supplier@example.com',
+      password: 'password123',
+      passwordConfirm: 'password123',
+    });
+    expect(supplierReg.status).toBe(201);
+    expect(supplierReg.body.data.pendingVerification).toBe(true);
+    expect(String(supplierReg.body.message)).toMatch(/24 hours/i);
+
+    const blockedLogin = await request(app).post('/api/auth/login').send({ email: 'pending.supplier@example.com', password: 'password123' });
+    expect(blockedLogin.status).toBe(403);
+    expect(String(blockedLogin.body.message)).toMatch(/pending admin verification/i);
+
+    const pendingProfile = await (await import('../src/modules/auth/model.js')).SupplierProfile.findOne({ businessName: 'Pending Business' }).exec();
+    expect(pendingProfile).toBeTruthy();
+
+    const approve = await admin.patch(`/api/admin/suppliers/${pendingProfile!._id.toString()}`).send({ verificationStatus: 'VERIFIED' });
+    expect(approve.status).toBe(200);
+
+    const login = await request(app).post('/api/auth/login').send({ email: 'pending.supplier@example.com', password: 'password123' });
+    expect(login.status).toBe(200);
+    expect(login.body.data.user.role).toBe('SUPPLIER');
   });
 });

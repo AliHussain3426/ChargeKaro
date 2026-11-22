@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, CalendarCheck, ChevronRight, MapPin, PlugZap, Store, Users } from 'lucide-react';
+import { ArrowUpRight, CalendarCheck, ChevronRight, PlugZap, Store, Users } from 'lucide-react';
 import { getAdminOverview, type AdminOverviewCounts } from '@/services/admin';
 
 export default function AdminOverview() {
@@ -42,10 +42,6 @@ export default function AdminOverview() {
           <h2>{counts ? `${counts.terminals} terminal${counts.terminals === 1 ? '' : 's'} and ${counts.bookings} booking${counts.bookings === 1 ? '' : 's'} under oversight.` : 'Loading…'}</h2>
           <p>Review stations, terminals, and booking activity using live platform data.</p>
           <Link to="/admin/terminals" className="admin-command-action">Review terminals <ChevronRight className="size-4" /></Link>
-        </div>
-        <div className="admin-command-map">
-          <span className="admin-map-pin"><MapPin className="size-5" /></span>
-          <span className="admin-map-pin admin-map-pin--minor"><PlugZap className="size-4" /></span>
         </div>
       </section>
 

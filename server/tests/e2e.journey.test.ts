@@ -35,6 +35,14 @@ describe('E2E integration: full charging journey', () => {
       passwordConfirm: 'password123',
     });
     expect(supplierReg.status).toBe(201);
+    const { User: _JourneyUser, SupplierProfile: _JourneySP } = await import('../src/modules/auth/model.js');
+    const _jUser = await _JourneyUser.findOne({ email: 'supplier.e2e@example.com' }).exec();
+    if (_jUser) {
+      await _JourneyUser.updateOne({ _id: _jUser._id }, { $set: { accountStatus: 'ACTIVE', verificationStatus: 'VERIFIED' } } as any).exec();
+      await _JourneySP.updateOne({ user: _jUser._id }, { $set: { verificationStatus: 'VERIFIED' } } as any).exec();
+    }
+    const supplierLogin = await supplier.post('/api/auth/login').send({ email: 'supplier.e2e@example.com', password: 'password123' });
+    expect(supplierLogin.status).toBe(200);
 
     const stationRes = await supplier.post('/api/stations').send({
       name: 'E2E Hub',

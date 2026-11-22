@@ -14,6 +14,7 @@ interface AuthUserResponse {
   accountStatus?: string;
   verificationStatus?: string;
   avatar?: string;
+  profileImage?: string;
   createdAt?: string;
 }
 
@@ -44,12 +45,25 @@ export interface RegisterSupplierInput {
   passwordConfirm: string;
 }
 
+export interface RegisterSupplierResult {
+  user: User;
+  pendingVerification: boolean;
+  message: string;
+}
+
 export interface UpdateProfileInput {
   name?: string;
   phone?: string;
+  profileImage?: string | null;
   businessName?: string;
   businessDescription?: string;
   businessAddress?: string;
+}
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+  passwordConfirm: string;
 }
 
 function normalizeUser(raw: AuthUserResponse): User {
@@ -59,7 +73,7 @@ function normalizeUser(raw: AuthUserResponse): User {
     email: raw.email,
     role: raw.role,
     phone: raw.phone,
-    avatar: raw.avatar,
+    avatar: raw.avatar ?? raw.profileImage,
     createdAt: raw.createdAt ?? '',
     accountStatus: raw.accountStatus,
     verificationStatus: raw.verificationStatus,
@@ -79,8 +93,16 @@ export const authService = {
     return requestUser('/auth/register/customer', input as unknown as Record<string, unknown>);
   },
 
-  async registerSupplier(input: RegisterSupplierInput): Promise<User> {
-    return requestUser('/auth/register/supplier', input as unknown as Record<string, unknown>);
+  async registerSupplier(input: RegisterSupplierInput): Promise<RegisterSupplierResult> {
+    const data = await apiFetch<{ user: AuthUserResponse; pendingVerification?: boolean; message?: string }>('/auth/register/supplier', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+    return {
+      user: normalizeUser(data.user),
+      pendingVerification: Boolean(data.pendingVerification),
+      message: data.message ?? '',
+    };
   },
 
   async login(email: string, password: string): Promise<User> {
@@ -109,12 +131,20 @@ export const authService = {
     await apiFetch<undefined>('/auth/logout', { method: 'POST' });
   },
 
+  async changePassword(input: ChangePasswordInput): Promise<string> {
+    const data = await apiFetch<{ message?: string } | undefined>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+    return data?.message ?? 'Password changed successfully.';
+  },
+
   async forgotPassword(email: string): Promise<string> {
-    const data = await apiFetch<{ message: string }>('/auth/forgot-password', {
+    const data = await apiFetch<{ message?: string } | undefined>('/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ email }),
     });
-    return data.message ?? 'Password reset instructions were generated.';
+    return data?.message ?? 'Password reset instructions were generated.';
   },
 };
 

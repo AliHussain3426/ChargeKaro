@@ -1,19 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, CalendarDays, Check, ChevronRight, CircleCheck, Copy, Headphones, Mail, Navigation, PlugZap, Route, ShieldCheck, Zap } from 'lucide-react';
+import {
+  ArrowRight,
+  CalendarDays,
+  Check,
+  ChevronRight,
+  Copy,
+  Headphones,
+  Mail,
+  Navigation,
+  PlugZap,
+  Route,
+  ShieldCheck,
+  Zap,
+} from 'lucide-react';
+import LandingChargingAnimation from './LandingChargingAnimation';
 
-/**
- * Software landing plan: product-led route planner hero, quiet route-flow motion,
- * then how-it-works and support sections. One green accent and the app's own
- * interface carry the visual story rather than decorative stock imagery.
- */
 export default function LandingPage() {
   const [supportMessage, setSupportMessage] = useState('');
   const location = useLocation();
 
   async function copySupportEmail() {
     const supportEmail = 'support@chargekaro.pk';
-
     try {
       await navigator.clipboard.writeText(supportEmail);
       setSupportMessage('Support email copied.');
@@ -28,7 +36,6 @@ export default function LandingPage() {
       if (sectionId) document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       else window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-
     return () => window.cancelAnimationFrame(frame);
   }, [location.hash, location.pathname]);
 
@@ -50,25 +57,8 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="lp-route-stage" role="img" aria-label="A route planner showing nearby compatible charging stations in Gulberg, Lahore">
-            <div className="lp-stage-glow" />
-            <div className="lp-map-grid" />
-            <svg className="lp-route-svg" viewBox="0 0 760 600" fill="none" aria-hidden="true">
-              <path className="lp-road lp-road--one" d="M-40 518C118 469 186 409 239 309C305 182 381 200 446 283C512 368 615 337 805 155" />
-              <path className="lp-road lp-road--two" d="M-30 132C129 195 187 144 291 92C405 34 479 113 517 201C577 340 672 383 800 354" />
-              <path className="lp-route-line" d="M86 477C169 453 211 396 245 315C279 235 361 228 420 284C486 349 531 337 622 261" />
-            </svg>
-            <span className="lp-map-label lp-map-label--north">Gulberg</span>
-            <span className="lp-map-label lp-map-label--south">Lahore</span>
-            <span className="lp-route-origin"><Navigation className="size-4 fill-current" /></span>
-            <span className="lp-route-station lp-route-station--one"><Zap className="size-4 fill-current" /></span>
-            <span className="lp-route-station lp-route-station--two"><Zap className="size-3 fill-current" /></span>
-            <article className="lp-route-card">
-              <div className="lp-route-card-top"><span className="lp-live-dot" /> <span>Closest compatible stop</span><b>1.8 km</b></div>
-              <div className="lp-route-card-station"><span className="lp-station-icon"><PlugZap className="size-4" /></span><div><strong>Gulberg Charge Hub</strong><small>CCS2 · 45 kW · 2 ports open</small></div></div>
-              <div className="lp-route-card-foot"><span>Arrival estimate</span><strong>7 min</strong><span className="lp-card-ready"><CircleCheck className="size-3" /> Ready</span></div>
-            </article>
-            <div className="lp-route-chip"><Route className="size-4" /><span>Route checked</span></div>
+          <div className="lp-route-stage lp-route-stage--live lp-charge-stage">
+            <LandingChargingAnimation />
           </div>
         </div>
       </section>

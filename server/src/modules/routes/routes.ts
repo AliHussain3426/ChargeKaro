@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { authenticate } from '../../middleware/auth.js';
 import routesController from './controller.js';
 
 const router = Router();
 
-router.use(authenticate);
+// Public read-only routing for landing page previews and authenticated customer flows.
 router.get('/', routesController.getRoute);
 router.get('/directions', routesController.getRoute);
 

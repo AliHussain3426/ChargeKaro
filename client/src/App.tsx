@@ -50,6 +50,8 @@ import ManageTerminalsPage from '@/pages/admin/ManageTerminalsPage';
 import ManageBookingsPage from '@/pages/admin/ManageBookingsPage';
 import AdminReportsPage from '@/pages/admin/AdminReportsPage';
 import SystemSettingsPage from '@/pages/admin/SystemSettingsPage';
+import AdminProfilePage from '@/pages/admin/AdminProfilePage';
+import AdminNotificationsPage from '@/pages/admin/AdminNotificationsPage';
 
 export default function App() {
   return (
@@ -120,7 +122,9 @@ export default function App() {
             <Route path="stations" element={<ManageStationsPage />} />
             <Route path="terminals" element={<ManageTerminalsPage />} />
             <Route path="bookings" element={<ManageBookingsPage />} />
+            <Route path="notifications" element={<AdminNotificationsPage />} />
             <Route path="reports" element={<AdminReportsPage />} />
+            <Route path="profile" element={<AdminProfilePage />} />
             <Route path="settings" element={<SystemSettingsPage />} />
           </Route>
 

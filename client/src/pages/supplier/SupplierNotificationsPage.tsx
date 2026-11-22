@@ -80,28 +80,32 @@ export default function SupplierNotificationsPage() {
           <Bell className="size-5 text-primary" />
         </div>
         {loading ? (
-          <p>Loading notifications…</p>
+          <div className="workspace-empty"><p>Loading notifications…</p></div>
         ) : items.length === 0 ? (
-          <p>No notifications yet.</p>
+          <div className="workspace-empty">
+            <Bell className="size-5" />
+            <strong>No notifications yet</strong>
+            <p>Booking requests, station activity, and payment updates will appear here.</p>
+          </div>
         ) : (
           <ul className="workspace-list">
             {items.map((n) => {
               const Icon = iconFor(n.type);
               return (
-                <li className="workspace-list-row" key={n._id}>
+                <li className={`workspace-list-row${!n.readAt ? ' workspace-list-row--unread' : ''}`} key={n._id}>
                   <span className="workspace-row-icon"><Icon className="size-4" /></span>
                   <div className="workspace-row-main">
                     <strong>{n.title}</strong>
-                    <span>{n.message}</span>
+                    <span className="workspace-row-message">{n.message}</span>
                   </div>
-                  <span className="workspace-row-value" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '.25rem' }}>
-                    <span>{timeLabel(n.createdAt)}</span>
+                  <div className="workspace-notification-meta">
+                    <time className="workspace-notification-time">{timeLabel(n.createdAt)}</time>
                     {!n.readAt ? (
                       <button className="workspace-text-button" type="button" onClick={() => void handleMarkRead(n._id)}>Mark read</button>
                     ) : (
                       <span className="workspace-status workspace-status--muted">Read</span>
                     )}
-                  </span>
+                  </div>
                 </li>
               );
             })}

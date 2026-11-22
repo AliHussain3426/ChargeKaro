@@ -48,7 +48,27 @@ export const validateResetPassword = [
 export const validateUpdateProfile = [
   body('name').optional().isString().trim().isLength({ min: 2, max: 80 }),
   body('phone').optional({ values: 'falsy' }).isString().trim().isLength({ min: 5, max: 30 }),
+  body('profileImage')
+    .optional({ nullable: true })
+    .custom((value) => {
+      if (value === null || value === '') return true;
+      if (typeof value !== 'string') throw new Error('Profile image must be a string.');
+      if (!value.startsWith('data:image/')) throw new Error('Profile image must be a valid image data URL.');
+      // Rough size guard: base64 payload should stay under ~2MB.
+      if (value.length > 2_800_000) throw new Error('Profile image is too large. Maximum size is 2MB.');
+      return true;
+    }),
   body('businessName').optional().isString().trim().isLength({ min: 2, max: 120 }),
   body('businessDescription').optional({ values: 'falsy' }).isString().trim().isLength({ max: 1000 }),
   body('businessAddress').optional({ values: 'falsy' }).isString().trim().isLength({ max: 500 }),
+];
+
+export const validateChangePassword = [
+  body('currentPassword').exists().isString().isLength({ min: 1, max: 128 }),
+  body('newPassword').exists().isString().isLength({ min: 8, max: 128 }),
+  body('passwordConfirm')
+    .exists()
+    .isString()
+    .isLength({ min: 8, max: 128 })
+    .custom((value, { req }) => value === req.body.newPassword),
 ];

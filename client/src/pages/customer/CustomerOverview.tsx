@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, CalendarDays, CarFront, ChevronRight, MapPin, PlugZap, Route } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, CarFront, ChevronRight, MapPin, Route } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { listVehicles, type Vehicle } from '@/services/vehicles';
 import { listBookings, type Booking } from '@/services/bookings';
@@ -76,7 +76,6 @@ export default function CustomerOverview() {
         </article>
 
         <article className="next-stop-card">
-          <div className="next-stop-map"><span className="next-stop-route" /><span className="next-stop-pin next-stop-pin--origin"><Route className="size-3" /></span><span className="next-stop-pin next-stop-pin--station"><PlugZap className="size-3" /></span></div>
           <div className="next-stop-copy">
             <span className="overview-tag overview-tag--green">{nextBooking ? 'Next booking' : 'Nearby station'}</span>
             <h2>{nextBooking ? nextBooking.bookingReference : (nearestStation?.name ?? 'Find a charger')}</h2>

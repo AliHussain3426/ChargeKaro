@@ -87,3 +87,82 @@ describe('Auth module - password reset', () => {
     expect(newLoginResponse.status).toBe(200);
   });
 });
+
+describe('Auth module - change password', () => {
+  beforeAll(async () => {
+    await startTestDatabase();
+  });
+
+  afterAll(async () => {
+    await stopTestDatabase();
+  });
+
+  it('changes password for authenticated user and allows login with new password', async () => {
+    const registerResponse = await request(app).post('/api/auth/register/customer').send({
+      name: 'Change Password User',
+      email: 'driver.changepw@example.com',
+      password: 'oldPassword123',
+      passwordConfirm: 'oldPassword123',
+    });
+    expect(registerResponse.status).toBe(201);
+
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'driver.changepw@example.com',
+      password: 'oldPassword123',
+    });
+    expect(loginResponse.status).toBe(200);
+    const accessToken = loginResponse.body.data.accessToken as string;
+
+    const changeResponse = await request(app)
+      .post('/api/auth/change-password')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        currentPassword: 'oldPassword123',
+        newPassword: 'newPassword456',
+        passwordConfirm: 'newPassword456',
+      });
+
+    expect(changeResponse.status).toBe(200);
+    expect(changeResponse.body.success).toBe(true);
+
+    const oldLogin = await request(app).post('/api/auth/login').send({
+      email: 'driver.changepw@example.com',
+      password: 'oldPassword123',
+    });
+    expect(oldLogin.status).toBe(401);
+
+    const newLogin = await request(app).post('/api/auth/login').send({
+      email: 'driver.changepw@example.com',
+      password: 'newPassword456',
+    });
+    expect(newLogin.status).toBe(200);
+  });
+
+  it('rejects change password with wrong current password', async () => {
+    const registerResponse = await request(app).post('/api/auth/register/customer').send({
+      name: 'Wrong Current PW User',
+      email: 'driver.wrongcurrent@example.com',
+      password: 'password123',
+      passwordConfirm: 'password123',
+    });
+    expect(registerResponse.status).toBe(201);
+
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'driver.wrongcurrent@example.com',
+      password: 'password123',
+    });
+    const accessToken = loginResponse.body.data.accessToken as string;
+
+    const changeResponse = await request(app)
+      .post('/api/auth/change-password')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        currentPassword: 'wrongPassword999',
+        newPassword: 'newPassword456',
+        passwordConfirm: 'newPassword456',
+      });
+
+    expect(changeResponse.status).toBe(400);
+    expect(changeResponse.body.success).toBe(false);
+  });
+});

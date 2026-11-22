@@ -102,6 +102,9 @@ export const bookingService = {
     if (!station) {
       throw new AppError('Station not found', 404);
     }
+    if ((station as any).status === 'SUSPENDED') {
+      throw new AppError('This station is currently suspended and cannot accept bookings', 403);
+    }
 
     const terminal = await Terminal.findById(input.terminalId).exec();
     if (!terminal) {

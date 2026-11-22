@@ -11,11 +11,14 @@ router.use(authenticate, authorize(UserRole.ADMIN));
 router.get('/overview', adminController.getOverview);
 router.get('/users', adminController.listUsers);
 router.patch('/users/:userId', adminController.updateUser);
+router.delete('/users/:userId', adminController.deleteUser);
 
 router.get('/suppliers', adminController.listSuppliers);
 router.patch('/suppliers/:supplierId', adminController.updateSupplier);
 
 router.get('/stations', adminController.listStations);
+router.patch('/stations/:stationId', adminController.updateStation);
+router.delete('/stations/:stationId', adminController.deleteStation);
 router.get('/terminals', adminController.listTerminals);
 router.get('/bookings', adminController.listBookings);
 

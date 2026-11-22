@@ -100,6 +100,39 @@ export async function updateSupplier(req: Request, res: Response, next: NextFunc
   }
 }
 
+export async function deleteUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const actorId = (req as any).userId as string | undefined;
+    const result = await adminService.deleteUser(req.params.userId as string, actorId);
+    res.json({ success: true, message: 'User deleted successfully', data: result });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateStation(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const status = (req.body ?? {}).status;
+    if (!status) {
+      res.status(400).json({ success: false, message: 'status is required' });
+      return;
+    }
+    const station = await adminService.updateStationStatus(req.params.stationId as string, status);
+    res.json({ success: true, message: 'Station updated successfully', data: { station } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteStation(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const result = await adminService.deleteStation(req.params.stationId as string);
+    res.json({ success: true, message: 'Station deleted successfully', data: result });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export const adminController = {
   getOverview,
   listUsers,
@@ -112,6 +145,9 @@ export const adminController = {
   updateSettings,
   updateUser,
   updateSupplier,
+  deleteUser,
+  updateStation,
+  deleteStation,
 };
 
 export default adminController;

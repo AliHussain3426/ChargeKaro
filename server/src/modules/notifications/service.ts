@@ -151,16 +151,19 @@ export const notificationService = {
     await this.createMany(tasks);
   },
 
-  async listForUser(userId: string) {
+  async listForUser(userId: string, options?: { isAdmin?: boolean }) {
+    if (options?.isAdmin) {
+      return Notification.find({}).sort({ createdAt: -1 }).limit(200).exec();
+    }
     return Notification.find({ userId } as any).sort({ createdAt: -1 }).exec();
   },
 
-  async markRead(userId: string, notificationId: string) {
+  async markRead(userId: string, notificationId: string, options?: { isAdmin?: boolean }) {
     const notification = await Notification.findById(notificationId).exec();
     if (!notification) {
       throw new AppError('Notification not found', 404);
     }
-    if (notification.userId.toString() !== userId) {
+    if (!options?.isAdmin && notification.userId.toString() !== userId) {
       throw new AppError('Forbidden: notification access denied', 403);
     }
     if (!notification.readAt) {
@@ -170,8 +173,53 @@ export const notificationService = {
     return notification;
   },
 
-  async markAllRead(userId: string) {
+  async markAllRead(userId: string, options?: { isAdmin?: boolean }) {
+    if (options?.isAdmin) {
+      await Notification.updateMany({ readAt: null } as any, { $set: { readAt: new Date() } }).exec();
+      return;
+    }
     await Notification.updateMany({ userId, readAt: null } as any, { $set: { readAt: new Date() } }).exec();
+  },
+
+  async delete(userId: string, notificationId: string, options?: { isAdmin?: boolean }) {
+    const notification = await Notification.findById(notificationId).exec();
+    if (!notification) {
+      throw new AppError('Notification not found', 404);
+    }
+    if (!options?.isAdmin && notification.userId.toString() !== userId) {
+      throw new AppError('Forbidden: notification access denied', 403);
+    }
+    await Notification.deleteOne({ _id: notificationId } as any).exec();
+  },
+
+  async createAdminNotification(input: { title: string; message: string; type: string; targetRole: 'ALL' | 'CUSTOMER' | 'SUPPLIER' | 'ADMIN'; userId?: string }) {
+    const title = input.title.trim();
+    const message = input.message.trim();
+    if (!title) throw new AppError('Title is required', 400);
+    if (!message) throw new AppError('Message is required', 400);
+
+    const { User } = await import('../auth/model.js');
+
+    let userIds: string[] = [];
+    if (input.userId) {
+      const user = await User.findById(input.userId).select('_id').exec();
+      if (!user) throw new AppError('Target user not found', 404);
+      userIds = [user._id.toString()];
+    } else {
+      const roleFilter = input.targetRole === 'ALL' ? {} : { role: input.targetRole };
+      const users = await User.find(roleFilter as any).select('_id').exec();
+      userIds = users.map((u) => u._id.toString());
+    }
+
+    const notifications = await this.createMany(userIds.map((userId) => ({
+      userId,
+      type: input.type || 'ADMIN_MESSAGE',
+      title,
+      message,
+      data: { source: 'admin', targetRole: input.targetRole },
+    })));
+
+    return { created: notifications.length };
   },
 };
 

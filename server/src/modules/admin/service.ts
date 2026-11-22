@@ -1,10 +1,11 @@
-import { User, SupplierProfile } from '../auth/model.js';
+import { User, SupplierProfile, CustomerProfile } from '../auth/model.js';
 import { Station } from '../stations/model.js';
 import { Terminal } from '../terminals/model.js';
 import { Booking } from '../bookings/model.js';
 import { Payment } from '../payments/model.js';
 import { SystemSettings } from './model.js';
 import { AppError } from '../../middleware/errorHandler.js';
+import { AccountStatus, StationStatus, UserRole, VerificationStatus } from '../../types/index.js';
 
 const PII_FIELDS = new Set([
   'name',
@@ -181,7 +182,26 @@ export const adminService = {
     if (!user) throw new AppError('User not found', 404);
 
     if (input.accountStatus !== undefined) (user as any).accountStatus = input.accountStatus;
-    if (input.verificationStatus !== undefined) (user as any).verificationStatus = input.verificationStatus;
+    if (input.verificationStatus !== undefined) {
+      const nextStatus = input.verificationStatus as VerificationStatus;
+      (user as any).verificationStatus = nextStatus;
+
+      if (user.role === UserRole.SUPPLIER) {
+        if (nextStatus === VerificationStatus.VERIFIED) {
+          (user as any).accountStatus = AccountStatus.ACTIVE;
+        } else if (nextStatus === VerificationStatus.REJECTED) {
+          (user as any).accountStatus = AccountStatus.SUSPENDED;
+        } else if (nextStatus === VerificationStatus.PENDING) {
+          (user as any).accountStatus = AccountStatus.PENDING;
+        }
+
+        const profile = await SupplierProfile.findOne({ user: user._id } as any).exec();
+        if (profile) {
+          (profile as any).verificationStatus = nextStatus;
+          await profile.save();
+        }
+      }
+    }
 
     await user.save();
     return user;
@@ -196,16 +216,84 @@ export const adminService = {
     if (!profile) throw new AppError('Supplier profile not found', 404);
 
     if (input.verificationStatus !== undefined) {
-      (profile as any).verificationStatus = input.verificationStatus;
+      const nextStatus = input.verificationStatus as VerificationStatus;
+      (profile as any).verificationStatus = nextStatus;
       await profile.save();
-      // keep linked user verification in sync for convenience
+      // keep linked user verification/account in sync
       const user = (profile as any).user;
-      if (user && input.verificationStatus) {
-        user.verificationStatus = input.verificationStatus;
+      if (user) {
+        user.verificationStatus = nextStatus;
+        if (nextStatus === VerificationStatus.VERIFIED) {
+          user.accountStatus = AccountStatus.ACTIVE;
+        } else if (nextStatus === VerificationStatus.REJECTED) {
+          user.accountStatus = AccountStatus.SUSPENDED;
+        } else if (nextStatus === VerificationStatus.PENDING) {
+          user.accountStatus = AccountStatus.PENDING;
+        }
         await user.save();
       }
     }
     return profile;
+  },
+
+  async deleteUser(userId: string, actorUserId?: string) {
+    if (actorUserId && actorUserId === userId) {
+      throw new AppError('You cannot delete your own admin account', 400);
+    }
+    const user = await User.findById(userId).exec();
+    if (!user) throw new AppError('User not found', 404);
+
+    if (user.role === UserRole.SUPPLIER) {
+      const supplierProfile = await SupplierProfile.findOne({ user: user._id } as any).exec();
+      if (supplierProfile) {
+        const stationCount = await Station.countDocuments({ supplierId: supplierProfile._id } as any).exec();
+        if (stationCount > 0) {
+          throw new AppError('Cannot delete supplier with existing stations. Suspend the account or remove stations first.', 409);
+        }
+      }
+      await SupplierProfile.deleteOne({ user: user._id } as any).exec();
+    }
+
+    if (user.role === UserRole.CUSTOMER) {
+      await CustomerProfile.deleteOne({ user: user._id } as any).exec();
+    }
+
+    const bookingCount = await Booking.countDocuments({ $or: [{ customerId: user._id }, { supplierId: user._id }] } as any).exec();
+    if (bookingCount > 0) {
+      throw new AppError('Cannot delete user with existing bookings. Suspend the account instead.', 409);
+    }
+
+    await User.deleteOne({ _id: user._id } as any).exec();
+    return { deleted: true, userId };
+  },
+
+  async updateStationStatus(stationId: string, status: StationStatus) {
+    if (!Object.values(StationStatus).includes(status)) {
+      throw new AppError('Invalid station status', 400);
+    }
+    const station = await Station.findById(stationId).exec();
+    if (!station) throw new AppError('Station not found', 404);
+    (station as any).status = status;
+    await station.save();
+    return station;
+  },
+
+  async deleteStation(stationId: string) {
+    const station = await Station.findById(stationId).exec();
+    if (!station) throw new AppError('Station not found', 404);
+
+    const terminalCount = await Terminal.countDocuments({ stationId: station._id } as any).exec();
+    if (terminalCount > 0) {
+      throw new AppError('Cannot delete station with existing terminals. Remove terminals first or suspend the station.', 409);
+    }
+
+    const bookingCount = await Booking.countDocuments({ stationId: station._id } as any).exec();
+    if (bookingCount > 0) {
+      throw new AppError('Cannot delete station with existing bookings. Suspend the station instead.', 409);
+    }
+
+    await Station.deleteOne({ _id: station._id } as any).exec();
+    return { deleted: true, stationId };
   },
 };
 

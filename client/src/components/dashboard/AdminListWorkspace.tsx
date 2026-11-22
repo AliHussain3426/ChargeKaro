@@ -1,8 +1,9 @@
 import { useMemo, useState, type ComponentType } from 'react';
 import { ChevronRight, Search, X } from 'lucide-react';
 
+export type RowAction = { label: string; onClick: () => void | Promise<void>; tone?: 'danger' | 'default' | 'warning' | 'success'; disabled?: boolean };
 export type RowDetail = { label: string; value: string };
-export type Row = { id?: string; name: string; meta: string; status: string; value: string; group: string; details?: RowDetail[] };
+export type Row = { id?: string; name: string; meta: string; status: string; value: string; group: string; details?: RowDetail[]; actions?: RowAction[] };
 
 interface AdminListWorkspaceProps {
   title: string;
@@ -111,6 +112,29 @@ export default function AdminListWorkspace({ title, description, itemLabel, tabs
                 <strong style={{ overflowWrap: 'anywhere' }}>{d.value || '—'}</strong>
               </div>
             ))}
+          </div>
+          <div className="admin-detail-actions">
+            <p className="admin-detail-actions__label">Actions</p>
+            {selected.actions?.some((a) => a.label.toLowerCase().includes('verify')) && (
+              <p className="admin-detail-actions__hint">Verify this supplier to allow the account to log in and use the platform.</p>
+            )}
+            <div className="admin-detail-actions__buttons">
+              {selected.actions && selected.actions.length > 0 ? (
+                selected.actions.map((action) => (
+                  <button
+                    key={action.label}
+                    type="button"
+                    className={`admin-action-btn admin-action-btn--${action.tone ?? 'default'}`}
+                    onClick={() => void action.onClick()}
+                    disabled={action.disabled}
+                  >
+                    {action.label}
+                  </button>
+                ))
+              ) : (
+                <p style={{ margin: 0, color: '#64748B', fontSize: '.84rem' }}>No actions available for this item.</p>
+              )}
+            </div>
           </div>
         </section>
       )}

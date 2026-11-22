@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, CalendarCheck, ChevronRight, CircleDollarSign, PlugZap, Store, Zap } from 'lucide-react';
+import { ArrowUpRight, CalendarCheck, ChevronRight, CircleDollarSign, PlugZap, Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { listStations, listTerminals, type Station, type Terminal } from '@/services/stations';
 import { listBookings, type Booking } from '@/services/bookings';
@@ -74,7 +74,6 @@ export default function SupplierOverview() {
         </article>
 
         <article className="supplier-station-focus">
-          <div className="supplier-station-map"><span className="supplier-map-mark"><Zap className="size-4" /></span></div>
           <div>
             <span className="overview-tag overview-tag--green">Station status</span>
             <h2>{primaryStation?.name ?? 'No station yet'}</h2>

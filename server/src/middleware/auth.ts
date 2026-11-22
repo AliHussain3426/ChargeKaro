@@ -5,7 +5,7 @@
 
 import type { Request, Response, NextFunction } from 'express';
 import { User } from '../modules/auth/model.js';
-import { UserRole, AccountStatus } from '../types/index.js';
+import { UserRole, AccountStatus, VerificationStatus } from '../types/index.js';
 import { verifyAccessToken } from '../utils/jwt.js';
 import { AppError } from './errorHandler.js';
 
@@ -46,8 +46,26 @@ export async function authenticate(
       return;
     }
 
+    if (user.accountStatus === AccountStatus.SUSPENDED) {
+      next(new AppError('Your account has been suspended. Please contact support for assistance.', 403));
+      return;
+    }
+
     if (user.accountStatus !== AccountStatus.ACTIVE) {
-      next(new AppError('Account is not active', 403));
+      if (user.role === UserRole.SUPPLIER && user.verificationStatus === VerificationStatus.PENDING) {
+        next(new AppError('Your supplier account is pending admin verification. Please wait up to 24 hours for your account to be verified.', 403));
+        return;
+      }
+      next(new AppError('Your account is not active. Please contact support for assistance.', 403));
+      return;
+    }
+
+    if (user.role === UserRole.SUPPLIER && user.verificationStatus !== VerificationStatus.VERIFIED) {
+      if (user.verificationStatus === VerificationStatus.REJECTED) {
+        next(new AppError('Your supplier account verification was rejected. Please contact support for assistance.', 403));
+        return;
+      }
+      next(new AppError('Your supplier account is pending admin verification. Please wait up to 24 hours for your account to be verified.', 403));
       return;
     }
 

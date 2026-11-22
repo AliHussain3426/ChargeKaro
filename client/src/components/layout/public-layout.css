@@ -75,17 +75,19 @@
   background: rgba(219, 234, 254, .76);
   color: #1E3A8A;
   cursor: pointer;
+  overflow: hidden;
   transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease;
 }
 .site-profile-trigger:hover { transform: translateY(-1px); background: #DBEAFE; box-shadow: 0 7px 18px rgba(30, 58, 138, .14); }
 .site-profile-avatar {
   display: inline-grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 100%;
+  height: 100%;
   border-radius: 999px;
   background: #fff;
   color: #1E3A8A;
+  overflow: hidden;
 }
 .site-profile-avatar--lg { width: 40px; height: 40px; background: #DBEAFE; }
 .site-profile-modal {
@@ -115,10 +117,10 @@
   width: 100%;
   margin-top: .55rem;
   padding: .65rem .8rem;
-  border: 0;
+  border: 1px solid #1E3A8A;
   border-radius: 12px;
-  background: transparent;
-  color: #475569;
+  background: #FFFFFF;
+  color: #1E3A8A;
   font: inherit;
   font-size: .84rem;
   font-weight: 700;
@@ -257,8 +259,8 @@
 .dark .site-profile-name { color: #FFFFFF; }
 .dark .site-profile-email { color: #CBD5E1; }
 .dark .site-profile-role { color: #E2E8F0; }
-.dark .site-profile-secondary { color: #E2E8F0; }
-.dark .site-profile-secondary:hover { background: #13345E; color: #FFFFFF; }
+.dark .site-profile-secondary { background: #FFFFFF; color: #1E3A8A; border-color: #FFFFFF; }
+.dark .site-profile-secondary:hover { background: #EFF6FF; color: #1E3A8A; }
 
 .dark .site-shell .site-footer { color: #E2E8F0; }
 .dark .site-shell .site-footer > .gc-container { background: #061326; }

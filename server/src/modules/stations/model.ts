@@ -1,5 +1,5 @@
 import { Schema, model, type Document } from 'mongoose';
-import { PricingType } from '../../types/index.js';
+import { PricingType, StationStatus } from '../../types/index.js';
 
 /**
  * Station module
@@ -128,6 +128,11 @@ const stationSchema = new Schema(
       type: operatingHoursSchema,
       required: true,
     },
+    status: {
+      type: String,
+      enum: StationStatus,
+      default: StationStatus.ACTIVE,
+    },
   },
   {
     timestamps: true,
@@ -159,6 +164,7 @@ export interface Station extends Document {
     opensAt: string;
     closesAt: string;
   };
+  status: StationStatus;
 }
 
 export const Station = model<Station>('Station', stationSchema);

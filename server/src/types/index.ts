@@ -53,6 +53,11 @@ export enum TerminalStatus {
   MAINTENANCE = 'MAINTENANCE',
 }
 
+export enum StationStatus {
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+}
+
 export enum PricingType {
   PER_KWH = 'PER_KWH',
   PER_MINUTE = 'PER_MINUTE',

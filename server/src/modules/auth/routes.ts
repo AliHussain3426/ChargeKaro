@@ -11,6 +11,7 @@ import {
   validateForgotPassword,
   validateResetPassword,
   validateUpdateProfile,
+  validateChangePassword,
 } from './validation.js';
 import {
   registerCustomer,
@@ -20,6 +21,7 @@ import {
   me,
   getProfile,
   updateProfile,
+  changePassword,
   logout,
   forgotPassword,
   resetPassword,
@@ -44,6 +46,7 @@ router.post('/refresh', authenticate, refresh);
 router.get('/me', authenticate, me);
 router.get('/profile', authenticate, getProfile);
 router.patch('/profile', authenticate, validateUpdateProfile, updateProfile);
+router.post('/change-password', authenticate, validateChangePassword, changePassword);
 router.post('/logout', authenticate, logout);
 
 export default router;

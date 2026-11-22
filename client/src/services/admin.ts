@@ -30,7 +30,7 @@ export interface AdminSupplier {
   businessName?: string;
   verificationStatus?: string;
   stationCount?: number;
-  user?: { name?: string; email?: string; accountStatus?: string };
+  user?: { _id?: string; name?: string; email?: string; accountStatus?: string; verificationStatus?: string };
   createdAt?: string;
 }
 
@@ -39,6 +39,7 @@ export interface AdminStation {
   name: string;
   address: string;
   city?: string;
+  status?: string;
   supplierId?: { businessName?: string; user?: { name?: string; email?: string } } | string;
   terminalCount?: number;
   pricing?: { amount: number; currency: string; billingType: string };
@@ -134,4 +135,40 @@ export async function updateSystemSettings(input: Partial<SystemSettings>) {
     body: JSON.stringify(input),
   });
   return data.settings;
+}
+
+export async function updateAdminUser(userId: string, input: { accountStatus?: string; verificationStatus?: string }) {
+  const data = await apiFetch<{ user: AdminUser }>(`/admin/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+  return data.user;
+}
+
+export async function deleteAdminUser(userId: string) {
+  return apiFetch<{ deleted: boolean; userId: string }>(`/admin/users/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function updateAdminSupplier(supplierId: string, input: { verificationStatus?: string }) {
+  const data = await apiFetch<{ supplier: AdminSupplier }>(`/admin/suppliers/${supplierId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+  return data.supplier;
+}
+
+export async function updateAdminStation(stationId: string, input: { status: string }) {
+  const data = await apiFetch<{ station: AdminStation }>(`/admin/stations/${stationId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
+  return data.station;
+}
+
+export async function deleteAdminStation(stationId: string) {
+  return apiFetch<{ deleted: boolean; stationId: string }>(`/admin/stations/${stationId}`, {
+    method: 'DELETE',
+  });
 }

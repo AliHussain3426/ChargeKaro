@@ -42,6 +42,10 @@ const userSchema = new Schema(
       type: String,
       trim: true,
     },
+    profileImage: {
+      type: String,
+      trim: true,
+    },
     passwordHash: {
       type: String,
       required: true,
@@ -82,6 +86,7 @@ export interface User extends Document {
   name: string;
   email: string;
   phone?: string;
+  profileImage?: string;
   passwordHash: string;
   role: UserRole;
   accountStatus: AccountStatus;
@@ -133,6 +138,10 @@ const supplierProfileSchema = new Schema(
       required: true,
       unique: true,
     },
+    profileImage: {
+      type: String,
+      trim: true,
+    },
     businessName: {
       type: String,
       required: true,
@@ -159,6 +168,7 @@ const supplierProfileSchema = new Schema(
 
 export interface SupplierProfile extends Document {
   user: Schema.Types.ObjectId;
+  profileImage?: string;
   businessName: string;
   businessDescription?: string;
   businessAddress?: string;

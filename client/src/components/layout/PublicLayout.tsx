@@ -119,12 +119,12 @@ export default function PublicLayout() {
                   aria-label="Open account menu"
                   title="Account"
                 >
-                  <span className="site-profile-avatar"><User className="size-4" /></span>
+                  <span className="site-profile-avatar">{user.avatar ? <img src={user.avatar} alt={`${user.name} profile`} className="site-profile-avatar-img" /> : <User className="size-4" />}</span>
                 </button>
                 {profileOpen && (
                   <div className="site-profile-modal" role="dialog" aria-label="Account menu">
                     <div className="site-profile-modal-head">
-                      <span className="site-profile-avatar site-profile-avatar--lg"><User className="size-5" /></span>
+                      <span className="site-profile-avatar site-profile-avatar--lg">{user.avatar ? <img src={user.avatar} alt={`${user.name} profile`} className="site-profile-avatar-img" /> : <User className="size-5" />}</span>
                       <div>
                         <p className="site-profile-name">{user.name}</p>
                         <p className="site-profile-email">{user.email}</p>

@@ -1,5 +1,6 @@
 import { Station } from '../stations/model.js';
 import { Terminal } from '../terminals/model.js';
+import { StationStatus } from '../../types/index.js';
 
 export interface DiscoveryQuery {
   lat?: number;
@@ -47,7 +48,9 @@ export async function discoverStations(query: DiscoveryQuery) {
   const hasGeo = typeof query.lat === 'number' && typeof query.lng === 'number';
   const radiusMeters = Math.max(0.1, query.radiusKm ?? 10) * 1000;
 
-  const match: Record<string, unknown> = {};
+  const match: Record<string, unknown> = {
+    status: { $ne: StationStatus.SUSPENDED },
+  };
 
   if (query.city) {
     match.city = { $regex: query.city, $options: 'i' };

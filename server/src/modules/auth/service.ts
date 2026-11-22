@@ -47,6 +47,7 @@ export interface SanitizeUserSource {
   name: string;
   email: string;
   phone?: string;
+  profileImage?: string;
   role: string;
   accountStatus: string;
   verificationStatus: string;
@@ -56,9 +57,15 @@ export interface SanitizeUserSource {
 export interface UpdateProfileInput {
   name?: string;
   phone?: string;
+  profileImage?: string | null;
   businessName?: string;
   businessDescription?: string;
   businessAddress?: string;
+}
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export function sanitizeUser(user: SanitizeUserSource): Record<string, unknown> {
@@ -67,6 +74,8 @@ export function sanitizeUser(user: SanitizeUserSource): Record<string, unknown> 
     name: user.name,
     email: user.email,
     phone: user.phone,
+    profileImage: user.profileImage,
+    avatar: user.profileImage,
     role: user.role,
     accountStatus: user.accountStatus,
     verificationStatus: user.verificationStatus,
@@ -122,8 +131,8 @@ export const authService = {
       phone: input.phone,
       passwordHash: await bcryptHash(input.password, SALT_ROUNDS),
       role: UserRole.SUPPLIER,
-      accountStatus: AccountStatus.ACTIVE,
-      verificationStatus: VerificationStatus.UNVERIFIED,
+      accountStatus: AccountStatus.PENDING,
+      verificationStatus: VerificationStatus.PENDING,
     });
     const savedUser = await user.save();
     const profile = await new SupplierProfile({
@@ -131,21 +140,16 @@ export const authService = {
       businessName: input.businessName,
       businessDescription: undefined,
       businessAddress: undefined,
-      verificationStatus: VerificationStatus.UNVERIFIED,
+      verificationStatus: VerificationStatus.PENDING,
     }).save();
 
-    const accessToken = signAccessToken({
-      userId: savedUser._id.toString(),
-      email: savedUser.email,
-      role: savedUser.role,
-    });
-    const refreshToken = signRefreshToken({
-      userId: savedUser._id.toString(),
-      email: savedUser.email,
-      role: savedUser.role,
-    });
-
-    return { user: savedUser, profileId: profile._id, accessToken, refreshToken };
+    return {
+      user: savedUser,
+      profileId: profile._id,
+      pendingVerification: true,
+      message:
+        'Your supplier account has been created and is pending admin verification. Please wait up to 24 hours for your account to be verified.',
+    };
   },
 
   async login(input: LoginInput) {
@@ -157,6 +161,30 @@ export const authService = {
     const validPassword = await bcryptCompare(input.password, user.passwordHash);
     if (!validPassword) {
       throw new AppError('Invalid email or password', 401);
+    }
+
+    if (user.accountStatus === AccountStatus.SUSPENDED) {
+      throw new AppError('Your account has been suspended. Please contact support for assistance.', 403);
+    }
+
+    if (user.accountStatus !== AccountStatus.ACTIVE) {
+      if (user.role === UserRole.SUPPLIER && user.verificationStatus === VerificationStatus.PENDING) {
+        throw new AppError(
+          'Your supplier account is pending admin verification. Please wait up to 24 hours for your account to be verified.',
+          403
+        );
+      }
+      throw new AppError('Your account is not active. Please contact support for assistance.', 403);
+    }
+
+    if (user.role === UserRole.SUPPLIER && user.verificationStatus !== VerificationStatus.VERIFIED) {
+      if (user.verificationStatus === VerificationStatus.REJECTED) {
+        throw new AppError('Your supplier account verification was rejected. Please contact support for assistance.', 403);
+      }
+      throw new AppError(
+        'Your supplier account is pending admin verification. Please wait up to 24 hours for your account to be verified.',
+        403
+      );
     }
 
     const accessToken = signAccessToken({
@@ -184,27 +212,42 @@ export const authService = {
   async getMyProfile(userId: string) {
     const user = await this.getAuthenticatedUser(userId);
     let profile: Record<string, unknown> | null = null;
+    let profileImage = user.profileImage;
 
     if (user.role === UserRole.CUSTOMER) {
       const customerProfile = await CustomerProfile.findOne({ user: user._id } as any).exec();
       if (customerProfile) {
+        profileImage = profileImage ?? customerProfile.profileImage;
         profile = {
           id: customerProfile._id.toString(),
           preferences: customerProfile.preferences ?? {},
-          profileImage: customerProfile.profileImage,
+          profileImage,
         };
       }
     } else if (user.role === UserRole.SUPPLIER) {
       const supplierProfile = await SupplierProfile.findOne({ user: user._id } as any).exec();
       if (supplierProfile) {
+        profileImage = profileImage ?? supplierProfile.profileImage;
         profile = {
           id: supplierProfile._id.toString(),
+          profileImage,
           businessName: supplierProfile.businessName,
           businessDescription: supplierProfile.businessDescription,
           businessAddress: supplierProfile.businessAddress,
           verificationStatus: supplierProfile.verificationStatus,
         };
       }
+    }
+
+    if (profileImage && user.profileImage !== profileImage) {
+      user.profileImage = profileImage;
+      await user.save();
+    }
+
+    if (!profile) {
+      profile = { profileImage };
+    } else if (profile.profileImage === undefined && profileImage) {
+      profile.profileImage = profileImage;
     }
 
     return { user, profile };
@@ -218,6 +261,9 @@ export const authService = {
       const phone = input.phone.trim();
       user.phone = phone ? phone : undefined;
     }
+    if (input.profileImage !== undefined) {
+      user.profileImage = input.profileImage ? input.profileImage : undefined;
+    }
 
     await user.save();
 
@@ -225,15 +271,22 @@ export const authService = {
     if (user.role === UserRole.CUSTOMER) {
       const customerProfile = await CustomerProfile.findOne({ user: user._id } as any).exec();
       if (customerProfile) {
+        if (input.profileImage !== undefined) {
+          customerProfile.profileImage = input.profileImage ? input.profileImage : undefined;
+        }
+        await customerProfile.save();
         profile = {
           id: customerProfile._id.toString(),
           preferences: customerProfile.preferences ?? {},
-          profileImage: customerProfile.profileImage,
+          profileImage: customerProfile.profileImage ?? user.profileImage,
         };
       }
     } else if (user.role === UserRole.SUPPLIER) {
       const supplierProfile = await SupplierProfile.findOne({ user: user._id } as any).exec();
       if (supplierProfile) {
+        if (input.profileImage !== undefined) {
+          supplierProfile.profileImage = input.profileImage ? input.profileImage : undefined;
+        }
         if (input.businessName !== undefined) supplierProfile.businessName = input.businessName.trim();
         if (input.businessDescription !== undefined) {
           const desc = input.businessDescription.trim();
@@ -246,6 +299,7 @@ export const authService = {
         await supplierProfile.save();
         profile = {
           id: supplierProfile._id.toString(),
+          profileImage: supplierProfile.profileImage ?? user.profileImage,
           businessName: supplierProfile.businessName,
           businessDescription: supplierProfile.businessDescription,
           businessAddress: supplierProfile.businessAddress,
@@ -254,7 +308,29 @@ export const authService = {
       }
     }
 
+    if (!profile) {
+      profile = { profileImage: user.profileImage };
+    } else if (profile.profileImage === undefined) {
+      profile.profileImage = user.profileImage;
+    }
+
     return { user, profile };
+  },
+
+  async changePassword(userId: string, input: ChangePasswordInput) {
+    const user = await User.findById(userId).select('+passwordHash').exec();
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    const validPassword = await bcryptCompare(input.currentPassword, user.passwordHash);
+    if (!validPassword) {
+      throw new AppError('Current password is incorrect', 400);
+    }
+
+    user.passwordHash = await bcryptHash(input.newPassword, SALT_ROUNDS);
+    await user.save();
+    return { message: 'Password changed successfully' };
   },
 
   async requestPasswordReset(email: string) {

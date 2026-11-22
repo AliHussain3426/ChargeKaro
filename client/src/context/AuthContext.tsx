@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { authService, type RegisterCustomerInput, type RegisterSupplierInput } from '@/services/auth';
+import { authService, type RegisterCustomerInput, type RegisterSupplierInput, type RegisterSupplierResult } from '@/services/auth';
 import type { User } from '@/types';
 
 interface AuthContextValue {
@@ -7,7 +7,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   registerCustomer: (input: RegisterCustomerInput) => Promise<User>;
-  registerSupplier: (input: RegisterSupplierInput) => Promise<User>;
+  registerSupplier: (input: RegisterSupplierInput) => Promise<RegisterSupplierResult>;
   refreshUser: () => Promise<User | null>;
   logout: () => Promise<void>;
 }
@@ -52,10 +52,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return nextUser;
   }, []);
 
-  const registerSupplier = useCallback(async (input: RegisterSupplierInput): Promise<User> => {
-    const nextUser = await authService.registerSupplier(input);
-    setUser(nextUser);
-    return nextUser;
+  const registerSupplier = useCallback(async (input: RegisterSupplierInput): Promise<RegisterSupplierResult> => {
+    const result = await authService.registerSupplier(input);
+    if (!result.pendingVerification) {
+      setUser(result.user);
+    }
+    return result;
   }, []);
 
   const refreshUser = useCallback(async (): Promise<User | null> => {

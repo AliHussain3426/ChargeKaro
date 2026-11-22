@@ -79,11 +79,14 @@ export const registerSupplier = async (
       phone: req.body.phone,
       password: req.body.password,
     });
-    setAuthCookies(res, result.accessToken, result.refreshToken);
     res.status(201).json({
       success: true,
-      message: 'Supplier account created successfully',
-      data: { user: sanitizeUser(result.user as unknown as SanitizeUserSource) },
+      message: result.message,
+      data: {
+        user: sanitizeUser(result.user as unknown as SanitizeUserSource),
+        pendingVerification: true,
+        message: result.message,
+      },
     });
   } catch (error) {
     next(error);
@@ -178,6 +181,7 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
     const { user, profile } = await authService.updateMyProfile(userId as string, {
       name: req.body.name,
       phone: req.body.phone,
+      profileImage: req.body.profileImage,
       businessName: req.body.businessName,
       businessDescription: req.body.businessDescription,
       businessAddress: req.body.businessAddress,
@@ -186,6 +190,24 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
       success: true,
       message: 'Profile updated successfully',
       data: { user: sanitizeUser(user as unknown as SanitizeUserSource), profile },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    handleValidationError(req);
+    const userId = (req as AuthenticatedUserRequest).userId;
+    const { message } = await authService.changePassword(userId as string, {
+      currentPassword: req.body.currentPassword,
+      newPassword: req.body.newPassword,
+    });
+    res.json({
+      success: true,
+      message,
+      data: { message },
     });
   } catch (error) {
     next(error);
@@ -240,6 +262,7 @@ export const authController = {
   me,
   getProfile,
   updateProfile,
+  changePassword,
   logout,
   forgotPassword,
   resetPassword,

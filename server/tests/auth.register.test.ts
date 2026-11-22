@@ -34,7 +34,7 @@ describe('Auth module - registration', () => {
     expect(profile).not.toBeNull();
   });
 
-  it('creates a supplier user and supplier profile on supplier registration', async () => {
+  it('creates a supplier user and supplier profile on supplier registration with pending admin verification', async () => {
     const response = await request(app).post('/api/auth/register/supplier').send({
       name: 'Green Operator',
       businessName: 'Green Charge Services',
@@ -47,14 +47,20 @@ describe('Auth module - registration', () => {
     expect(response.status).toBe(201);
     expect(response.body.success).toBe(true);
     expect(response.body.data.user.email).toBe('operator.green@example.com');
+    expect(response.body.data.pendingVerification).toBe(true);
+    expect(response.body.message).toMatch(/pending admin verification/i);
+    expect(response.body.message).toMatch(/24 hours/i);
 
     const user = await User.findOne({ email: 'operator.green@example.com' }).exec();
     expect(user).not.toBeNull();
     expect(user?.role).toBe('SUPPLIER');
+    expect(user?.accountStatus).toBe('PENDING');
+    expect(user?.verificationStatus).toBe('PENDING');
 
     const profile = await SupplierProfile.findOne({ user: user?._id }).exec();
     expect(profile).not.toBeNull();
     expect(profile?.businessName).toBe('Green Charge Services');
+    expect(profile?.verificationStatus).toBe('PENDING');
   });
 
   it('rejects customer registration with mismatched passwords', async () => {

@@ -734,7 +734,8 @@ pm install if package-lock normalization is needed; no functional logic changes 
   - Added dark-mode overrides in client/src/components/auth/auth.css and client/src/components/layout/public-layout.css for authentication surfaces and public header/footer treatments.
 - **Files:** client/src/context/ThemeContext.tsx (new), client/src/main.tsx, client/src/App.tsx, client/src/components/layout/PublicLayout.tsx, client/src/components/layout/DashboardLayout.tsx, client/src/index.css, client/src/components/auth/auth.css, client/src/components/layout/public-layout.css, Project Description/ProjectState.md, Project Description/DevLog.md.
 - **Status:** Completed.
-- **Verification:** cd client && npx tsc -b --pretty false -> passed. cd client && npm run lint -> passed with pre-existing oxlint warnings only, plus src/context/ThemeContext.tsx eact(only-export-components) warning consistent with existing AuthContext pattern (no lint errors). Full client build/test suite not rerun in this task.
+- **Verification:** cd client && npx tsc -b --pretty false -> passed. cd client && npm run lint -> passed with pre-existing oxlint warnings only, plus src/context/ThemeContext.tsx 
+eact(only-export-components) warning consistent with existing AuthContext pattern (no lint errors). Full client build/test suite not rerun in this task.
 - **Notes:** Dark theme prioritizes dark blue/gray surfaces and accents while preserving existing brand structure and role-based layouts. Some page-specific hardcoded colors may still need incremental refinement in follow-up UI passes; backend behavior unchanged.
 
 ### [2026-11-16] - Dark Mode Visibility Tweak
@@ -761,7 +762,8 @@ pm install if package-lock normalization is needed; no functional logic changes 
 - **Files:** `server/src/modules/chargingSessions/{model,service,controller,routes,validation}.ts` (new), `server/src/routes/index.ts`, `server/src/modules/payments/service.ts`, `client/src/services/chargingSessions.ts` (new), `client/src/pages/supplier/BookingRequestsPage.tsx`, `client/src/pages/customer/MyBookingsPage.tsx`, `Project Description/ProjectState.md`, `Project Description/DevLog.md`.
 - **Status:** Completed (integrated into existing architecture; existing core flows preserved).
 - **Verification:** `cd server; npx tsc --noEmit` -> passed. `cd server; npx vitest run tests/booking.workflow.test.ts tests/payments.earnings.test.ts tests/e2e.journey.test.ts` -> 3 files, 9 tests passed. `cd client; npx tsc -b` -> passed (after removing unused import). `cd client; npm run build` -> passed (Vite chunk-size warning pre-existing). Full regression suite and live DB/manual E2E not rerun in this session.
-- **Notes:** Charging session billing is now calculated server-side from SOC and station rate snapshot at completion; session bill payments reuse existing booking payment endpoints/flow. "Station worker" actions are exposed through the supplier booking/session interface with supplier ownership authorization. Further UX/policy alignment (e.g. whether pre-accept payment is required before session start in all deployments) may be refined based on operational policy.
+- **Notes:** Charging session billing is now calculated server-side from SOC and station rate snapshot at completion; session bill payments reuse existing booking payment endpoints/flow. "Station worker" actions are exposed through the supplier booking/session interface with supplier ownership authorization. Further UX/policy alignment (e.g. whether pre-accept payment is required before session start in all deployments) may be refined based on operational policy.
+
 
 ### [2026-11-16] - Landing Page: Remove Driver and Station Sections
 
@@ -771,3 +773,273 @@ pm install if package-lock normalization is needed; no functional logic changes 
 - **Status:** Completed.
 - **Verification:** cd client; npx tsc -b --pretty false -> passed. cd client; npx oxlint src/pages/public/LandingPage.tsx src/components/layout/PublicLayout.tsx -> 1 pre-existing warning in PublicLayout.tsx (set-state-in-effect, not introduced by this change). Build/test suite not rerun.
 - **Notes:** Home page now retains hero, how-it-works, about/help, and closing CTA sections. Former /#for-customers and /#for-suppliers anchors/sections no longer exist on the landing page.
+
+---
+
+### [2026-11-22] - Home Page Hero Spacing Adjustment
+
+- **Objective:** Reduce excessive vertical space below the navbar on the home page.
+- **Changes:** Reduced top padding on `.landing-v2 .lp-hero` from `clamp(5.8rem, 10vw, 9.2rem)` to `clamp(2.75rem, 4.5vw, 4.5rem)` and slightly tightened bottom padding for better balance. Updated the 820px breakpoint hero override from `padding-top: 5rem` to `padding-top: 3rem` to keep spacing consistent on medium screens.
+- **Files:** `client/src/index.css`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npm run build` -> passed (Vite build successful; pre-existing chunk-size warning only).
+- **Notes:** The fix targets the landing hero spacing below the sticky public navbar; no layout/behavior changes were made to the navbar itself.
+
+---
+
+### [2026-11-22] - Dashboard Profile Management (Name, Image, Password, Readonly Email)
+
+- **Objective:** Add/fix dashboard profile option so users can manage name, profile image, and password, while keeping email read-only; provide full CRUD-style management for profile image.
+- **Changes:**
+  - Backend auth/profile: added `profileImage` support to `SupplierProfile` model and profile read/update responses; `PATCH /api/auth/profile` now accepts `profileImage` (data URL) or `null` to remove it. Email remains non-editable (ignored/not exposed as updatable field).
+  - Added authenticated password change endpoint `POST /api/auth/change-password` with validation (`currentPassword`, `newPassword`, `passwordConfirm`) and bcrypt current-password verification.
+  - Frontend auth service: added `changePassword` API call and `profileImage` in profile update input.
+  - Customer/Supplier Profile & Settings UI: added profile photo upload/preview/remove (JPG/PNG/WebP/GIF, 2MB client-side limit), kept email field read-only with explicit note, and implemented working password change form with validation/error/success states.
+  - Added CSS for avatar management, password form, readonly field note, and dark-mode variants.
+- **Files:**
+  - `server/src/modules/auth/model.ts`
+  - `server/src/modules/auth/validation.ts`
+  - `server/src/modules/auth/service.ts`
+  - `server/src/modules/auth/controller.ts`
+  - `server/src/modules/auth/routes.ts`
+  - `server/tests/auth.password.test.ts`
+  - `server/tests/auth.profile.test.ts` (new)
+  - `client/src/services/auth.ts`
+  - `client/src/components/dashboard/ProfileSettings.tsx`
+  - `client/src/index.css`
+  - `Project Description/DevLog.md`
+- **Status:** Completed.
+- **Verification:**
+  - `cd server && npx tsc --noEmit` -> passed.
+  - `cd server && npx vitest run tests/auth.password.test.ts tests/auth.profile.test.ts tests/auth.login.test.ts tests/auth.register.test.ts` -> **4 files, 15 tests passed**.
+  - `cd client && npx vitest run` -> **7 files, 26 tests; 2 failed** in `src/pages/customer/BookingFlow.test.tsx` (pre-existing, unrelated to profile changes).
+  - `cd client && npm run lint` -> passed with pre-existing warnings only.
+  - `cd client && npx tsc -b --noEmit` -> failed on pre-existing error `src/pages/public/LandingRouteMap.tsx(14,7): 'STATION_ICON' is declared but its value is never read` (not introduced by this change).
+- **Notes:** Profile image CRUD is supported through profile read/update/remove (`profileImage: null`). Password change requires current password. Email is intentionally read-only. Pre-existing client TS/lint warnings and BookingFlow test failures were not modified.
+
+---
+
+### [2026-11-22] - Landing Page Live Location, Nearby Station & Route Animation
+
+- **Objective:** Replace the static/dummy home page hero map with a live location-aware preview showing the user's current location, nearest available charging station, and a real route with improved animation.
+- **Changes:**
+  - Updated `client/src/pages/public/LandingPage.tsx` to request browser geolocation, fetch nearby available stations via discovery API, select the nearest station, fetch an OSRM route, and render live status/card details (location state, nearest station, distance, ETA, route status).
+  - Added `client/src/pages/public/LandingRouteMap.tsx` (lazy-loaded) using Leaflet/react-leaflet to display current location pulse marker, nearest station marker, animated route draw, and auto-fit bounds.
+  - Added hero live-map styles/animations and responsive/dark-mode adjustments in `client/src/index.css`.
+  - Made read-only discovery and routing endpoints public for landing preview use: removed `authenticate` middleware from `server/src/modules/discovery/routes.ts` and `server/src/modules/routes/routes.ts` (existing authenticated customer flows continue to work).
+- **Files:** `client/src/pages/public/LandingPage.tsx`, `client/src/pages/public/LandingRouteMap.tsx` (new), `client/src/index.css`, `server/src/modules/discovery/routes.ts`, `server/src/modules/routes/routes.ts`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npm run build` -> passed (pre-existing chunk-size warning only). `cd client && npx oxlint src/pages/public/LandingPage.tsx src/pages/public/LandingRouteMap.tsx` -> passed. `cd server && npx vitest run tests/discovery.routes.test.ts` -> 1 file, 3 tests passed. `cd server && npm run lint` -> passed.
+- **Notes:** If geolocation is denied/unavailable, the hero falls back to Lahore-area station discovery and shows a clear location status; route line is drawn when current location and nearest station are available. Discovery/routing are now public read-only endpoints; monitor/rate-limit as needed before production hardening.
+
+---
+
+### [2026-11-22] - Profile & Settings Navigation Link for All Dashboard Roles
+
+- **Objective:** Add Profile & Settings navigation link in dashboard menu/sidebar for all roles and ensure the profile section shows profile data.
+- **Changes:**
+  - Added `AdminProfilePage` (`/admin/profile`) using shared `ProfileSettings` with `kind="admin"`.
+  - Added Profile & Settings nav item to Admin sidebar/mobile nav; updated DashboardLayout topbar profile link for admin to `/admin/profile`.
+  - Extended `ProfileSettings` to support admin role labels/copy while keeping name/image/password management and read-only email.
+- **Files:** `client/src/App.tsx`, `client/src/pages/admin/AdminApp.tsx`, `client/src/pages/admin/AdminProfilePage.tsx` (new), `client/src/components/layout/DashboardLayout.tsx`, `client/src/components/dashboard/ProfileSettings.tsx`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npx tsc -b --noEmit` -> passed.
+- **Notes:** Admin now has both personal Profile & Settings (`/admin/profile`) and System Settings (`/admin/settings`).
+
+---
+
+### [2026-11-22] - Landing Hero Map Interaction & Animation Tweak
+
+- **Objective:** Make the landing hero live map non-interactive while keeping live location visible and adding subtle animation.
+- **Changes:** Disabled Leaflet interactions (`dragging`, `doubleClickZoom`, `touchZoom`, `boxZoom`, `keyboard`) in `LandingRouteMap.tsx`; added subtle ambient breathing overlay animation on the live map stage in `index.css`.
+- **Files:** `client/src/pages/public/LandingRouteMap.tsx`, `client/src/index.css`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npm run build` -> passed (pre-existing chunk-size warning only). `cd client && npx oxlint src/pages/public/LandingPage.tsx src/pages/public/LandingRouteMap.tsx` -> passed.
+
+---
+
+### [2026-11-22] - Dashboard Detail/Empty-State Spacing Fix
+
+- **Objective:** Fix spacing issues when detail panels expand below list items and when dashboards show no data for new users.
+- **Changes:**
+  - Added consistent padding for direct `workspace-panel > p` content (loading/empty/no-data messages) and tightened panel-head + paragraph spacing.
+  - Improved `admin-detail-panel` spacing: added panel-head separator, padded detail grid, increased gap/margins, and added dark-mode border treatment.
+  - Added `workspace-inline-detail-grid` class and applied it to supplier `MyStationsPage` expanded details for clearer separation/spacing.
+- **Files:** `client/src/index.css`, `client/src/pages/supplier/MyStationsPage.tsx`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npm run build` -> passed (pre-existing chunk-size warning only).
+- **Notes:** Admin list detail panels (used across admin dashboards) now have proper body spacing; plain empty/loading messages inside workspace panels no longer sit against panel edges.
+
+---
+
+### [2026-11-22] - Profile Image Save Fix & Dashboard Profile Menu/Sign-out UX
+
+- **Objective:** Fix profile image not saving and align dashboard profile/sign-out UX across roles.
+- **Changes:**
+  - Fixed profile image persistence for all roles by adding `profileImage` to `User` model and updating auth service to read/write canonical user profile image (with fallback to customer/supplier profile image). `sanitizeUser`/client normalization now include avatar/profileImage.
+  - Dashboard topbar profile icon is now interactive (dropdown/modal) showing avatar image, user info, "Go to Home", "Profile & Settings", and "Sign out".
+  - Removed sign-out buttons from dashboard sidebar and mobile drawer for all roles; sign-out is now in profile modal (like home/public layout).
+  - Public layout profile avatar now also displays saved profile image.
+- **Files:** `server/src/modules/auth/model.ts`, `server/src/modules/auth/service.ts`, `client/src/services/auth.ts`, `client/src/components/layout/DashboardLayout.tsx`, `client/src/components/layout/PublicLayout.tsx`, `client/src/index.css`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd server && npx tsc --noEmit` -> passed. `cd client && npx tsc -b --noEmit` -> passed.
+- **Notes:** Profile image is stored on User for cross-role compatibility; existing profile images in Customer/SupplierProfile are used as fallback and synced.
+
+---
+
+### [2026-11-22] - Landing Hero Map Simplified to Live Location Only
+
+- **Objective:** Show only the user's live location on the landing hero map with animated live roads, removing station/route details.
+- **Changes:** Simplified `LandingRouteMap.tsx` to render only the user's live location marker and animated decorative road polylines; removed nearest-station/route fetching and station card UI from `LandingPage.tsx`.
+- **Files:** `client/src/pages/public/LandingPage.tsx`, `client/src/pages/public/LandingRouteMap.tsx`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npm run build` -> passed (pre-existing chunk-size warning only). `cd client && npx oxlint src/pages/public/LandingPage.tsx src/pages/public/LandingRouteMap.tsx` -> passed.
+
+---
+
+### [2026-11-22] - Landing Live Location Permission Button
+
+- **Objective:** Make live location permission explicit by providing a user-triggered allow button.
+- **Changes:** Added `requestLocation()` and an "Allow live location" button in the landing hero overlay when location is not ready; added responsive/dark-mode styling for the button.
+- **Files:** `client/src/pages/public/LandingPage.tsx`, `client/src/index.css`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npm run build` -> passed (pre-existing chunk-size warning only). `cd client && npx oxlint src/pages/public/LandingPage.tsx src/pages/public/LandingRouteMap.tsx` -> passed.
+
+---
+
+### [2026-11-22] - Landing Hero Map Replaced with Animated Charging Socket
+
+- **Objective:** Replace the landing hero map with a large animated ChargeKaro charging visual (male/female connector connecting with sparks).
+- **Changes:** Removed the live map/location hero implementation from `LandingPage.tsx`; added `LandingChargingAnimation.tsx` with SVG/CSS animation showing plug connecting to socket, spark burst, glowing rings, cable flow, and status pulse. Added responsive/dark-mode styles in `index.css`; removed unused `LandingRouteMap.tsx`.
+- **Files:** `client/src/pages/public/LandingPage.tsx`, `client/src/pages/public/LandingChargingAnimation.tsx` (new), `client/src/index.css`, `client/src/pages/public/LandingRouteMap.tsx` (removed), `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npm run build` -> passed (pre-existing chunk-size warning only). `cd client && npx oxlint src/pages/public/LandingPage.tsx src/pages/public/LandingChargingAnimation.tsx` -> passed.
+
+---
+
+### [2026-11-22] - Landing Charging Animation Background & Boom Tweak
+
+- **Objective:** Make charging animation stage background white and strengthen insert-and-boom spark animation.
+- **Changes:** Set `.lp-charge-stage` background to white (dark mode clean dark surface); retimed plug insert/spark keyframes for clearer male-insert-to-female connection and larger spark/flash burst; added extra spark paths.
+- **Files:** `client/src/index.css`, `client/src/pages/public/LandingChargingAnimation.tsx`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npm run build` -> passed (pre-existing chunk-size warning only). `cd client && npx oxlint src/pages/public/LandingPage.tsx src/pages/public/LandingChargingAnimation.tsx` -> passed.
+
+---
+
+### [2026-11-22] - Landing Charging Animation Wire & Background Tweak
+
+- **Objective:** Move cable/wire with plug animation and make hero stage background blend with page background.
+- **Changes:** Moved cable SVG paths inside the animated plug group so wire moves with the socket/plug; set `.lp-charge-stage` background to transparent (light/dark) with no border/shadow to match surrounding page background.
+- **Files:** `client/src/pages/public/LandingChargingAnimation.tsx`, `client/src/index.css`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npx vite build` -> passed (pre-existing chunk-size warning only). `cd client && npx oxlint src/pages/public/LandingPage.tsx src/pages/public/LandingChargingAnimation.tsx` -> passed. `npm run build` blocked by pre-existing unrelated TS error in `src/pages/admin/ManageUsersPage.tsx`.
+
+---
+
+### [2026-11-22] - Dashboard Notification Bell Preview Modal
+
+- **Objective:** Add a notification preview modal to the dashboard topbar bell so users can quickly review recent notifications, see unread count, and open the full notifications page.
+- **Changes:**
+  - Updated DashboardLayout to replace the direct bell link (for customer/supplier roles) with a notification dropdown trigger.
+  - Bell now shows unread notification count badge, opens a modal with recent notifications (latest 5), loading/empty states, unread styling, mark-read on item click, mark-all-read action, and a "Show more" button linking to the full notifications page.
+  - Added outside-click/Escape close behavior and route-change close/reset behavior for the notification dropdown.
+  - Added dashboard notification dropdown styles in index.css, including dark-mode support and responsive width constraints.
+  - Admin bell behavior remains a direct navigation/link fallback because admin has no dedicated notifications page.
+- **Files:** client/src/components/layout/DashboardLayout.tsx, client/src/index.css, Project Description/DevLog.md.
+- **Status:** Completed (UI/interaction).
+- **Verification:** cd client && npx oxlint src/components/layout/DashboardLayout.tsx src/index.css -> passed with pre-existing 
+eact-hooks/set-state-in-effect warnings only (existing DashboardLayout pattern). cd client && npx tsc -b --noEmit -> failed on pre-existing unrelated error in src/pages/admin/ManageUsersPage.tsx (not introduced by this change).
+- **Notes:** Backend notification APIs already existed (/notifications, read, read-all) and were reused. Notification dropdown is enabled for customer/supplier dashboards with existing notification pages; admin has no notification page so bell keeps fallback navigation.
+
+---
+
+### [2026-11-22] - Admin User/Station Moderation and Supplier Verification Gate
+
+- **Objective:** Implement admin ability to suspend/block or delete users and stations, and require admin verification before supplier accounts can be used.
+- **Changes:**
+  - **Supplier verification gate:** POST /api/auth/register/supplier now creates User+SupplierProfile with ccountStatus=PENDING, erificationStatus=PENDING, does not issue auth cookies/tokens, and returns pendingVerification with message "Your supplier account has been created and is pending admin verification. Please wait up to 24 hours for your account to be verified." Login/auth middleware block unverified/pending/rejected/suspended suppliers with clear messages. Admin supplier verification approval (PATCH /api/admin/suppliers/:supplierId with erificationStatus=VERIFIED) sets User/SupplierProfile verified and activates account; REJECTED suspends.
+  - **Admin moderation:** Added DELETE /api/admin/users/:userId (prevents self-delete; blocks delete when supplier has stations or user has bookings; deletes user+profile), PATCH /api/admin/stations/:stationId (status ACTIVE/SUSPENDED), DELETE /api/admin/stations/:stationId (blocks delete when terminals/bookings exist). Added StationStatus enum and status field on Station model (default ACTIVE). Discovery excludes suspended stations; booking creation rejects suspended stations.
+  - **Frontend:** Admin Users/Suppliers/Stations pages now include detail actions (suspend/reactivate/delete users; approve/reject/verify suppliers; suspend/reactivate/delete stations) with confirmation and refresh. AdminListWorkspace supports row actions. Admin service/client types extended. SupplierRegisterPage shows pending-verification success state and disables resubmission.
+  - **Tests:** Updated supplier registration test expectations and patched test helpers to auto-approve suppliers where tests require authenticated supplier flows. Added admin module tests for suspend/delete user, suspend/delete station, and supplier verification-required login flow.
+- **Files:** server/src/types/index.ts, server/src/modules/auth/model.ts, server/src/modules/auth/service.ts, server/src/modules/auth/controller.ts, server/src/middleware/auth.ts, server/src/modules/admin/service.ts, server/src/modules/admin/controller.ts, server/src/modules/admin/routes.ts, server/src/modules/stations/model.ts, server/src/modules/discovery/service.ts, server/src/modules/bookings/service.ts, server/tests/auth.register.test.ts, server/tests/admin.module.test.ts, many server test helpers, client/src/services/api.ts (no change), client/src/services/auth.ts, client/src/services/admin.ts, client/src/context/AuthContext.tsx, client/src/pages/auth/SupplierRegisterPage.tsx, client/src/components/dashboard/AdminListWorkspace.tsx, client/src/pages/admin/ManageUsersPage.tsx, client/src/pages/admin/ManageSuppliersPage.tsx, client/src/pages/admin/ManageStationsPage.tsx, Project Description/ProjectState.md, Project Description/DevLog.md.
+- **Status:** Completed.
+- **Verification:** Server 
+px tsc --noEmit PASS. Server targeted tests 
+px vitest run tests/auth.register.test.ts tests/admin.module.test.ts tests/auth.login.test.ts -> **3 files, 14 tests PASS**. Client 
+px tsc -b --noEmit PASS.
+- **Notes:** Supplier accounts created before this change with erificationStatus=UNVERIFIED and ccountStatus=ACTIVE will be blocked by new login/auth checks until admin verifies them; migration/data review may be needed for existing environments. Station delete is guarded when terminals/bookings exist; use suspend for active operational records. User delete is guarded when bookings/stations exist.
+
+---
+
+### [2026-11-22] - Dashboard Notifications Modal Fix + Admin Notifications CRUD
+
+- **Objective:** Fix dashboard notification bell/modal/count visibility, add proper animation, add notification nav link for admin, and support admin notification visibility/CRUD across roles.
+- **Changes:**
+  - Updated DashboardLayout to enable notification bell modal for all roles including admin, with unread count badge, recent notifications preview, mark-read/mark-all-read, "Show more", outside-click/Escape close, and entrance animation.
+  - Added AdminNotificationsPage with list/read/mark-all/delete and admin broadcast create form (title/message/target role).
+  - Added admin notifications route/nav links in App.tsx and AdminApp.tsx (sidebar/mobile).
+  - Extended notifications client service with deleteNotification and createNotification.
+  - Extended backend notifications module: admin can list all platform notifications, mark read/delete any notification, mark all read, and create/broadcast notifications to ALL/CUSTOMER/SUPPLIER/ADMIN users; added DELETE and admin POST routes.
+- **Files:** client/src/components/layout/DashboardLayout.tsx, client/src/index.css, client/src/pages/admin/AdminNotificationsPage.tsx (new), client/src/pages/admin/AdminApp.tsx, client/src/App.tsx, client/src/services/notifications.ts, server/src/modules/notifications/routes.ts, server/src/modules/notifications/controller.ts, server/src/modules/notifications/service.ts, Project Description/DevLog.md, Project Description/ProjectState.md.
+- **Status:** Completed.
+- **Verification:** cd server && npx tsc --noEmit -> passed. cd server && npx vitest run tests/notifications.test.ts -> **1 file, 3 tests passed**. cd client && npx tsc -b --noEmit -> passed. cd client && npm run lint -> passed with pre-existing warnings only. cd client && npx vite build -> passed (pre-existing chunk-size warning only).
+- **Notes:** Admin notification list returns all platform notifications for visibility; admin mark-all-read/delete actions apply as admin operations. Existing customer/supplier notification flows remain intact.
+
+---
+
+### [2026-11-22] - Dashboard Topbar Icon Alignment & Sizing
+
+- **Objective:** Properly align and normalize icon/button sizing in the dashboard top bar across all roles (customer, supplier, admin).
+- **Changes:**
+  - Updated shared `DashboardLayout` topbar styling in `client/src/index.css` so theme, notifications, and profile controls share consistent 40px sizing and vertical alignment.
+  - Made `.topbar-icon` an explicit centered 40x40 button (inline-flex, centered content, transparent background, rounded, hover/focus states) instead of content-sized default button.
+  - Tightened `.topbar-actions` gap for consistent icon spacing; made notification/profile wrapper containers flex-aligned.
+  - Adjusted notification badge position for the normalized button size and added dark-mode badge halo.
+  - Normalized mobile drawer trigger button sizing/alignment to match topbar controls.
+- **Files:** `client/src/index.css`, `Project Description/DevLog.md`.
+- **Status:** Completed.
+- **Verification:** `cd client && npx tsc -b --noEmit` -> PASS. `git diff --stat -- client/src/index.css` shows this file already had pre-existing uncommitted changes; this task added only targeted topbar alignment/sizing rules on top.
+- **Notes:** Change is in the shared `DashboardLayout` topbar CSS, so it applies to all role dashboards. Did not modify unrelated dirty-worktree files.
+
+---
+
+### [2026-11-22] - Admin Users: Verify Supplier Button
+
+- **Objective:** Add a "Verify Supplier" action in Admin > Users details for supplier accounts.
+- **Changes:**
+  - Updated `client/src/pages/admin/ManageUsersPage.tsx` to show a `Verify Supplier` action in the user detail panel for users with role `SUPPLIER` whose `verificationStatus` is not `VERIFIED`. Action uses confirmation dialog and calls `updateAdminUser(id, { verificationStatus: 'VERIFIED' })`, then reloads the list.
+  - Updated `server/src/modules/admin/service.ts` `updateUserOversight` so when an admin sets `verificationStatus` for a `SUPPLIER` user, the linked `SupplierProfile.verificationStatus` is synced and account status follows the same rules as supplier oversight (`VERIFIED -> ACTIVE`, `REJECTED -> SUSPENDED`, `PENDING -> PENDING`). This keeps Users-page verification consistent with existing supplier verification behavior.
+- **Files:** `client/src/pages/admin/ManageUsersPage.tsx`, `server/src/modules/admin/service.ts`, `Project Description/DevLog.md`.
+- **Status:** Completed (targeted verification).
+- **Verification:** `cd server && npx tsc --noEmit` -> PASS. `cd client && npx tsc -b --noEmit` -> PASS. No full test suite run in this pass due pre-existing dirty worktree and unrelated modified files.
+- **Notes:** Worktree contained many pre-existing modified/untracked files before this task; only the files listed above were intentionally changed for this request. `AdminListWorkspace` already displays a verify hint when an action label includes "verify".
+
+---
+
+### [2026-11-22] - Dark Mode: Force Black Text to White in Dashboards
+
+- **Objective:** Make all black/dark text white in dark mode across project dashboards, with emphasis on the admin dashboard.
+- **Changes:**
+  - Added dark-mode dashboard text overrides in `client/src/index.css` scoped to `.dark .dashboard-canvas`.
+  - Forced core text elements (`h1-h6, p, strong, b, small, label, li, td, th, dt, dd, figcaption, blockquote, legend, em`) to `color: #FFFFFF !important` in dark dashboard views.
+  - Set default white color for `span, a, div, button, input, select, textarea, option` in dark dashboards (non-!important to reduce conflicts with intentional component styles).
+  - Restored intentional accent/status colors (links/actions blue, danger red, warning amber, success green, muted status, primary icon/text) and placeholder color for readability.
+- **Files:** `client/src/index.css`, `Project Description/DevLog.md`.
+- **Status:** Completed (targeted verification).
+- **Verification:** `cd client && npx tsc -b --noEmit` -> PASS.
+- **Notes:** Worktree had many pre-existing modified/untracked files before this task; I only changed `client/src/index.css` for this request and appended this DevLog entry. Visual QA in browser dark mode is still recommended to confirm no intentional accent colors were unintentionally overridden.
+
+---
+
+### [2026-11-22] - Notification UI Adjustment/Polish
+
+- **Objective:** Properly adjust the notification UI (bell modal and role notification pages) for consistency and readability.
+- **Changes:**
+  - Polished CustomerNotificationsPage, SupplierNotificationsPage, and AdminNotificationsPage to use consistent workspace notification row layout: unread row highlight, wrapped two-line message preview, structured meta column (time + actions), and clearer empty/loading states.
+  - Replaced inline-styled admin "Send notification" form with shared workspace-form/workspace-field/workspace-form-actions classes; added textarea styling support in workspace form CSS.
+  - Added notification-specific workspace CSS (unread row state, notification meta/actions, danger text button, panel form padding) with responsive and dark-mode handling.
+- **Files:** client/src/pages/customer/CustomerNotificationsPage.tsx, client/src/pages/supplier/SupplierNotificationsPage.tsx, client/src/pages/admin/AdminNotificationsPage.tsx, client/src/index.css, Project Description/ProjectState.md, Project Description/DevLog.md.
+- **Status:** Completed.
+- **Verification:** cd client && npm run -s build -> PASS (Vite build, pre-existing chunk-size warning only). cd client && npm run -s lint -> PASS with pre-existing warnings only (including existing set-state-in-effect warnings in notification pages).
+- **Notes:** Worktree contained many unrelated pre-existing modified/untracked files; this task intentionally changed only notification UI files, shared notification/workspace CSS, and shared project docs.
