@@ -22,23 +22,35 @@ function handleValidationError(req: Request): void {
 }
 
 function setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
+  const isProd = process.env.NODE_ENV === 'production';
   res.cookie(ACCESS_TOKEN_COOKIE, accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     path: '/',
   });
   res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     path: '/',
   });
 }
 
 function clearAuthCookies(res: Response): void {
-  res.clearCookie(ACCESS_TOKEN_COOKIE, { httpOnly: true, sameSite: 'lax', path: '/' });
-  res.clearCookie(REFRESH_TOKEN_COOKIE, { httpOnly: true, sameSite: 'lax', path: '/' });
+  const isProd = process.env.NODE_ENV === 'production';
+  res.clearCookie(ACCESS_TOKEN_COOKIE, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    path: '/',
+  });
+  res.clearCookie(REFRESH_TOKEN_COOKIE, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    path: '/',
+  });
 }
 
 export const registerCustomer = async (

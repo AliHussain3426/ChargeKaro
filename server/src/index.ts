@@ -11,6 +11,9 @@ import routes from './routes/index.js';
 
 const app = express();
 
+// Trust proxy for Render / cloud reverse proxies (enables secure cookies over HTTPS)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 
@@ -19,13 +22,21 @@ if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// CORS
+// CORS - allows single or comma-separated client URLs and strips trailing slashes
+const allowedOrigins = (env.CLIENT_URL || '')
+  .split(',')
+  .map((url: string) => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || origin === env.CLIENT_URL) return callback(null, true);
-      if (env.NODE_ENV !== 'production') return callback(null, true);
-      return callback(new Error('Not allowed by CORS'));
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      if (!origin) return callback(null, true);
+      const cleanOrigin = origin.replace(/\/$/, '');
+      if (allowedOrigins.includes(cleanOrigin) || env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
     },
     credentials: true,
   })
@@ -59,10 +70,15 @@ app.use(errorHandler);
 
 // Start server (only in non-serverless environments like local dev or Render)
 async function start(): Promise<void> {
-  await connectDB();
   app.listen(env.PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
   });
+
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error('MongoDB connection issue on startup (check MONGODB_URI and IP whitelist):', err);
+  }
 }
 
 // On Vercel (serverless), do NOT call app.listen().
