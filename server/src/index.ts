@@ -61,8 +61,9 @@ app.use(
 );
 app.use(cookieParser());
 
-// API routes
+// API routes (supports both /api/* and root /* for deployment flexibility)
 app.use('/api', routes);
+app.use('/', routes);
 
 // Error handling
 app.use(notFound);

@@ -10,7 +10,8 @@ import type { ApiResponse } from '@/types';
  *   raise an `ApiError` carrying the status code and server message.
  */
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '');
+const rawBase = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '');
+const API_BASE_URL = rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`;
 
 export class ApiError extends Error {
   status: number;
