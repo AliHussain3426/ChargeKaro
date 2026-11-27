@@ -1,14 +1,26 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import AuthFrame from '@/components/auth/AuthFrame';
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { useAuth } from '@/context/AuthContext';
 
 export default function CustomerRegisterPage() {
   const { registerCustomer } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', passwordConfirm: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const oauthError = searchParams.get('error');
+    if (oauthError) {
+      setError(oauthError);
+      const next = new URLSearchParams(searchParams);
+      next.delete('error');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   function updateField(field: keyof typeof form) {
     return (event: ChangeEvent<HTMLInputElement>) => {
@@ -40,6 +52,8 @@ export default function CustomerRegisterPage() {
 
   return (
     <AuthFrame title="Create your driver account." description="Add your details now, then save your vehicle and find compatible charging stations.">
+      <GoogleAuthButton intent="customer_register" />
+      <div className="auth-divider" aria-hidden="true"><span>or register with email</span></div>
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <div className="field"><label htmlFor="customer-name">Full name</label><input id="customer-name" name="name" type="text" placeholder="Enter your full name" autoComplete="name" required value={form.name} onChange={updateField('name')} /></div>
         <div className="form-split"><div className="field"><label htmlFor="customer-email">Email</label><input id="customer-email" name="email" type="email" placeholder="you@example.com" autoComplete="email" required value={form.email} onChange={updateField('email')} /></div><div className="field"><label htmlFor="customer-phone">Mobile number</label><input id="customer-phone" name="phone" type="tel" placeholder="0300 1234567" autoComplete="tel" required value={form.phone} onChange={updateField('phone')} /></div></div>

@@ -9,6 +9,16 @@ import { authService, sanitizeUser } from './service.js';
 import { AppError } from '../../middleware/errorHandler.js';
 import { signAccessToken, signRefreshToken, ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '../../utils/jwt.js';
 import type { SanitizeUserSource } from './service.js';
+import {
+  buildGoogleAuthorizationUrl,
+  getSafeClientRedirectBase,
+  GOOGLE_OAUTH_INTENT_COOKIE,
+  GOOGLE_OAUTH_STATE_COOKIE,
+  verifyGoogleCallbackCode,
+  verifyGoogleOAuthState,
+  type GoogleAuthIntent,
+} from './google.js';
+import { env } from '../../config/env.js';
 
 interface AuthenticatedUserRequest {
   userId?: string;
@@ -266,6 +276,100 @@ export const resetPassword = async (
   }
 };
 
+function getOAuthCookieOptions() {
+  const isProd = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: 'lax' as const,
+    path: '/api/auth/google',
+    maxAge: 10 * 60 * 1000,
+  };
+}
+
+function clearOAuthCookies(res: Response): void {
+  const options = getOAuthCookieOptions();
+  res.clearCookie(GOOGLE_OAUTH_STATE_COOKIE, options);
+  res.clearCookie(GOOGLE_OAUTH_INTENT_COOKIE, options);
+}
+
+function buildClientRedirect(pathname: string, params?: Record<string, string | undefined>): string {
+  const base = getSafeClientRedirectBase();
+  const url = new URL(pathname, base);
+  for (const [key, value] of Object.entries(params ?? {})) {
+    if (value) url.searchParams.set(key, value);
+  }
+  return url.toString();
+}
+
+function resolveGoogleIntent(value: unknown): GoogleAuthIntent {
+  if (value === 'login' || value === 'customer_register' || value === 'supplier_register') return value;
+  return 'login';
+}
+
+export const googleAuthStart = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const intent = resolveGoogleIntent(req.query.intent);
+    const businessName = typeof req.query.businessName === 'string' ? req.query.businessName.trim() : undefined;
+
+    // Supplier Google registration ideally includes business name. For existing-account sign-in
+    // or login-page flows, we allow missing business name and derive a fallback during creation.
+
+    const { url, nonce } = buildGoogleAuthorizationUrl(intent, businessName);
+    const cookieOptions = getOAuthCookieOptions();
+    res.cookie(GOOGLE_OAUTH_STATE_COOKIE, nonce, cookieOptions);
+    res.cookie(GOOGLE_OAUTH_INTENT_COOKIE, intent, cookieOptions);
+    res.redirect(url);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to start Google authentication.';
+    res.redirect(buildClientRedirect('/login', { error: message }));
+  }
+};
+
+export const googleAuthCallback = async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+  const intentCookie = typeof req.cookies?.[GOOGLE_OAUTH_INTENT_COOKIE] === 'string' ? req.cookies[GOOGLE_OAUTH_INTENT_COOKIE] : undefined;
+  const fallbackIntent = resolveGoogleIntent(intentCookie);
+
+  try {
+    const { code, state, error, error_description } = req.query as Record<string, string | undefined>;
+    if (error) {
+      clearOAuthCookies(res);
+      const message = error_description || error || 'Google authentication was cancelled.';
+      const target = fallbackIntent === 'supplier_register' ? '/register/supplier' : fallbackIntent === 'customer_register' ? '/register/customer' : '/login';
+      res.redirect(buildClientRedirect(target, { error: message }));
+      return;
+    }
+
+    if (!code || !state) {
+      throw new AppError('Missing Google authentication response. Please try again.', 400);
+    }
+
+    const expectedNonce = typeof req.cookies?.[GOOGLE_OAUTH_STATE_COOKIE] === 'string' ? req.cookies[GOOGLE_OAUTH_STATE_COOKIE] : undefined;
+    const statePayload = verifyGoogleOAuthState(state, expectedNonce);
+    clearOAuthCookies(res);
+
+    const identity = await verifyGoogleCallbackCode(code);
+    const result = await authService.authenticateWithGoogle(identity, statePayload.intent, statePayload.businessName);
+
+    if (result.kind === 'pending_supplier') {
+      res.redirect(buildClientRedirect('/register/supplier', {
+        status: 'pending_verification',
+        message: result.message,
+      }));
+      return;
+    }
+
+    setAuthCookies(res, result.accessToken, result.refreshToken);
+    const homePath = result.user.role === 'SUPPLIER' ? '/supplier' : result.user.role === 'ADMIN' ? '/admin' : '/customer';
+    res.redirect(buildClientRedirect(homePath, { auth: result.isNewUser ? 'google_signup' : 'google_login' }));
+  } catch (err) {
+    clearOAuthCookies(res);
+    const message = err instanceof AppError ? err.message : err instanceof Error ? err.message : 'Google authentication failed. Please try again.';
+    const target = fallbackIntent === 'supplier_register' ? '/register/supplier' : fallbackIntent === 'customer_register' ? '/register/customer' : '/login';
+    res.redirect(buildClientRedirect(target, { error: message }));
+  }
+};
+
 export const authController = {
   registerCustomer,
   registerSupplier,
@@ -278,6 +382,8 @@ export const authController = {
   logout,
   forgotPassword,
   resetPassword,
+  googleAuthStart,
+  googleAuthCallback,
 };
 
 export default authController;

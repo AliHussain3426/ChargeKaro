@@ -347,6 +347,128 @@
   transform: translateY(0);
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: 1rem 0 .25rem;
+  color: #64748B;
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #CBD5E1;
+}
+
+.auth-google-button {
+  width: 100%;
+  min-height: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1.5px solid #D7DFEA;
+  background: #FFFFFF;
+  color: #1F2937;
+  font-size: .9rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+  box-sizing: border-box;
+}
+
+.auth-google-button:hover {
+  background: #F8FAFC;
+  border-color: #BFCBDD;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, .06);
+  transform: translateY(-1px);
+}
+
+.auth-google-button:active {
+  transform: translateY(0);
+}
+
+.auth-google-button:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, .14);
+}
+
+.auth-google-button[aria-disabled='true'] {
+  opacity: .65;
+  pointer-events: none;
+}
+
+.auth-google-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.dark .auth-divider {
+  color: #94A3B8;
+}
+
+.dark .auth-divider::before,
+.dark .auth-divider::after {
+  background: #334155;
+}
+
+.dark .auth-google-button {
+  background: #111827;
+  border-color: #334155;
+  color: #E5E7EB;
+}
+
+.dark .auth-google-button:hover {
+  background: #182235;
+  border-color: #475569;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+}
+
+.auth-google-role-panel {
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--auth-line);
+  border-radius: 14px;
+  background: #F8FAFC;
+}
+
+.auth-google-role-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--auth-ink);
+}
+
+.auth-google-role-copy {
+  margin: 0;
+  font-size: 12px;
+  color: var(--auth-muted);
+  line-height: 1.5;
+}
+
+.dark .auth-google-role-panel {
+  background: #111827;
+  border-color: #334155;
+}
+
+.dark .auth-google-role-title {
+  color: #F8FAFC;
+}
+
+.dark .auth-google-role-copy {
+  color: #94A3B8;
+}
+
 /* --- Role Choices (Register Select) --- */
 .role-choice-grid {
   display: flex;

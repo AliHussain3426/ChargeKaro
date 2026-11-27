@@ -1059,3 +1059,61 @@ px tsc -b --noEmit PASS.
   - Added explicit parameter types `(req: Request, res: Response, next: NextFunction)` in `server/src/routes/health.ts`.
 - **Files:** `server/package.json`, `server/tsconfig.json`, `server/src/routes/health.ts`, `Project Description/DevLog.md`.
 - **Status:** Completed.
+
+---
+
+### [2026-11-26] - Google Authentication (OAuth 2.0 / OIDC) Integration
+
+- **Agent/Tool:** GitHub Copilot / GPT-5 (OpenCode)
+- **Objective:** Integrate secure, production-ready "Continue with Google" authentication into the existing ChargeKaro architecture without replacing existing email/password auth.
+- **Architecture decision:** Implemented backend-driven Google OAuth 2.0 Authorization Code flow with OpenID Connect ID token verification using official google-auth-library (OAuth2Client). Frontend uses backend redirect initiation (GET /api/auth/google) to keep Google client secret server-side. State/intent are stored in short-lived signed JWT state plus HttpOnly google_oauth_state cookie (CSRF/double-submit check). Callback verifies state, exchanges code, verifies ID token signature/audience/issuer/expiry/email_verified, links or creates user, issues existing app JWT cookies, and redirects to client.
+- **Backend changes:**
+  - Added google-auth-library dependency.
+  - Extended env config: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL, normalized CLIENT_URLS/PRIMARY_CLIENT_URL.
+  - Updated User model: passwordHash made optional for Google-only accounts; added googleId (sparse unique), emailVerified boolean. Updated sanitizeUser to expose emailVerified, hasPassword, googleLinked.
+  - Added server/src/modules/auth/google.ts helper for OAuth client, state signing/verification, auth URL generation, and ID token verification.
+  - Added auth service uthenticateWithGoogle: login existing googleId, securely link verified-email existing account, create new customer, or create pending supplier (admin verification preserved). Added guards for Google-only accounts on password login/change-password.
+  - Added controllers/routes: GET /api/auth/google, GET /api/auth/google/callback.
+  - Added env placeholders in server/.env.example and ender.yaml.
+- **Frontend changes:**
+  - Added reusable GoogleAuthButton component with official Google "G" branding and API-base redirect URL helper (getGoogleAuthStartUrl).
+  - Integrated "Continue with Google" + divider into Login, Customer Register, and Supplier Register pages. Supplier Google registration requires business name before redirect and handles pending-verification callback state.
+  - Added OAuth error/pending query-param handling on auth pages.
+  - Updated client auth/types to include emailVerified, hasPassword, googleLinked.
+  - Updated client/.env.example with VITE_API_BASE_URL documentation.
+- **Tests/verification:**
+  - Server 
+px tsc --noEmit: PASS.
+  - Server 
+pm run build: PASS.
+  - Client 
+px tsc -b: PASS.
+  - Client 
+px vite build: PASS (pre-existing chunk-size warning).
+  - Client 
+px vitest run: 6 files/24 tests passed, 1 file/2 tests failed (BookingFlow.test.tsx booking status badge expectations) - pre-existing/unrelated to Google auth changes.
+  - Server Vitest auth DB tests (uth.google.test.ts, uth.login.test.ts, uth.register.test.ts) **not executable in this environment** due mongodb-memory-server binary download failure (MD5 check failed / ECONNRESET on re-download). New server/tests/auth.google.test.ts added for coverage once DB test runtime is available.
+- **Files created/modified:** server/package.json, server/package-lock.json, server/src/config/env.ts, server/src/modules/auth/model.ts, server/src/modules/auth/service.ts, server/src/modules/auth/controller.ts, server/src/modules/auth/routes.ts, server/src/modules/auth/google.ts (new), server/tests/auth.google.test.ts (new), server/.env.example, server/.env (local placeholder keys appended; file is git-tracked in repo - do not commit secrets), client/src/components/auth/GoogleAuthButton.tsx (new), client/src/components/auth/auth.css, client/src/pages/auth/LoginPage.tsx, client/src/pages/auth/CustomerRegisterPage.tsx, client/src/pages/auth/SupplierRegisterPage.tsx, client/src/services/api.ts, client/src/services/auth.ts, client/src/types/index.ts, client/.env.example, ender.yaml, docs.
+- **Status:** Implemented; external Google Cloud credentials and live OAuth consent/redirect configuration required before end-to-end Google sign-in can be tested.
+- **Next steps:** Configure Google Cloud Console OAuth client, set GOOGLE_CLIENT_ID/SECRET/CALLBACK_URL in local/server env and Render, run server auth tests in a working mongodb-memory-server environment, and perform manual E2E Google login/register/linking tests.
+
+---
+
+### [2026-11-27] - Project-Wide Mobile Responsiveness & UI/UX Audit (Code-Level Pass)
+
+- **Agent/Tool:** opencode / iceman-free
+- **Objective:** Perform and implement a project-wide mobile responsiveness and UI/UX audit across ChargeKaro pages, shared layouts, components, and interactive surfaces; verify with lint/build/tests.
+- **Audit scope (code-level):** Reviewed shared layout/CSS and key routes/components including client/src/index.css, client/src/components/layout/public-layout.css, DashboardLayout.tsx, PublicLayout.tsx, AdminListWorkspace.tsx, ConfirmDialog.tsx, ProfileSettings.tsx, StationMap.tsx, auth pages/CSS, landing page, customer/supplier/admin workspace pages, and grep scans for fixed widths, nowrap overflow, and responsive grid gaps.
+- **Changes implemented:**
+  - Added missing .workspace-inline-actions base and responsive CSS (desktop right-align/flex-wrap; 720px/480px left-align/full-width behavior) in client/src/index.css for terminal action containers.
+  - Hardened workspace action button styling for standalone .accept/.decline buttons outside .workspace-action-row (used in supplier booking/session actions) and added mobile full-width/touch-target rules.
+  - Improved small-screen touch target in station discovery min-power input (minHeight: 44px) in client/src/pages/customer/FindStationsPage.tsx.
+  - Added responsive safeguards for legacy 3-column grids: .booking-slots collapses at 480px; .lp-slot-picker uses minmax(0,1fr) with reduced gap on small screens to prevent overflow.
+  - Confirmed existing responsive protections already present: viewport meta, image max-width, dashboard/profile/notification modal viewport constraints, workspace form/card grid collapse, admin detail grid auto-fit minmax(min(...,100%),1fr), public profile modal fixed mobile behavior, overflow-x clip.
+- **Files modified (this pass):** client/src/index.css, client/src/pages/customer/FindStationsPage.tsx, Project Description/DevLog.md, Project Description/ProjectState.md (and prior uncommitted responsive edits already present in worktree were preserved).
+- **Verification:**
+  - cd client && npm run lint -> PASS with pre-existing oxlint warnings only (no new lint errors).
+  - cd client && npm run build -> PASS (	sc -b && vite build, built in ~10.23s; pre-existing chunk-size warning for large JS bundle).
+  - cd client && npm run test -- --run -> **7 files, 26 tests: 24 passed, 2 failed**. Failures are pre-existing/unrelated src/pages/customer/BookingFlow.test.tsx status badge class expectations (COMPLETED expected muted; PENDING_SUPPLIER expected base class) also noted in prior DevLog history.
+- **Not verified / limitations:** No live browser/device manual QA was executed in this environment (no interactive browser automation available). Visual validation at 320/360/375/390/414/430/768px and desktop should be performed in a browser/devtools session before final release signoff.
+- **Status:** Code-level responsiveness hardening pass completed; runtime visual QA pending.

@@ -301,7 +301,7 @@ export default function MyStationsPage() {
 
                 <div className="workspace-card-footer">
                   <span className="text-sm font-semibold"><Store className="mr-1 inline size-3" /> Managed by you</span>
-                  <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                     <button className="workspace-text-button" type="button" onClick={() => void handleDelete(station._id)} aria-label={`Delete ${station.name}`}>
                       <Trash2 className="size-4" /> Delete
                     </button>

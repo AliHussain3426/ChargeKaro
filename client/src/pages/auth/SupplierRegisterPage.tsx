@@ -1,15 +1,37 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import AuthFrame from '@/components/auth/AuthFrame';
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton';
 import { useAuth } from '@/context/AuthContext';
 
 export default function SupplierRegisterPage() {
   const { registerSupplier } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [form, setForm] = useState({ name: '', businessName: '', email: '', phone: '', password: '', passwordConfirm: '' });
   const [error, setError] = useState('');
   const [pendingMessage, setPendingMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const oauthError = searchParams.get('error');
+    const status = searchParams.get('status');
+    const message = searchParams.get('message');
+    if (status === 'pending_verification') {
+      setPendingMessage(message || 'Your supplier account has been created with Google and is pending admin verification. Please wait up to 24 hours for your account to be verified.');
+    }
+    if (oauthError) {
+      setError(oauthError);
+    }
+    if (oauthError || status || message) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('error');
+      next.delete('status');
+      next.delete('message');
+      next.delete('auth');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   function updateField(field: keyof typeof form) {
     return (event: ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +87,13 @@ export default function SupplierRegisterPage() {
         </div>
       ) : (
         <>
+          <GoogleAuthButton intent="supplier_register" businessName={form.businessName} disabled={form.businessName.trim().length < 2} />
+          {form.businessName.trim().length < 2 && (
+            <p style={{ margin: '10px 0 0', fontSize: 12, color: '#64748B', textAlign: 'center' }}>
+              Enter your business name below to continue with Google supplier registration.
+            </p>
+          )}
+          <div className="auth-divider" aria-hidden="true"><span>or register with email</span></div>
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="form-split"><div className="field"><label htmlFor="supplier-name">Contact name</label><input id="supplier-name" name="name" type="text" placeholder="Enter your full name" autoComplete="name" required value={form.name} onChange={updateField('name')} /></div><div className="field"><label htmlFor="business-name">Business name</label><input id="business-name" name="businessName" type="text" placeholder="Enter your business name" required value={form.businessName} onChange={updateField('businessName')} /></div></div>
             <div className="form-split"><div className="field"><label htmlFor="supplier-email">Business email</label><input id="supplier-email" name="email" type="email" placeholder="team@business.com" autoComplete="email" required value={form.email} onChange={updateField('email')} /></div><div className="field"><label htmlFor="supplier-phone">Mobile number</label><input id="supplier-phone" name="phone" type="tel" placeholder="0300 1234567" autoComplete="tel" required value={form.phone} onChange={updateField('phone')} /></div></div>

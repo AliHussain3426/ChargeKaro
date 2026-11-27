@@ -236,13 +236,14 @@ export default function FindStationsPage() {
               <h2>{visibleStations.length} charger{visibleStations.length === 1 ? '' : 's'} found</h2>
               <p>{filters.available ? 'Showing stations with available terminals.' : userLocation ? 'Sorted by distance from your location.' : 'Search or use your location for nearby results.'}</p>
             </div>
-            <label style={{ display: 'flex', gap: '.4rem', alignItems: 'center', fontSize: '.78rem' }}>
+            <label style={{ display: 'flex', gap: '.4rem', alignItems: 'center', fontSize: '.78rem', flexWrap: 'wrap' }}>
               Min kW
               <input
-                style={{ width: '72px', minHeight: '30px', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '0 .4rem' }}
+                style={{ width: '72px', minHeight: '44px', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '0 .4rem' }}
                 value={filters.minPower}
                 onChange={(e) => setFilters((f) => ({ ...f, minPower: e.target.value }))}
                 inputMode="decimal"
+                aria-label="Minimum power in kilowatts"
               />
             </label>
           </div>
@@ -278,9 +279,9 @@ export default function FindStationsPage() {
 
           {selectedStation && (
             <div style={{ padding: '1rem 1.15rem', borderTop: '1px solid #F1F5F9' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.5rem', flexWrap: 'wrap' }}>
-                <strong>Book {selectedStation.name}</strong>
-                <button className="workspace-action" type="button" onClick={() => { setShowBooking((v) => !v); setError(''); }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '.75rem', flexWrap: 'wrap' }}>
+                <strong style={{ minWidth: 0, overflowWrap: 'anywhere' }}>Book {selectedStation.name}</strong>
+                <button className="workspace-action" type="button" style={{ width: 'auto', flex: '1 1 180px' }} onClick={() => { setShowBooking((v) => !v); setError(''); }}>
                   <CalendarPlus className="size-4" /> {showBooking ? 'Close' : 'Request booking'}
                 </button>
               </div>

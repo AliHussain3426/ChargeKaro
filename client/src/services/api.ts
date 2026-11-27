@@ -10,8 +10,14 @@ import type { ApiResponse } from '@/types';
  *   raise an `ApiError` carrying the status code and server message.
  */
 
-const rawBase = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/$/, '');
-const API_BASE_URL = rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`;
+const rawBase = (import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '');
+export const API_BASE_URL = rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`;
+
+export function getGoogleAuthStartUrl(intent: 'login' | 'customer_register' | 'supplier_register', businessName?: string): string {
+  const params = new URLSearchParams({ intent });
+  if (businessName && businessName.trim()) params.set('businessName', businessName.trim());
+  return `${API_BASE_URL}/auth/google?${params.toString()}`;
+}
 
 export class ApiError extends Error {
   status: number;

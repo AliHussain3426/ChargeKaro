@@ -177,7 +177,7 @@ export default function MyBookingsPage() {
                       {!r ? (
                         <button className="workspace-text-button" type="button" onClick={() => void loadReceipt(s._id)}>View full receipt</button>
                       ) : (
-                        <div style={{ marginTop: '.35rem', padding: '.6rem .75rem', border: '1px solid #E2E8F0', borderRadius: '10px', background: '#F8FAFC', fontSize: '.85rem' }}>
+                        <div style={{ marginTop: '.35rem', padding: '.6rem .75rem', border: '1px solid #E2E8F0', borderRadius: '10px', background: '#F8FAFC', fontSize: '.85rem', overflowWrap: 'anywhere' }}>
                           <div><strong>Transaction/Session ID:</strong> {r.transactionId}</div>
                           <div><strong>Customer:</strong> {r.customerName ?? '—'} · <strong>Booking:</strong> {r.bookingReference ?? '—'}</div>
                           <div><strong>Vehicle:</strong> {r.vehicle?.name ?? '—'} · <strong>Battery:</strong> {r.vehicle?.batteryCapacityKwh ?? '—'} kWh</div>
@@ -226,12 +226,12 @@ export default function MyBookingsPage() {
                     <span className="workspace-row-icon">{s ? <Zap className="size-4" /> : <CalendarDays className="size-4" />}</span>
                     <div className="workspace-row-main">
                       <strong>{place}</strong>
-                      <span><Clock3 className="mr-1 inline size-3" />{formatRange(booking.requestedStartTime, booking.requestedEndTime)} · {terminalLabel(booking)}{sub ? ` · ${sub}` : ''}</span>
-                      <span style={{ fontSize: '.78rem', color: 'var(--gc-ink-soft)' }}>
+                      <span style={{ overflowWrap: 'anywhere' }}><Clock3 className="mr-1 inline size-3" />{formatRange(booking.requestedStartTime, booking.requestedEndTime)} · {terminalLabel(booking)}{sub ? ` · ${sub}` : ''}</span>
+                      <span style={{ fontSize: '.78rem', color: 'var(--gc-ink-soft)', overflowWrap: 'anywhere' }}>
                         Ref: {booking.bookingReference} · Booking payment: {(booking.paymentStatus || 'UNPAID').replace(/_/g, ' ')}
                       </span>
                       {s && (
-                        <div style={{ marginTop: '.35rem', fontSize: '.85rem', padding: '.5rem .6rem', border: '1px solid #E2E8F0', borderRadius: '10px', background: '#F8FAFC' }}>
+                        <div style={{ marginTop: '.35rem', fontSize: '.85rem', padding: '.5rem .6rem', border: '1px solid #E2E8F0', borderRadius: '10px', background: '#F8FAFC', overflowWrap: 'anywhere' }}>
                           <strong>Charging session ({s.status})</strong>
                           <div>Initial SOC: {s.initialSocPercent}% {s.finalSocPercent != null ? `→ Final SOC: ${s.finalSocPercent}%` : ''}</div>
                           {s.energyConsumedKwh != null && <div>Energy consumed: {s.energyConsumedKwh} kWh · Rate: {money(s.stationRatePkrPerKwhSnapshot, s.currency)}/kWh</div>}

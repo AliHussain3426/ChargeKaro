@@ -15,6 +15,9 @@ interface AuthUserResponse {
   verificationStatus?: string;
   avatar?: string;
   profileImage?: string;
+  emailVerified?: boolean;
+  hasPassword?: boolean;
+  googleLinked?: boolean;
   createdAt?: string;
 }
 
@@ -77,6 +80,9 @@ function normalizeUser(raw: AuthUserResponse): User {
     createdAt: raw.createdAt ?? '',
     accountStatus: raw.accountStatus,
     verificationStatus: raw.verificationStatus,
+    emailVerified: raw.emailVerified,
+    hasPassword: raw.hasPassword,
+    googleLinked: raw.googleLinked,
   };
 }
 

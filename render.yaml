@@ -31,3 +31,9 @@ services:
         value: PKR
       - key: PLATFORM_COMMISSION_RATE
         value: 0.1
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false

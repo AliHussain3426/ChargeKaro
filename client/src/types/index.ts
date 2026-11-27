@@ -16,6 +16,9 @@ export interface User {
   createdAt: string;
   accountStatus?: string;
   verificationStatus?: string;
+  emailVerified?: boolean;
+  hasPassword?: boolean;
+  googleLinked?: boolean;
 }
 
 export interface ApiResponse<T = unknown> {

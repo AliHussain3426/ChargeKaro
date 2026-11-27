@@ -48,7 +48,7 @@ const userSchema = new Schema(
     },
     passwordHash: {
       type: String,
-      required: true,
+      required: false,
       minlength: [10, 'Password hash must be at least 10 characters'],
     },
     role: {
@@ -65,6 +65,16 @@ const userSchema = new Schema(
       type: String,
       enum: VerificationStatus,
       default: VerificationStatus.UNVERIFIED,
+    },
+    googleId: {
+      type: String,
+      trim: true,
+      sparse: true,
+      unique: true,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
     },
     resetPasswordToken: {
       type: String,
@@ -87,10 +97,12 @@ export interface User extends Document {
   email: string;
   phone?: string;
   profileImage?: string;
-  passwordHash: string;
+  passwordHash?: string;
   role: UserRole;
   accountStatus: AccountStatus;
   verificationStatus: VerificationStatus;
+  googleId?: string;
+  emailVerified?: boolean;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
 }

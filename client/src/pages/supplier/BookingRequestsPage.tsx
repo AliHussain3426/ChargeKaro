@@ -194,7 +194,7 @@ export default function BookingRequestsPage() {
                           step="0.1"
                           value={finalSocBySession[s._id] ?? ''}
                           onChange={(e) => setFinalSocBySession((c) => ({ ...c, [s._id]: e.target.value }))}
-                          style={{ marginLeft: '.4rem', width: '110px' }}
+                          style={{ marginLeft: '.4rem', width: 'min(110px, 100%)', maxWidth: '100%' }}
                         />
                       </label>
                       <button className="accept" type="button" disabled={busy} onClick={() => void onCompleteSession(s)}>
@@ -258,7 +258,7 @@ export default function BookingRequestsPage() {
                             step="0.1"
                             value={initialSocByBooking[booking._id] ?? ''}
                             onChange={(e) => setInitialSocByBooking((c) => ({ ...c, [booking._id]: e.target.value }))}
-                            style={{ marginLeft: '.4rem', width: '110px' }}
+                            style={{ marginLeft: '.4rem', width: 'min(110px, 100%)', maxWidth: '100%' }}
                           />
                         </label>
                         <button className="accept" type="button" disabled={busy} onClick={() => void onStartSession(booking)}>

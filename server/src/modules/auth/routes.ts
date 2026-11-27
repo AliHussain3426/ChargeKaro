@@ -25,6 +25,8 @@ import {
   logout,
   forgotPassword,
   resetPassword,
+  googleAuthStart,
+  googleAuthCallback,
 } from './controller.js';
 import { authenticate } from '../../middleware/auth.js';
 
@@ -38,6 +40,8 @@ router.post('/register/supplier', validateRegisterSupplier, registerSupplier);
 router.post('/login', validateLogin, login);
 router.post('/forgot-password', validateForgotPassword, forgotPassword);
 router.post('/reset-password', validateResetPassword, resetPassword);
+router.get('/google', googleAuthStart);
+router.get('/google/callback', googleAuthCallback);
 
 /**
  * Protected auth routes

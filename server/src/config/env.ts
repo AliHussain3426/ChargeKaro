@@ -1,6 +1,15 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+function normalizeUrl(value: string): string {
+  return value.trim().replace(/\/$/, '');
+}
+
+const clientUrls = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map(normalizeUrl)
+  .filter(Boolean);
+
 export const env = {
   PORT: parseInt(process.env.PORT || '5000', 10),
   NODE_ENV: process.env.NODE_ENV || 'development',
@@ -8,7 +17,14 @@ export const env = {
   JWT_SECRET: process.env.JWT_SECRET || 'dev-secret-change-in-production',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
   JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
-  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+  CLIENT_URL: clientUrls.join(','),
+  CLIENT_URLS: clientUrls,
+  PRIMARY_CLIENT_URL: clientUrls[0] || 'http://localhost:5173',
+
+  // Google OAuth 2.0 / OpenID Connect
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
+  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || '',
 
   // Payments (P0): provider-agnostic config. "sandbox" uses internal signed test adapter.
   PAYMENT_PROVIDER: process.env.PAYMENT_PROVIDER || 'sandbox',

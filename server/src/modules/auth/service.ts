@@ -10,6 +10,7 @@ import { User, CustomerProfile, SupplierProfile } from './model.js';
 import { UserRole, AccountStatus, VerificationStatus } from '../../types/index.js';
 import { signAccessToken, signRefreshToken } from '../../utils/jwt.js';
 import { AppError } from '../../middleware/errorHandler.js';
+import type { GoogleAuthIntent, GoogleIdentity } from './google.js';
 
 const SALT_ROUNDS = 12;
 
@@ -51,6 +52,9 @@ export interface SanitizeUserSource {
   role: string;
   accountStatus: string;
   verificationStatus: string;
+  emailVerified?: boolean;
+  googleId?: string;
+  passwordHash?: string;
   createdAt?: Date | string;
 }
 
@@ -79,11 +83,180 @@ export function sanitizeUser(user: SanitizeUserSource): Record<string, unknown> 
     role: user.role,
     accountStatus: user.accountStatus,
     verificationStatus: user.verificationStatus,
+    emailVerified: Boolean(user.emailVerified),
+    hasPassword: Boolean(user.passwordHash),
+    googleLinked: Boolean(user.googleId),
     createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
   };
 }
 
+function issueTokens(user: { _id: { toString(): string }; email: string; role: UserRole }) {
+  const accessToken = signAccessToken({
+    userId: user._id.toString(),
+    email: user.email,
+    role: user.role,
+  });
+  const refreshToken = signRefreshToken({
+    userId: user._id.toString(),
+    email: user.email,
+    role: user.role,
+  });
+  return { accessToken, refreshToken };
+}
+
+function assertGoogleLoginAllowed(user: { role: UserRole; accountStatus: AccountStatus; verificationStatus: VerificationStatus }) {
+  if (user.accountStatus === AccountStatus.SUSPENDED) {
+    throw new AppError('Your account has been suspended. Please contact support for assistance.', 403);
+  }
+
+  if (user.accountStatus !== AccountStatus.ACTIVE) {
+    if (user.role === UserRole.SUPPLIER && user.verificationStatus === VerificationStatus.PENDING) {
+      throw new AppError(
+        'Your supplier account is pending admin verification. Please wait up to 24 hours for your account to be verified.',
+        403
+      );
+    }
+    throw new AppError('Your account is not active. Please contact support for assistance.', 403);
+  }
+
+  if (user.role === UserRole.SUPPLIER && user.verificationStatus !== VerificationStatus.VERIFIED) {
+    if (user.verificationStatus === VerificationStatus.REJECTED) {
+      throw new AppError('Your supplier account verification was rejected. Please contact support for assistance.', 403);
+    }
+    throw new AppError(
+      'Your supplier account is pending admin verification. Please wait up to 24 hours for your account to be verified.',
+      403
+    );
+  }
+}
+
+export type GoogleAuthResult =
+  | {
+      kind: 'authenticated';
+      user: any;
+      accessToken: string;
+      refreshToken: string;
+      isNewUser: boolean;
+    }
+  | {
+      kind: 'pending_supplier';
+      user: any;
+      message: string;
+      isNewUser: boolean;
+    };
+
 export const authService = {
+  async authenticateWithGoogle(
+    identity: GoogleIdentity,
+    intent: GoogleAuthIntent,
+    businessName?: string
+  ): Promise<GoogleAuthResult> {
+    if (!identity.emailVerified) {
+      throw new AppError('Your Google email address is not verified. Please verify your Google email before continuing.', 403);
+    }
+
+    // 1) Existing linked Google account
+    let user = await User.findOne({ googleId: identity.googleId }).exec();
+    let isNewUser = false;
+
+    if (!user) {
+      // 2) Secure account linking by verified email ownership
+      const existingByEmail = await User.findOne({ email: identity.email.toLowerCase() }).exec();
+      if (existingByEmail) {
+        existingByEmail.googleId = identity.googleId;
+        existingByEmail.emailVerified = true;
+        if (!existingByEmail.profileImage && identity.picture) {
+          existingByEmail.profileImage = identity.picture;
+        }
+        if (!existingByEmail.name && identity.name) {
+          existingByEmail.name = identity.name;
+        }
+        user = await existingByEmail.save();
+
+        if (user.role === UserRole.CUSTOMER) {
+          const profile = await CustomerProfile.findOne({ user: user._id } as any).exec();
+          if (profile && !profile.profileImage && identity.picture) {
+            profile.profileImage = identity.picture;
+            await profile.save();
+          }
+        } else if (user.role === UserRole.SUPPLIER) {
+          const profile = await SupplierProfile.findOne({ user: user._id } as any).exec();
+          if (profile && !profile.profileImage && identity.picture) {
+            profile.profileImage = identity.picture;
+            await profile.save();
+          }
+        }
+      }
+    }
+
+    // 3) Create new account if no existing match
+    if (!user) {
+      isNewUser = true;
+      if (intent === 'supplier_register') {
+        const resolvedBusinessName = (businessName || '').trim() || `${identity.name.trim()}'s Business`;
+        const newUser = new User({
+          name: identity.name.trim() || 'Google User',
+          email: identity.email.toLowerCase(),
+          profileImage: identity.picture,
+          role: UserRole.SUPPLIER,
+          accountStatus: AccountStatus.PENDING,
+          verificationStatus: VerificationStatus.PENDING,
+          googleId: identity.googleId,
+          emailVerified: true,
+        });
+        const savedUser = await newUser.save();
+        await new SupplierProfile({
+          user: savedUser._id,
+          businessName: resolvedBusinessName,
+          profileImage: identity.picture,
+          verificationStatus: VerificationStatus.PENDING,
+        }).save();
+
+        return {
+          kind: 'pending_supplier',
+          user: savedUser,
+          isNewUser: true,
+          message:
+            'Your supplier account has been created with Google and is pending admin verification. Please wait up to 24 hours for your account to be verified.',
+        };
+      }
+
+      const newUser = new User({
+        name: identity.name.trim() || 'Google User',
+        email: identity.email.toLowerCase(),
+        profileImage: identity.picture,
+        role: UserRole.CUSTOMER,
+        accountStatus: AccountStatus.ACTIVE,
+        verificationStatus: VerificationStatus.UNVERIFIED,
+        googleId: identity.googleId,
+        emailVerified: true,
+      });
+      const savedUser = await newUser.save();
+      await new CustomerProfile({
+        user: savedUser._id,
+        profileImage: identity.picture,
+        preferences: {},
+      }).save();
+      user = savedUser;
+    } else {
+      // Keep Google profile data fresh where safe
+      let changed = false;
+      if (!user.googleId) { user.googleId = identity.googleId; changed = true; }
+      if (user.emailVerified !== true) { user.emailVerified = true; changed = true; }
+      if (!user.profileImage && identity.picture) { user.profileImage = identity.picture; changed = true; }
+      if (changed) await user.save();
+    }
+
+    assertGoogleLoginAllowed(user);
+    const tokens = issueTokens(user);
+    return {
+      kind: 'authenticated',
+      user,
+      ...tokens,
+      isNewUser,
+    };
+  },
+
   async registerCustomer(input: RegisterCustomerInput) {
     const existingUser = await User.findOne({ email: input.email }).exec();
     if (existingUser) {
@@ -156,6 +329,13 @@ export const authService = {
     const user = await User.findOne({ email: input.email }).exec();
     if (!user) {
       throw new AppError('Invalid email or password', 401);
+    }
+
+    if (!user.passwordHash) {
+      throw new AppError(
+        'This account uses Google sign-in. Please continue with Google, or set a password after signing in.',
+        400
+      );
     }
 
     const validPassword = await bcryptCompare(input.password, user.passwordHash);
@@ -321,6 +501,13 @@ export const authService = {
     const user = await User.findById(userId).select('+passwordHash').exec();
     if (!user) {
       throw new AppError('User not found', 404);
+    }
+
+    if (!user.passwordHash) {
+      throw new AppError(
+        'This account was created with Google sign-in and does not have a local password yet. Use password reset to create one.',
+        400
+      );
     }
 
     const validPassword = await bcryptCompare(input.currentPassword, user.passwordHash);

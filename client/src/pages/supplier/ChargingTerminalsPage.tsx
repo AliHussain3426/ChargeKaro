@@ -246,7 +246,7 @@ export default function ChargingTerminalsPage() {
       )}
 
       <section className="workspace-panel" style={{ marginBottom: '1.25rem' }}>
-        <label className="workspace-field" style={{ maxWidth: '420px' }}>
+        <label className="workspace-field" style={{ maxWidth: '420px', width: '100%' }}>
           <span>Station</span>
           {loadingStations ? (
             <p>Loading stations…</p>
@@ -376,7 +376,7 @@ export default function ChargingTerminalsPage() {
                     {selectedStation?.name ?? 'Station'} · {terminal.connectorTypes.join(', ') || terminal.chargingMethod} · {terminal.maximumPowerKw} kW · {terminal.pricing.currency} {terminal.pricing.amount}
                   </span>
                 </div>
-                <div style={{ display: 'flex', gap: '.4rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                <div className="workspace-inline-actions">
                   <span className={statusClass(terminal.status)}>{terminal.status.replace(/_/g, ' ')}</span>
                   <button className="workspace-text-button" type="button" onClick={() => void toggleAvailability(terminal)}>
                     {terminal.availability ? 'Set unavailable' : 'Set available'}
