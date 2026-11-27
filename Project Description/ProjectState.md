@@ -164,6 +164,7 @@ The project follows a clean, modern, elegant, and professional visual direction.
 - Shared React mark: `client/src/components/ui/BrandLogo.tsx`, used by the public header/footer, dashboard sidebar, and auth brand row. Colours come from `--ck-navy` / `--ck-blue`, with light values on `:root` and a light-on-dark variant for `.dark` and the auth story panel.
 - Static/vector assets: `client/public/logo.svg` and `client/public/favicon.svg` (favicon is referenced by `index.html`, `manifest.webmanifest` and `sw.js`, so all PWA/app icon surfaces use the new mark).
 - Mark colours: navy `#0B1E8C`, blue `#1D4ED8`; wordmark text "ChargeKaro" is unchanged.
+- Cache busting (2026-11-27): favicon/manifest icon URLs use `?v=2`, the service worker shell cache is `chargekaro-shell-v2` with network-first icon requests, and `client/vercel.json` sets short-revalidation headers for icon/SW/manifest assets. Vercel deploy state check: `chargekaroo.vercel.app` serves the new mark; `chargekarokaro.vercel.app` was still stale (old CSS bundle hash) as of this date and needs a redeploy from latest `main`.
 
 ### Design Priorities
 - Light, accessible palette avoiding dark-first AI tropes.

@@ -1,6 +1,7 @@
 /* Basic service worker for PWA installability/offline shell (Phase 11). */
-const CACHE_NAME = 'chargekaro-shell-v1';
-const APP_SHELL = ['/', '/index.html', '/favicon.svg', '/manifest.webmanifest'];
+const CACHE_NAME = 'chargekaro-shell-v2';
+const ICON_URL = '/favicon.svg?v=2';
+const APP_SHELL = ['/', '/index.html', ICON_URL, '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -21,6 +22,19 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  /* Icons are network-first: a brand change must reach returning users
+     immediately instead of being served from an old precached shell. */
+  if (url.pathname === '/favicon.svg' || url.pathname === '/logo.svg') {
+    event.respondWith(
+      fetch(request).then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+        return response;
+      }).catch(() => caches.match(request))
+    );
+    return;
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith(

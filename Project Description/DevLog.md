@@ -1143,3 +1143,20 @@ px vitest run: 6 files/24 tests passed, 1 file/2 tests failed (BookingFlow.test.
 - **Verification:** client `npm run build` PASS (tsc -b + vite build; only the pre-existing bundle-size warning). Client `npm test`: 24/26 pass; the 2 failures are the pre-existing `BookingFlow.test.tsx` status-badge expectations, unrelated to this change. Rendered `client/public/logo.svg` in headless Chrome and compared it with the supplied image; the ring, bolt, speed lines and plug proportions were refined after that comparison. No in-app browser QA was run, so a final visual check in the running UI is still recommended.
 - **Status:** Implemented and build-verified. The vector is a faithful recreation of the supplied artwork rather than the original source vector; if the official SVG is available, swap the path data in the three logo files.
 - **Next steps:** If the recreated vector differs from the intended artwork, replace the path data in `BrandLogo.tsx`, `logo.svg`, and `favicon.svg` with the official SVG; run a browser check at desktop and mobile sizes.
+
+---
+
+### [2026-11-27] - Fix Stale Favicon on Vercel
+
+- **Agent/Tool:** opencode / hy4-flash-free
+- **Objective:** User reported the new favicon showing on localhost but the old bolt icon still showing on the deployed Vercel site. Diagnose and fix.
+- **Diagnosis (live checks):** `git log` confirmed the logo change was committed (`e51932b`, "logo Change") and pushed to `origin/main` (`git ls-remote origin main` matches). Fetching deployed assets showed two live Vercel deployments: `https://chargekaroo.vercel.app/favicon.svg` serves the **new** logo and its HTML bundles match the local build CSS hash (`index-00tLgYMn.css`), while `https://chargekarokaro.vercel.app/favicon.svg` still serves the **old** bolt icon with an older CSS hash (`index-690Y45I1.css`). So one Vercel project/deployment is stale; returning visitors can additionally be served the old icon by the production service worker, which precached `/favicon.svg` under the unchanged `chargekaro-shell-v1` cache name and used cache-first for non-navigation requests.
+- **Changes implemented:**
+  - `client/public/sw.js`: bumped `CACHE_NAME` to `chargekaro-shell-v2` (old caches are deleted on activate), added a versioned icon URL to the app shell, and made `/favicon.svg` and `/logo.svg` network-first with cache fallback.
+  - `client/index.html`: favicon link now `"/favicon.svg?v=2"` to defeat browser favicon cache.
+  - `client/public/manifest.webmanifest`: both icon entries now `"/favicon.svg?v=2"` to refresh installed PWA icons.
+  - `client/vercel.json`: added `Cache-Control: public, max-age=0, must-revalidate` headers for `/sw.js`, `/favicon.svg`, `/logo.svg`, and `/manifest.webmanifest`.
+- **Files modified:** client/public/sw.js, client/index.html, client/public/manifest.webmanifest, client/vercel.json, Project Description/ProjectState.md, Project Description/DevLog.md.
+- **Verification:** client `npm run build` PASS (tsc -b + vite build; pre-existing chunk-size warning only). Live deployment state was verified with HTTP fetches before/after the fix; post-deploy verification still requires a fresh Vercel deployment and hard refresh.
+- **Status:** Code-side cache busting implemented. The remaining blocker is operational: the Vercel project serving the domain the user visits must be redeployed from the latest `main` commit (or the production domain repointed to the up-to-date deployment).
+- **Next steps:** In Vercel, identify which project owns `chargekarokaro.vercel.app`, check its connected repo/branch/production commit, trigger a redeploy of `e51932b` + this fix, then hard-refresh and unregister/reload the service worker if the icon still appears old.
