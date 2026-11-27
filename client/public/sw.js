@@ -1,7 +1,8 @@
 /* Basic service worker for PWA installability/offline shell (Phase 11). */
-const CACHE_NAME = 'chargekaro-shell-v2';
+const CACHE_NAME = 'chargekaro-shell-v3';
 const ICON_URL = '/favicon.svg?v=2';
-const APP_SHELL = ['/', '/index.html', ICON_URL, '/manifest.webmanifest'];
+const MANIFEST_URL = '/manifest.webmanifest?v=2';
+const APP_SHELL = ['/', '/index.html', ICON_URL, MANIFEST_URL];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

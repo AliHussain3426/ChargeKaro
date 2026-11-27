@@ -162,9 +162,10 @@ The project follows a clean, modern, elegant, and professional visual direction.
 ### Brand Mark (2026-11-27)
 - Replaced the generic bolt icon with the ChargeKaro charging logo: a navy "C" charging ring, a tilted blue lightning bolt, three blue speed lines, and a navy two-prong plug.
 - Shared React mark: `client/src/components/ui/BrandLogo.tsx`, used by the public header/footer, dashboard sidebar, and auth brand row. Colours come from `--ck-navy` / `--ck-blue`, with light values on `:root` and a light-on-dark variant for `.dark` and the auth story panel.
-- Static/vector assets: `client/public/logo.svg` and `client/public/favicon.svg` (favicon is referenced by `index.html`, `manifest.webmanifest` and `sw.js`, so all PWA/app icon surfaces use the new mark).
+- Static/vector assets: `client/public/logo.svg` and `client/public/favicon.svg` (browser tab icon), plus raster install icons in `client/public/icons/` (`icon-192.png`, `icon-512.png`, `icon-512-maskable.png`, `apple-touch-icon.png`) generated from the vector so Android/iOS splash icons are sharp instead of stretched.
 - Mark colours: navy `#0B1E8C`, blue `#1D4ED8`; wordmark text "ChargeKaro" is unchanged.
-- Cache busting (2026-11-27): favicon/manifest icon URLs use `?v=2`, the service worker shell cache is `chargekaro-shell-v2` with network-first icon requests, and `client/vercel.json` sets short-revalidation headers for icon/SW/manifest assets. Vercel deploy state check: `chargekaroo.vercel.app` serves the new mark; `chargekarokaro.vercel.app` was still stale (old CSS bundle hash) as of this date and needs a redeploy from latest `main`.
+- Launch experience (2026-11-27): `client/index.html` paints an instant branded boot splash (inline vector logo + wordmark + slim progress bar, dark-mode aware, reduced-motion aware) before the JS bundle loads; `main.tsx` fades/removes it after React renders. The protected-route guard uses the same mark and progress pattern. All splash visuals are inline so they appear on the first frame of an installed PWA.
+- Cache busting (2026-11-27): favicon/manifest/install icon URLs use `?v=2`, the service worker shell cache is `chargekaro-shell-v3` with network-first icon requests, and `client/vercel.json` sets short-revalidation headers for icon/SW/manifest assets. Vercel deploy state check: `chargekaroo.vercel.app` serves the new mark; `chargekarokaro.vercel.app` was still stale (old CSS bundle hash) as of this date and needs a redeploy from latest `main`.
 
 ### Design Priorities
 - Light, accessible palette avoiding dark-first AI tropes.

@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import BrandLogo from '@/components/ui/BrandLogo';
 import type { UserRole } from '@/types';
 
 const roleHomePaths: Record<UserRole, string> = {
@@ -22,7 +23,9 @@ export default function ProtectedRoute({
   if (loading) {
     return (
       <div className="route-guard-loading" role="status" aria-live="polite">
-        Checking your session…
+        <BrandLogo className="brand-logo route-guard-logo" />
+        <p>Checking your session…</p>
+        <span className="route-guard-bar" aria-hidden="true" />
       </div>
     );
   }

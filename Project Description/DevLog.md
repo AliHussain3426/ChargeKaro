@@ -1160,3 +1160,23 @@ px vitest run: 6 files/24 tests passed, 1 file/2 tests failed (BookingFlow.test.
 - **Verification:** client `npm run build` PASS (tsc -b + vite build; pre-existing chunk-size warning only). Live deployment state was verified with HTTP fetches before/after the fix; post-deploy verification still requires a fresh Vercel deployment and hard refresh.
 - **Status:** Code-side cache busting implemented. The remaining blocker is operational: the Vercel project serving the domain the user visits must be redeployed from the latest `main` commit (or the production domain repointed to the up-to-date deployment).
 - **Next steps:** In Vercel, identify which project owns `chargekarokaro.vercel.app`, check its connected repo/branch/production commit, trigger a redeploy of `e51932b` + this fix, then hard-refresh and unregister/reload the service worker if the icon still appears old.
+
+---
+
+### [2026-11-27] - Improve Installed-PWA Launch Screen and Icons
+
+- **Agent/Tool:** opencode / hy4-flash-free
+- **Objective:** User reported that after installing the web app on mobile, the opening loading animation showed a distorted logo and asked for a better loading animation.
+- **Diagnosis:** The manifest only declared an SVG icon with `sizes: "any"`, so Android/iOS generated the installed-app splash from an unsuitable icon; the app itself had no instant boot screen (only a plain "Checking your session…" text guard), and the first painted frame came from the JS bundle.
+- **Changes implemented:**
+  - Generated real raster install icons from `client/public/logo.svg` into `client/public/icons/`: `icon-192.png`, `icon-512.png`, `icon-512-maskable.png` (content kept inside the maskable safe zone), and `apple-touch-icon.png`. Rendered with headless Chrome from the vector source.
+  - `client/public/manifest.webmanifest`: PNG icons first (192/512 `any`, 512 `maskable`), all `?v=2` cache-busted.
+  - `client/index.html`: added `apple-touch-icon`, versioned manifest URL, and an inline critical boot splash — inline ChargeKaro vector logo, wordmark, and a thin sliding progress bar on the established page background. It is dark-mode aware, respects `prefers-reduced-motion`, uses safe-area padding, and has a 4-second safety timeout so a failed bundle cannot leave a blocking splash.
+  - `client/src/main.tsx`: fades and removes the boot splash immediately after React renders.
+  - `client/src/components/auth/ProtectedRoute.tsx` and `client/src/index.css`: the session-check state now uses the same brand mark and progress pattern instead of plain text.
+  - `client/public/sw.js`: cache bumped to `chargekaro-shell-v3`, versioned manifest in the app shell. `client/vercel.json`: revalidation headers for `/icons/(.*)`.
+- **Files created:** client/public/icons/icon-192.png, client/public/icons/icon-512.png, client/public/icons/icon-512-maskable.png, client/public/icons/apple-touch-icon.png.
+- **Files modified:** client/index.html, client/src/main.tsx, client/src/components/auth/ProtectedRoute.tsx, client/src/index.css, client/public/manifest.webmanifest, client/public/sw.js, client/vercel.json, Project Description/ProjectState.md, Project Description/DevLog.md.
+- **Verification:** client `npm run build` PASS (tsc -b + vite build; pre-existing chunk-size warning only). Rendered the boot splash at 390x844 with headless Chrome and visually checked centering, logo clarity and progress bar; rendered `icon-512.png` and checked crispness. Client `npm test`: 24/26 pass; the 2 failures remain the pre-existing `BookingFlow.test.tsx` status-badge expectations.
+- **Status:** Implemented and build/visual-verified. Installed-PWA behavior must be confirmed on a real phone after the next Vercel deployment; the previously stale `chargekarokaro.vercel.app` project also still needs a correct redeploy.
+- **Next steps:** After deploy, install/reinstall the PWA on a phone and check the OS splash icon plus the in-app boot splash; if the OS splash still uses a stale icon, clear the browser's site data before reinstalling.

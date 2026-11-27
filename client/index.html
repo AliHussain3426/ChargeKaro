@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=2" />
+    <link rel="manifest" href="/manifest.webmanifest?v=2" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="ChargeKaro — Find & book EV charging stations across Pakistan" />
     <meta name="theme-color" content="#1E3A8A" />
@@ -11,9 +12,103 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>ChargeKaro — EV Charging Platform</title>
+    <style>
+      :root { --ck-navy: #0B1E8C; --ck-blue: #1D4ED8; }
+      .dark { --ck-navy: #FFFFFF; --ck-blue: #93C5FD; }
+
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        background: #F1F5F9;
+        transition: opacity .3s ease, visibility .3s ease;
+      }
+      .dark #boot-splash { background: #081A33; }
+      #boot-splash.boot-splash--done { opacity: 0; visibility: hidden; pointer-events: none; }
+      .boot-inner { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+      .boot-mark {
+        display: block;
+        width: clamp(104px, 28vw, 132px);
+        height: auto;
+        animation: ck-boot-pulse 1.8s ease-in-out infinite;
+      }
+      .boot-name {
+        color: #0F172A;
+        font: 800 17px/1 'Manrope', system-ui, sans-serif;
+        letter-spacing: -.04em;
+      }
+      .dark .boot-name { color: #FFFFFF; }
+      .boot-bar {
+        position: relative;
+        display: block;
+        width: clamp(104px, 28vw, 132px);
+        height: 3px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #DBEAFE;
+      }
+      .dark .boot-bar { background: #1E3A8A; }
+      .boot-bar::after {
+        content: '';
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 42%;
+        border-radius: inherit;
+        background: #1D4ED8;
+        animation: ck-boot-progress 1.15s ease-in-out infinite;
+      }
+      .dark .boot-bar::after { background: #93C5FD; }
+      @keyframes ck-boot-pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.045); opacity: .86; }
+      }
+      @keyframes ck-boot-progress {
+        0% { transform: translateX(-110%); }
+        100% { transform: translateX(340%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-mark, .boot-bar::after { animation: none; }
+        #boot-splash { transition: none; }
+      }
+    </style>
   </head>
   <body>
+    <div id="boot-splash" aria-hidden="true">
+      <div class="boot-inner">
+        <svg class="boot-mark" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <defs>
+            <mask id="ck-boot-mask">
+              <rect width="240" height="200" fill="#fff" />
+              <path d="M115 100 L260 -13 L260 213 Z" fill="#000" />
+            </mask>
+          </defs>
+          <circle cx="115" cy="100" r="66" fill="none" stroke="var(--ck-navy)" stroke-width="22" mask="url(#ck-boot-mask)" />
+          <rect x="35" y="52" width="60" height="10" rx="5" fill="var(--ck-blue)" stroke="#fff" stroke-width="3" />
+          <rect x="14" y="84" width="52" height="10" rx="5" fill="var(--ck-blue)" />
+          <rect x="40" y="116" width="30" height="10" rx="5" fill="var(--ck-blue)" />
+          <g transform="translate(115 100) rotate(16) scale(4 5.4) translate(-12 -12)">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="var(--ck-blue)" />
+          </g>
+          <path d="M145 100 L162 82 L162 118 Z" fill="var(--ck-navy)" />
+          <rect x="160" y="81" width="26" height="38" rx="8" fill="var(--ck-navy)" />
+          <rect x="186" y="91" width="16" height="5" rx="2.5" fill="var(--ck-navy)" />
+          <rect x="186" y="104" width="16" height="5" rx="2.5" fill="var(--ck-navy)" />
+        </svg>
+        <span class="boot-name">ChargeKaro</span>
+        <span class="boot-bar"></span>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Safety net: if the app bundle fails to load, never leave a blocking splash behind.
+      setTimeout(function () {
+        var splash = document.getElementById('boot-splash');
+        if (splash && !splash.classList.contains('boot-splash--done')) splash.classList.add('boot-splash--done');
+      }, 4000);
+    </script>
   </body>
 </html>

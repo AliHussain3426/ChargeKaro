@@ -795,7 +795,15 @@ button, a, input, select { -webkit-tap-highlight-color: transparent; }
   .workspace-form-grid { grid-template-columns: 1fr; }
 }
 
-.route-guard-loading { display: grid; place-items: center; min-height: 100svh; padding: 2rem; background: var(--gc-ground, #F1F5F9); color: var(--gc-ink-soft, #475569); font-size: .9rem; font-weight: 600; }
+@keyframes ck-boot-pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.045); opacity: .86; } }
+@keyframes ck-boot-progress { 0% { transform: translateX(-110%); } 100% { transform: translateX(340%); } }
+.route-guard-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .9rem; min-height: 100svh; padding: 2rem; background: var(--gc-ground, #F1F5F9); color: var(--gc-ink-soft, #475569); font-size: .9rem; font-weight: 600; text-align: center; }
+.route-guard-logo { width: 112px; height: auto; animation: ck-boot-pulse 1.8s ease-in-out infinite; }
+.route-guard-bar { position: relative; display: block; width: 112px; height: 3px; overflow: hidden; border-radius: 999px; background: #DBEAFE; }
+.route-guard-bar::after { content: ''; position: absolute; inset: 0 auto 0 0; width: 42%; border-radius: inherit; background: #1D4ED8; animation: ck-boot-progress 1.15s ease-in-out infinite; }
+.dark .route-guard-bar { background: #1E3A8A; }
+.dark .route-guard-bar::after { background: #93C5FD; }
+@media (prefers-reduced-motion: reduce) { .route-guard-logo, .route-guard-bar::after { animation: none; } }
 
 .role-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: .14rem .5rem; background: #DBEAFE; color: #1D4ED8; font-size: .66rem; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
 

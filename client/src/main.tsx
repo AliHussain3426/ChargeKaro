@@ -16,6 +16,13 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
+// Hand off from the instant boot splash to the rendered app.
+const bootSplash = document.getElementById('boot-splash');
+if (bootSplash) {
+  bootSplash.classList.add('boot-splash--done');
+  window.setTimeout(() => bootSplash.remove(), 350);
+}
+
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {
