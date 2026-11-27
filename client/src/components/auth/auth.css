@@ -90,6 +90,8 @@
 }
 
 .auth-refined .auth-brand {
+  --ck-navy: #FFFFFF;
+  --ck-blue: #93C5FD;
   display: inline-flex;
   align-items: center;
   gap: .65rem;

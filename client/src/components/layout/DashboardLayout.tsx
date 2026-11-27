@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type FocusEvent } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, CalendarCheck, CheckCircle2, CircleDollarSign, Home, LogOut, Menu, Moon, Sun, User, UserCircle, X, XCircle, Zap } from 'lucide-react';
+import { Bell, CalendarCheck, CheckCircle2, CircleDollarSign, Home, LogOut, Menu, Moon, Sun, User, UserCircle, X, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import BrandLogo from '@/components/ui/BrandLogo';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import type { NavItem } from '@/types';
@@ -211,7 +212,7 @@ export default function DashboardLayout({ role, sidebarItems, mobileNavItems = [
   return (
     <div className={cn('dashboard-root', isSidebarExpanded && 'dashboard-root--sidebar-expanded')}>
       <aside ref={sidebarRef} onMouseEnter={expandSidebar} onMouseLeave={collapseSidebar} onFocus={expandSidebar} onBlur={handleSidebarBlur} className="dashboard-sidebar">
-        <div className="dashboard-brand"><Link to="/" className="brand" aria-label="ChargeKaro home"><span className="brand-mark"><Zap className="size-4 fill-current" /></span><span>ChargeKaro</span></Link><p className="dashboard-role">{roleLabels[role]}</p></div>
+        <div className="dashboard-brand"><Link to="/" className="brand" aria-label="ChargeKaro home"><BrandLogo /><span>ChargeKaro</span></Link><p className="dashboard-role">{roleLabels[role]}</p></div>
         <nav className="dashboard-nav" aria-label={`${role} navigation`}>
           {sidebarItems.map((item) => { const Icon = item.icon; return <Link key={item.href} to={item.href} title={item.label} aria-label={item.label} className={cn(isActive(item.href) && 'active')}>{Icon && <Icon className="size-4" />}<span>{item.label}</span>{item.badge !== undefined && <span className="nav-badge">{item.badge}</span>}</Link>; })}
         </nav>

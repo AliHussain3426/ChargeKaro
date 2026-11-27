@@ -36,7 +36,7 @@ A supplier can manage multiple stations, and each station can contain multiple c
 | **Repository Setup & Tooling** | 95% | Completed | React 19 + Vite + Tailwind v4 frontend; Express 5 + TS backend; builds passing |
 | **Design System & Tokens** | 95% | Completed | #1E3A8A primary, #E2E8F0 card surface, #F1F5F9 background, DM Sans / Manrope typography; dark mode (dark blue + gray palette) with toggle and persisted preference |
 | **Public Navigation & Marketing** | 90% | Completed | A bespoke route-planning landing page with live location-aware nearby-station/route hero preview, one-page public navigation, demo access, and 404 pages |
-| **Authentication UI** | 80% | Completed | Login, Register Select, Customer Register, Supplier Register, Forgot Password; matching surfaces and mobile-safe input/layout rules |
+| **Authentication UI** | 80% | Completed | Login, Register Select, Customer Register, Supplier Register; matching surfaces and mobile-safe input/layout rules. Forgot/reset password UI hidden from login/footer/routes because end-to-end flow is incomplete. |
 | **Customer Interface Flow** | 65% | In Progress | Overview, container-aware station discovery, bookings, vehicles, notifications, and profile/settings have interactive UIs; profile supports name/photo/password management with read-only email |
 | **Supplier Interface Flow** | 55% | In Progress | Overview, requests, stations, terminals, earnings, notifications, and profile/settings have interactive UIs; profile supports name/photo/password/business details with read-only email |
 | **Super Admin Interface Flow** | 60% | In Progress | Overview, management lists, reports, and settings now use interactive operational prototype UIs |
@@ -74,7 +74,7 @@ The current verified repository structure includes:
 │   │   ├── components/auth/                 # Shared authentication form components
 │   │   ├── components/dashboard/            # Shared dashboard components (ProfileSettings)
 │   │   ├── pages/public/                    # Landing, HowItWorks, ForCustomers, ForSuppliers, NotFound
-│   │   ├── pages/auth/                      # Login, RegisterSelect, CustomerRegister, SupplierRegister, ForgotPassword
+│   │   ├── pages/auth/                      # Login, RegisterSelect, CustomerRegister, SupplierRegister (ForgotPasswordPage exists but is not routed/UI-hidden)
 │   │   ├── pages/customer/                  # CustomerApp, Overview, FindStations, MyBookings, MyVehicles, Notifications, Profile
 │   │   ├── pages/supplier/                  # SupplierApp, Overview, Bookings, Stations, Terminals, Earnings, Notifications, Profile
 │   │   ├── pages/admin/                     # AdminApp, Overview, Users, Suppliers, Stations, Terminals, Bookings, Reports, Settings
@@ -158,6 +158,12 @@ The project follows a clean, modern, elegant, and professional visual direction.
 | Page Background | `#F1F5F9` | Configured in `client/src/index.css` |
 | Foreground (Dark) | `#0F172A` | Configured in `client/src/index.css` |
 | Border | `#CBD5E1` | Configured in `client/src/index.css` |
+
+### Brand Mark (2026-11-27)
+- Replaced the generic bolt icon with the ChargeKaro charging logo: a navy "C" charging ring, a tilted blue lightning bolt, three blue speed lines, and a navy two-prong plug.
+- Shared React mark: `client/src/components/ui/BrandLogo.tsx`, used by the public header/footer, dashboard sidebar, and auth brand row. Colours come from `--ck-navy` / `--ck-blue`, with light values on `:root` and a light-on-dark variant for `.dark` and the auth story panel.
+- Static/vector assets: `client/public/logo.svg` and `client/public/favicon.svg` (favicon is referenced by `index.html`, `manifest.webmanifest` and `sw.js`, so all PWA/app icon surfaces use the new mark).
+- Mark colours: navy `#0B1E8C`, blue `#1D4ED8`; wordmark text "ChargeKaro" is unchanged.
 
 ### Design Priorities
 - Light, accessible palette avoiding dark-first AI tropes.

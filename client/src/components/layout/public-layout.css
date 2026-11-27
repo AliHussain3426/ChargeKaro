@@ -247,8 +247,7 @@
 .dark .site-shell .brand,
 .dark .site-shell .brand:hover { color: #FFFFFF; }
 .dark .site-shell .brand .brand-suffix { color: #FFFFFF; }
-.dark .site-shell .brand-mark { background: #2563EB; color: #FFFFFF; }
-.dark .site-shell .brand-mark svg { color: #FFFFFF; }
+/* brand mark colours are driven by --ck-navy / --ck-blue on :root and .dark */
 .dark .site-shell .site-nav a,
 .dark .site-shell .site-login { color: #E2E8F0; }
 .dark .site-shell .site-nav a:hover,

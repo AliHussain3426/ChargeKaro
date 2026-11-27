@@ -17,7 +17,7 @@ import LoginPage from '@/pages/auth/LoginPage';
 import RegisterSelectPage from '@/pages/auth/RegisterSelectPage';
 import CustomerRegisterPage from '@/pages/auth/CustomerRegisterPage';
 import SupplierRegisterPage from '@/pages/auth/SupplierRegisterPage';
-import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
+
 
 // Dashboard shells
 import CustomerApp from '@/pages/customer/CustomerApp';
@@ -69,7 +69,7 @@ export default function App() {
             <Route path="/register" element={<RegisterSelectPage />} />
             <Route path="/register/customer" element={<CustomerRegisterPage />} />
             <Route path="/register/supplier" element={<SupplierRegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
           </Route>
 
           {/* ── Customer routes (driver accounts only) ── */}

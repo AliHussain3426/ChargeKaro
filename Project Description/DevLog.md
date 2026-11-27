@@ -1117,3 +1117,29 @@ px vitest run: 6 files/24 tests passed, 1 file/2 tests failed (BookingFlow.test.
   - cd client && npm run test -- --run -> **7 files, 26 tests: 24 passed, 2 failed**. Failures are pre-existing/unrelated src/pages/customer/BookingFlow.test.tsx status badge class expectations (COMPLETED expected muted; PENDING_SUPPLIER expected base class) also noted in prior DevLog history.
 - **Not verified / limitations:** No live browser/device manual QA was executed in this environment (no interactive browser automation available). Visual validation at 320/360/375/390/414/430/768px and desktop should be performed in a browser/devtools session before final release signoff.
 - **Status:** Code-level responsiveness hardening pass completed; runtime visual QA pending.
+
+---
+
+### [2026-11-27] - Hide Broken Reset Password UI from Login
+
+- **Agent/Tool:** opencode / iceman-free
+- **Objective:** Hide the reset password / forgot password UI from the login experience because the end-to-end flow is not working properly.
+- **Summary:** Removed the "Reset password" link from the login form, removed the footer "Reset password" link from the public layout, removed /forgot-password from the public auth-route detection, and removed the /forgot-password route/import from App.tsx. The ForgotPasswordPage.tsx file and backend forgot/reset endpoints remain in place for future completion; they are no longer exposed in the UI.
+- **Files modified:** client/src/pages/auth/LoginPage.tsx, client/src/components/layout/PublicLayout.tsx, client/src/App.tsx, Project Description/ProjectState.md, Project Description/DevLog.md
+- **Verification:** cd client && npx tsc -b --noEmit passed with no output/errors. No browser/manual UI QA run in this environment.
+- **Status:** Completed (UI hidden). Reset-password end-to-end flow remains incomplete and should be re-enabled only after token delivery/reset UI is implemented.
+- **Next steps:** Implement complete password reset flow (email/token delivery, reset-password page/route, token validation UX) before restoring UI entry points.
+
+---
+
+### [2026-11-27] - Replace Brand Logo Across the Application
+
+- **Agent/Tool:** opencode / hy4-flash-free
+- **Objective:** Replace the existing generic bolt icon with the supplied ChargeKaro charging logo (navy "C" ring, blue lightning bolt, speed lines, plug) across all app surfaces.
+- **Summary:** Added a shared `BrandLogo` React component and static SVG assets, then swapped the old Lucide `Zap` brand icon in the public header/footer, dashboard sidebar, and authentication brand row. Kept the "ChargeKaro" wordmark text unchanged. Favicon/manifest/service-worker app icon now use the new mark through the updated `client/public/favicon.svg`.
+- **Files created:** client/src/components/ui/BrandLogo.tsx, client/public/logo.svg.
+- **Files modified:** client/src/components/layout/PublicLayout.tsx, client/src/components/layout/DashboardLayout.tsx, client/src/components/auth/AuthFrame.tsx, client/src/index.css, client/src/components/layout/public-layout.css, client/src/components/auth/auth.css, client/public/favicon.svg, Project Description/ProjectState.md, Project Description/DevLog.md.
+- **Implementation details:** The mark is inline SVG with CSS variables (`--ck-navy: #0B1E8C`, `--ck-blue: #1D4ED8` on `:root`) so it can be inverted to white/light blue in dark mode (`.dark`) and on the auth story panel. Mask IDs are generated with `useId()` to avoid duplicate-ID issues when the mark renders more than once per page. The vector was recreated from the supplied image rather than embedding a raster file, keeping it crisp at icon and header sizes.
+- **Verification:** client `npm run build` PASS (tsc -b + vite build; only the pre-existing bundle-size warning). Client `npm test`: 24/26 pass; the 2 failures are the pre-existing `BookingFlow.test.tsx` status-badge expectations, unrelated to this change. Rendered `client/public/logo.svg` in headless Chrome and compared it with the supplied image; the ring, bolt, speed lines and plug proportions were refined after that comparison. No in-app browser QA was run, so a final visual check in the running UI is still recommended.
+- **Status:** Implemented and build-verified. The vector is a faithful recreation of the supplied artwork rather than the original source vector; if the official SVG is available, swap the path data in the three logo files.
+- **Next steps:** If the recreated vector differs from the intended artwork, replace the path data in `BrandLogo.tsx`, `logo.svg`, and `favicon.svg` with the official SVG; run a browser check at desktop and mobile sizes.

@@ -1,7 +1,8 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, LayoutDashboard, LogOut, Mail, Menu, Moon, Sun, User, X, Zap } from 'lucide-react';
+import { ArrowUpRight, LayoutDashboard, LogOut, Mail, Menu, Moon, Sun, User, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import BrandLogo from '@/components/ui/BrandLogo';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import type { UserRole } from '@/types';
@@ -30,7 +31,7 @@ export default function PublicLayout() {
   const { theme, toggleTheme } = useTheme();
   const { user, loading, logout } = useAuth();
   const isAuthRoute = location.pathname === '/login'
-    || location.pathname === '/forgot-password'
+
     || location.pathname.startsWith('/register');
   const isNavActive = (hash: string) => location.pathname === '/' && location.hash === hash;
   const dashboardPath = user ? dashboardPathByRole[user.role] : '/login';
@@ -74,7 +75,7 @@ export default function PublicLayout() {
       {!isAuthRoute && <header className="site-header sticky top-0 z-40">
         <div className="site-header-inner">
           <Link to="/" className="brand" aria-label="ChargeKaro home">
-            <span className="brand-mark"><Zap className="size-4 fill-current" /></span>
+            <BrandLogo />
             <span>ChargeKaro</span><span className="brand-suffix">Pakistan</span>
           </Link>
 
@@ -227,7 +228,7 @@ export default function PublicLayout() {
           <div className="footer-columns">
             <div className="footer-brand-column">
               <Link to="/" className="brand footer-brand" aria-label="ChargeKaro home">
-                <span className="brand-mark"><Zap className="size-4 fill-current" /></span>
+                <BrandLogo />
                 <span>ChargeKaro</span><span className="brand-suffix">Pakistan</span>
               </Link>
               <p>Clearer charging decisions for EV users and charging operators.</p>
@@ -244,7 +245,7 @@ export default function PublicLayout() {
               <Link to="/register">Create an account</Link>
               <Link to="/login">Sign in</Link>
               <Link to="/demo">Preview workspaces</Link>
-              <Link to="/forgot-password">Reset password</Link>
+
             </nav>
             <div className="footer-status">
               <p className="footer-column-title">The network</p>

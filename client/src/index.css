@@ -54,6 +54,12 @@
   --shadow-lg: 0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 6px -2px rgba(0, 0, 0, 0.06);
 }
 
+/* ChargeKaro brand mark colours */
+:root {
+  --ck-navy: #0B1E8C;
+  --ck-blue: #1D4ED8;
+}
+
 .dark {
   color-scheme: dark;
   --color-primary: #60A5FA;
@@ -96,6 +102,9 @@
   --gc-green: #60A5FA;
   --gc-green-deep: #93C5FD;
   --gc-night: #061326;
+
+  --ck-navy: #FFFFFF;
+  --ck-blue: #93C5FD;
 }
 
 /* ===== Base Styles ===== */
@@ -183,6 +192,7 @@ button, a, input, select { -webkit-tap-highlight-color: transparent; }
 .site-header-inner { width: min(100% - 48px, 1240px); margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
 .brand { display: inline-flex; align-items: center; gap: .65rem; color: var(--gc-ink); font-family: Manrope, sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -.04em; }
 .brand-mark { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 9px; background: var(--gc-green); color: #fff; }
+.brand-logo { display: block; flex: 0 0 auto; width: 32px; height: 27px; }
 .brand-suffix { color: var(--gc-ink-soft); font: 500 .7rem/1 var(--font-sans); letter-spacing: 0; }
 .site-nav { display: flex; align-items: center; gap: 1.7rem; }
 .site-nav a { color: var(--gc-ink-soft); font-size: .86rem; font-weight: 600; }
@@ -1176,8 +1186,7 @@ button.dashboard-logout:disabled, button.mobile-drawer-logout:disabled { opacity
 .dark .brand,
 .dark .brand:hover { color: #FFFFFF; }
 .dark .brand-suffix { color: #FFFFFF; }
-.dark .brand-mark { background: #2563EB; color: #FFFFFF; }
-.dark .brand-mark svg { color: #FFFFFF; }
+/* brand mark colours are driven by --ck-navy / --ck-blue on :root and .dark */
 .dark .site-nav a { color: #E2E8F0; }
 .dark .site-nav a:hover,
 .dark .site-nav a[aria-current='page'] { color: #FFFFFF; }

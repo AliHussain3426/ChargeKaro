@@ -103,7 +103,7 @@ export default function LoginPage() {
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <div className="field"><label htmlFor="email">Email</label><input id="email" name="email" type="email" placeholder="you@example.com" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} aria-invalid={Boolean(error)} /></div>
         <div className="field"><label htmlFor="password">Password</label><input id="password" name="password" type="password" placeholder="Enter your password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(error)} /></div>
-        <div className="form-help"><label className="form-check"><input type="checkbox" /> Keep me signed in</label><Link className="gc-link" to="/forgot-password">Reset password</Link></div>
+        <div className="form-help"><label className="form-check"><input type="checkbox" /> Keep me signed in</label></div>
         {error && <p className="form-error" role="alert">{error}</p>}
         <button className="gc-button gc-button-primary auth-submit" type="submit" disabled={submitting}>{submitting ? 'Signing in…' : 'Sign in'}</button>
       </form>

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { ArrowLeft, CircleCheck, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowLeft, CircleCheck, ShieldCheck } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import BrandLogo from '@/components/ui/BrandLogo';
 import './auth.css';
 
 interface AuthFrameProps {
@@ -27,7 +28,7 @@ export default function AuthFrame({
         <span className="auth-orbit auth-orbit-one" aria-hidden="true" />
         <span className="auth-orbit auth-orbit-two" aria-hidden="true" />
         <div className="auth-story-content">
-          <Link to="/" className="brand auth-brand"><span className="brand-mark"><Zap className="size-4 fill-current" /></span><span>ChargeKaro</span><span className="auth-brand-country">Pakistan</span></Link>
+          <Link to="/" className="brand auth-brand"><BrandLogo /><span>ChargeKaro</span><span className="auth-brand-country">Pakistan</span></Link>
           <p className="auth-story-kicker"><ShieldCheck className="size-4" /> Clear charging, every step</p>
           <h1>{storyTitle}</h1>
           <p>{storyCopy}</p>
