@@ -45,7 +45,10 @@ export default function LandingPage() {
         <div className="gc-container lp-hero-grid">
           <div className="lp-hero-copy">
             <p className="lp-eyebrow"><span className="lp-eyebrow-bolt"><Zap className="size-3 fill-current" /></span>Pakistan&apos;s EV charging workspace</p>
-            <h1 id="landing-title">EV charging,<br /><em>without guesswork.</em></h1>
+            <h1 id="landing-title" className="lp-brand-heading">
+              <span className="lp-brand-name">ChargeKaro</span>
+              <span className="lp-brand-tagline">Connecting EV users with stations</span>
+            </h1>
             <p className="lp-hero-lead">Find the stations that fit your vehicle, see what is open, and request a time before you leave.</p>
             <div className="lp-hero-actions">
               <Link to="/register/customer" className="gc-button gc-button-primary">Find a charging station <ArrowRight className="size-4" /></Link>
